@@ -5,7 +5,9 @@ type Location = {
 
 type PrayerTimeLabel = {
   label: string;
-  time: string;
+  time: Date;
 };
 
 type Adjustment = Record<string, number>;
+
+declare module 'react-native-push-notification';

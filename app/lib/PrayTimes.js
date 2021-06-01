@@ -214,9 +214,9 @@ function PrayTimes(method) {
 
 	// set calculating parameters
 	adjust: function(params) {
-		console.log('ADJUSTMENTS', params);
 		for (var id in params)
 			setting[id] = params[id];
+		console.log('SETTINGS', setting);
 	},
 
 
@@ -243,18 +243,16 @@ function PrayTimes(method) {
 	// return prayer times for a given date
 	getTimes: function(date, coords, timezone, dst, format) {
 		lat = 1* coords[0];
-		lng = 1* coords[1]; 
+		lng = 1* coords[1];
 		elv = coords[2] ? 1* coords[2] : 0;
 		timeFormat = format || timeFormat;
 		if (date.constructor === Date)
 			date = [date.getFullYear(), date.getMonth()+ 1, date.getDate()];
 		if (typeof(timezone) == 'undefined' || timezone == 'auto')
 			timezone = this.getTimeZone(date);
-		if (typeof(dst) == 'undefined' || dst == 'auto') 
+		if (typeof(dst) == 'undefined' || dst == 'auto')
 			dst = this.getDst(date);
-		console.log('ORIGINAL_TIMEZONE', timezone);
 		timeZone = 1* timezone+ (1* dst ? 1 : 0);
-		console.log('UPDATED_TIMEZONE', timeZone);
 		jDate = this.julian(date[0], date[1], date[2])- lng/ (15* 24);
 		
 		return this.computeTimes();
@@ -382,16 +380,15 @@ function PrayTimes(method) {
 		times.midnight = (setting.midnight == 'Jafari') ? 
 				times.sunset+ this.timeDiff(times.sunset, times.fajr)/ 2 :
 				times.sunset+ this.timeDiff(times.sunset, times.sunrise)/ 2;
-		if (params.fajrFromSunrise) {
-			console.log('PARAMS_', params.fajrFromSunrise);
-			this.adjustFajrWithSunrise(times);
-		}
+		this.adjustFajrWithSunrise(times);
 		times = this.tuneTimes(times);
 		return this.modifyFormats(times);
 	},
 
 	adjustFajrWithSunrise: function(times) {
-		times.fajr = times.sunrise - this.eval(params.fajrFromSunrise) / 60;
+		if (setting.fajrFromSunrise) {
+			times.fajr = times.sunrise + this.eval(setting.fajrFromSunrise) / 60;
+		}
 	},
 
 

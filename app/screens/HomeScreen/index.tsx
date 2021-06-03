@@ -1,27 +1,20 @@
 import React, {useState, useEffect, FunctionComponent, useMemo} from 'react';
 import {Text, View, useColorScheme, StyleProp, TextStyle} from 'react-native';
-import {find, floor, filter, range, map, flatten} from 'lodash/fp';
-import PushNotification from 'react-native-push-notification';
+import {find, floor, range, forEach, flatten, last, keys} from 'lodash/fp';
+// import PushNotification from 'react-native-push-notification';
 import Body from '../../components/Body';
+import MyDate from '../../lib/MyDate';
 import Colors from '../../theme/Colors';
 import useAppSettings from '../../hooks/useAppSettings';
 import styles from './styles';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const NUMBER_OF_DAYS_TO_FETCH = 30;
-const PUSH_NOTIFICATION_SET_TILL = '@prayer_app:push_notification';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
+import AppConstants from '../../AppConstants';
+import usePushNotifications from '../../hooks/usePushNotifications';
 
 const timeFormat = new Intl.DateTimeFormat('en-US', {
   hour: 'numeric',
   minute: 'numeric',
 });
-
-const filterTimesByDate = (date: Date) =>
-  filter(
-    (time: PrayerTimeLabel) => time.time.toDateString() === date.toDateString(),
-  );
-
-const filterTimesByToday = filterTimesByDate(new Date());
 
 const displayTime = (time: number) => {
   const value = floor(time);
@@ -54,7 +47,7 @@ const Title = ({...rest}) => {
 };
 
 interface NextPrayerProps {
-  prayerTimes: PrayerTimeLabel[] | undefined;
+  prayerTimes: PrayerTimesByDate | undefined;
 }
 
 const NextPrayer: FunctionComponent<NextPrayerProps> = ({prayerTimes}) => {
@@ -63,9 +56,10 @@ const NextPrayer: FunctionComponent<NextPrayerProps> = ({prayerTimes}) => {
     if (!prayerTimes) {
       return undefined;
     }
+    const flattened = flatten(Object.values(prayerTimes));
     const interval = setInterval(() => {
-      const prayer = find((p: PrayerTimeLabel) => p.time > new Date())(
-        prayerTimes,
+      const prayer = find((p: PrayerTimeLabel) => p.time > new MyDate())(
+        flattened,
       );
       if (!prayer) {
         return;
@@ -94,45 +88,30 @@ const NextPrayer: FunctionComponent<NextPrayerProps> = ({prayerTimes}) => {
 
 const HomeScreen = () => {
   const {getPrayerTimes} = useAppSettings();
-  const prayerTimes: PrayerTimeLabel[] = useMemo(() => {
-    return flatten(
-      map((index: number) => {
-        const date = new Date();
-        date.setDate(date.getDate() + index);
-        return getPrayerTimes(date);
-      })(range(0)(NUMBER_OF_DAYS_TO_FETCH)),
-    );
+  const {registered, scheduleNotifications} = usePushNotifications();
+  const today = new MyDate().beginningOfDay().getTime();
+  const prayerTimes: PrayerTimesByDate = useMemo(() => {
+    const data: PrayerTimesByDate = {};
+    forEach((index: number) => {
+      const date = new MyDate().beginningOfDay();
+      date.setDate(date.getDate() + index);
+      data[date.getTime()] = getPrayerTimes(date);
+    })(range(0)(AppConstants.numberOfDaysToFetch));
+    return data;
   }, [getPrayerTimes]);
-  useEffect(() => {
-    AsyncStorage.getItem(PUSH_NOTIFICATION_SET_TILL).then(
-      (value: string | null) => {
-        const yesterday = new Date();
-        yesterday.setDate(new Date().getDate() - 1);
-        const date = value ? new Date(value) : yesterday;
-        filterTimesByDate(date)(prayerTimes).forEach(
-          (time: PrayerTimeLabel) => {
-            PushNotification.localNotificationSchedule({
-              message: `${time.label} Time`,
-              date: time.time,
-              actions: ['Okay'],
-            });
-          },
-        );
-      },
-    );
-  }, [prayerTimes]);
 
-  const todayPrayers = useMemo(
-    () => filterTimesByToday(prayerTimes),
-    [prayerTimes],
-  );
+  useEffect(() => {
+    if (registered) {
+      scheduleNotifications(prayerTimes);
+    }
+  }, [prayerTimes, registered, scheduleNotifications]);
 
   return (
     <Body>
       <Title>Prayer Times</Title>
       <View style={styles.timeContainer}>
         <View style={[styles.labelTime, styles.times]}>
-          {todayPrayers?.map(time => (
+          {prayerTimes[today]?.map(time => (
             <View style={styles.row} key={`time-${time.label}`}>
               <Content style={styles.content}>{time.label}</Content>
               <Content style={[styles.content, styles.time]}>

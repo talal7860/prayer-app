@@ -8,12 +8,24 @@ type PrayerTimeLabel = {
   time: Date;
 };
 
+type PrayerCalculationMethod =
+  | 'MWL'
+  | 'ISNA'
+  | 'Egypt'
+  | 'Makkah'
+  | 'Karachi'
+  | 'Tehran'
+  | 'Jafari';
+
+type AsrJuristics = 'Hanafi' | 'Standard';
+type FajrIshaCalculation = 'Standard' | '90mins';
+
 type Settings = {
   location: Location;
-  asr: string;
+  asr: AsrJuristics;
   fajr: string;
-  fajrFromSunrise: string;
-  calculationMethod: string;
+  fajrIshaCalculation: FajrIshaCalculation;
+  calculationMethod: PrayerCalculationMethod;
 };
 
 type SettingKey =
@@ -26,3 +38,5 @@ type SettingKey =
 type Adjustment = Record<string, number>;
 
 declare module 'react-native-push-notification';
+
+type PrayerTimesByDate = Record<string, PrayerTimeLabel[]>;

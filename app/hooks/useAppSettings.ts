@@ -12,8 +12,7 @@ const defaultSettings: Settings = Object.freeze({
     lng: -114.08529,
   },
   calculationMethod: 'Karachi',
-  isha: '90 min',
-  fajrFromSunrise: '-90 min',
+  fajrIshaCalculation: '90mins',
   fajr: '',
   asr: 'Hanafi',
 });
@@ -63,7 +62,7 @@ const useAppSettings = () => {
       const PT = new PrayerTimes(settings.method);
       PT.adjust(settings);
       const times = PT.getTimes(
-        date,
+        new Date(date),
         [settings.location.lat, settings.location.lng],
         -date.getTimezoneOffset() / 60,
         0,

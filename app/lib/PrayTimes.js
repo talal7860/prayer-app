@@ -146,6 +146,11 @@ function PrayTimes(method) {
 		'12hNS',       // 12-hour format with no suffix
 		'Float'        // floating point number 
 	],
+
+	fajrIshaCalculations : [
+		'Standard', // Based on formula
+		'90mins'
+	]
 	*/	
 
 
@@ -158,7 +163,8 @@ function PrayTimes(method) {
 		imsak    : '10 min',
 		dhuhr    : '0 min',  
 		asr      : 'Standard',
-		highLats : 'NightMiddle'
+		highLats : 'NightMiddle',
+		fajrIshaCalculation: 'Standard'
 	},
 
 	timeFormat = '24h',
@@ -216,7 +222,6 @@ function PrayTimes(method) {
 	adjust: function(params) {
 		for (var id in params)
 			setting[id] = params[id];
-		console.log('SETTINGS', setting);
 	},
 
 
@@ -345,7 +350,6 @@ function PrayTimes(method) {
 	computePrayerTimes: function(times) {
 		times = this.dayPortion(times);
 		var params  = setting;
-		
 		var imsak   = this.sunAngleTime(this.eval(params.imsak), times.imsak, 'ccw');
 		var fajr    = this.sunAngleTime(this.eval(params.fajr), times.fajr, 'ccw');
 		var sunrise = this.sunAngleTime(this.riseSetAngle(), times.sunrise, 'ccw');  
@@ -380,17 +384,13 @@ function PrayTimes(method) {
 		times.midnight = (setting.midnight == 'Jafari') ? 
 				times.sunset+ this.timeDiff(times.sunset, times.fajr)/ 2 :
 				times.sunset+ this.timeDiff(times.sunset, times.sunrise)/ 2;
-		this.adjustFajrWithSunrise(times);
+		if (setting.fajrIshaCalculation === '90mins') {
+			times.fajr = times.sunrise + this.eval('-90 min') / 60;
+			times.isha = times.maghrib + this.eval('90 min') / 60;
+		}
 		times = this.tuneTimes(times);
 		return this.modifyFormats(times);
 	},
-
-	adjustFajrWithSunrise: function(times) {
-		if (setting.fajrFromSunrise) {
-			times.fajr = times.sunrise + this.eval(setting.fajrFromSunrise) / 60;
-		}
-	},
-
 
 	// adjust times 
 	adjustTimes: function(times) {

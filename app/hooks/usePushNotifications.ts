@@ -6,6 +6,7 @@ import {last, keys} from 'lodash/fp';
 import {Platform} from 'react-native';
 import MyDate from '../lib/MyDate';
 import AppConstants from '../AppConstants';
+import I18n from 'i18n-js';
 
 const PUSH_NOTIFICATION_SET_TILL = '@prayer_app:push_notification';
 
@@ -13,8 +14,11 @@ const usePushNotifications = () => {
   const [registered, setRegistered] = useState(false);
   const {getItem, setItem} = useAsyncStorage(PUSH_NOTIFICATION_SET_TILL);
   useEffect(() => {
-    PushNotificationIOS.addEventListener('register', () => setRegistered(true));
-    return () => PushNotificationIOS.removeEventListener('register');
+    PushNotificationIOS.requestPermissions().then((res: any) => {
+      if ([0, 1].includes(res.authorizationStatus)) {
+        setRegistered(true);
+      }
+    });
   }, []);
 
   const scheduleNotifications = useCallback(
@@ -25,12 +29,12 @@ const usePushNotifications = () => {
           if (new MyDate(key).getTime() > date.getTime()) {
             prayerTimes[key].forEach(time => {
               PushNotification.localNotificationSchedule({
-                title: 'Prayer Time',
+                title: I18n.t('notification.title'),
                 playSound: true,
                 soundName: 'Makkah-Azan.wav',
-                message: `${time.label} Time`,
+                message: I18n.t('notification.message', {label: time.label}),
                 date: time.time,
-                actions: ['Okay'],
+                actions: [I18n.t('notification.action_ok')],
                 channelId: AppConstants.notificationChannel,
               });
             });
@@ -51,8 +55,8 @@ const usePushNotifications = () => {
             PushNotification.createChannel(
               {
                 channelId: AppConstants.notificationChannel, // (required)
-                channelName: 'Prayer Time Notifications', // (required)
-                channelDescription: 'Prayer Time Notifications', // (optional) default: undefined.
+                channelName: I18n.t('notification.channel.name'), // (required)
+                channelDescription: I18n.t('notification.channel.description'), // (optional) default: undefined.
                 playSound: false, // (optional) default: true
                 soundName: 'default', // (optional) See `soundName` parameter of `localNotification` function
                 importance: Importance.HIGH, // (optional) default: Importance.HIGH. Int value of the Android notification importance

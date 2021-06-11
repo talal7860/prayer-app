@@ -40,3 +40,12 @@ type Adjustment = Record<string, number>;
 declare module 'react-native-push-notification';
 
 type PrayerTimesByDate = Record<string, PrayerTimeLabel[]>;
+
+type ColorScheme = 'light' | 'dark' | 'system' | undefined | null;
+
+interface AppSettingsContextInterface {
+  settings: Settings;
+  setSettings: React.Dispatch<React.SetStateAction<Settings>>;
+  getPrayerTimes: (date?: Date) => PrayerTimeLabel[];
+  calculationMethod: () => string;
+}

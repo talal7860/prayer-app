@@ -7,10 +7,11 @@ export default StyleSheet.create({
     textAlign: 'center',
     fontSize: 20,
     fontWeight: 'bold',
+    marginTop: 20,
   },
   timeContainer: {
     display: 'flex',
-    marginTop: 40,
+    marginTop: 25,
     flexDirection: 'row',
     alignContent: 'center',
   },
@@ -40,5 +41,11 @@ export default StyleSheet.create({
     textAlign: 'center',
     marginTop: 10,
     width: '100%',
+  },
+  infoContainer: {
+    marginTop: 15,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
   },
 });

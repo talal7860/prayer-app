@@ -9,18 +9,15 @@
  */
 
 import React from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  useColorScheme,
-} from 'react-native';
+import {SafeAreaView, StatusBar} from 'react-native';
 import HomeScreen from './app/screens/HomeScreen';
+import useColorScheme from './app/hooks/useColorScheme';
 
 import Colors from './app/theme/Colors';
+import {AppSettingsProvider} from './app/contexts/AppSettingsContext';
 
 const App = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+  const {isDarkMode} = useColorScheme();
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -29,11 +26,9 @@ const App = () => {
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
+      <AppSettingsProvider>
         <HomeScreen />
-      </ScrollView>
+      </AppSettingsProvider>
     </SafeAreaView>
   );
 };

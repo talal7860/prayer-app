@@ -1,15 +1,15 @@
 import React, {useState, useEffect, FunctionComponent, useMemo} from 'react';
-import {Text, View, useColorScheme, StyleProp, TextStyle} from 'react-native';
-import {find, floor, range, forEach, flatten, last, keys} from 'lodash/fp';
-// import PushNotification from 'react-native-push-notification';
+import {Text, View, StyleProp, TextStyle} from 'react-native';
+import {find, floor, range, forEach, flatten} from 'lodash/fp';
 import Body from '../../components/Body';
 import MyDate from '../../lib/MyDate';
 import Colors from '../../theme/Colors';
-import useAppSettings from '../../hooks/useAppSettings';
 import styles from './styles';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConstants from '../../AppConstants';
 import usePushNotifications from '../../hooks/usePushNotifications';
+import I18n from '../../I18n';
+import useColorScheme from '../../hooks/useColorScheme';
+import useAppSettings from '../../hooks/useAppSettings';
 
 const timeFormat = new Intl.DateTimeFormat('en-US', {
   hour: 'numeric',
@@ -29,7 +29,7 @@ interface Content {
 }
 
 const Content: FunctionComponent<Content> = ({style, ...rest}) => {
-  const isDarkMode = useColorScheme() === 'dark';
+  const {isDarkMode} = useColorScheme();
   const textColor = {
     color: isDarkMode ? Colors.light : Colors.dark,
   };
@@ -38,7 +38,7 @@ const Content: FunctionComponent<Content> = ({style, ...rest}) => {
 };
 
 const Title = ({...rest}) => {
-  const isDarkMode = useColorScheme() === 'dark';
+  const {isDarkMode} = useColorScheme();
   const textColor = {
     color: isDarkMode ? Colors.light : Colors.dark,
   };
@@ -81,13 +81,13 @@ const NextPrayer: FunctionComponent<NextPrayerProps> = ({prayerTimes}) => {
 
   return (
     <Content style={[styles.nextPrayer]}>
-      {`${nextPrayer?.label} in ${nextPrayer?.time}`}
+      {I18n.t('prayer.next', {time: nextPrayer.time, label: nextPrayer.label})}
     </Content>
   );
 };
 
 const HomeScreen = () => {
-  const {getPrayerTimes} = useAppSettings();
+  const {getPrayerTimes, calculationMethod} = useAppSettings();
   const {registered, scheduleNotifications} = usePushNotifications();
   const today = new MyDate().beginningOfDay().getTime();
   const prayerTimes: PrayerTimesByDate = useMemo(() => {
@@ -108,7 +108,11 @@ const HomeScreen = () => {
 
   return (
     <Body>
-      <Title>Prayer Times</Title>
+      <Title>{I18n.t('title')}</Title>
+      <View style={styles.infoContainer}>
+        <Text>{new Date(today).toDateString()}</Text>
+        <Text>{calculationMethod()}</Text>
+      </View>
       <View style={styles.timeContainer}>
         <View style={[styles.labelTime, styles.times]}>
           {prayerTimes[today]?.map(time => (

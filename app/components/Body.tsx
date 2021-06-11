@@ -1,9 +1,10 @@
 import React from 'react';
-import {useColorScheme, View} from 'react-native';
+import {View} from 'react-native';
 import Colors from '../theme/Colors';
+import useColorScheme from '../hooks/useColorScheme';
 
 const Body: React.FC = ({children}) => {
-  const isDarkMode = useColorScheme() === 'dark';
+  const {isDarkMode} = useColorScheme();
   return (
     <View
       style={{

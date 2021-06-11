@@ -48,4 +48,5 @@ interface AppSettingsContextInterface {
   setSettings: React.Dispatch<React.SetStateAction<Settings>>;
   getPrayerTimes: (date?: Date) => PrayerTimeLabel[];
   calculationMethod: () => string;
+  today: number;
 }

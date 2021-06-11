@@ -14,11 +14,15 @@ const usePushNotifications = () => {
   const [registered, setRegistered] = useState(false);
   const {getItem, setItem} = useAsyncStorage(PUSH_NOTIFICATION_SET_TILL);
   useEffect(() => {
-    PushNotificationIOS.requestPermissions().then((res: any) => {
-      if ([0, 1].includes(res.authorizationStatus)) {
+    const request = async () => {
+      const res = await PushNotificationIOS.requestPermissions();
+      if (res.authorizationStatus === 1) {
         setRegistered(true);
+      } else if (res.authorizationStatus === 0) {
+        request();
       }
-    });
+    };
+    request();
   }, []);
 
   const scheduleNotifications = useCallback(

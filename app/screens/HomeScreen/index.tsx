@@ -87,18 +87,17 @@ const NextPrayer: FunctionComponent<NextPrayerProps> = ({prayerTimes}) => {
 };
 
 const HomeScreen = () => {
-  const {getPrayerTimes, calculationMethod} = useAppSettings();
+  const {getPrayerTimes, calculationMethod, today} = useAppSettings();
   const {registered, scheduleNotifications} = usePushNotifications();
-  const today = new MyDate().beginningOfDay().getTime();
   const prayerTimes: PrayerTimesByDate = useMemo(() => {
     const data: PrayerTimesByDate = {};
     forEach((index: number) => {
-      const date = new MyDate().beginningOfDay();
+      const date = new MyDate(today);
       date.setDate(date.getDate() + index);
       data[date.getTime()] = getPrayerTimes(date);
     })(range(0)(AppConstants.numberOfDaysToFetch));
     return data;
-  }, [getPrayerTimes]);
+  }, [getPrayerTimes, today]);
 
   useEffect(() => {
     if (registered) {
@@ -110,8 +109,10 @@ const HomeScreen = () => {
     <Body>
       <Title>{I18n.t('title')}</Title>
       <View style={styles.infoContainer}>
-        <Text>{new Date(today).toDateString()}</Text>
-        <Text>{calculationMethod()}</Text>
+        <Content style={styles.smallText}>
+          {new Date(today).toDateString()}
+        </Content>
+        <Content style={styles.smallText}>{calculationMethod()}</Content>
       </View>
       <View style={styles.timeContainer}>
         <View style={[styles.labelTime, styles.times]}>

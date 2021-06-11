@@ -48,4 +48,9 @@ export default StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
   },
+  smallText: {
+    fontSize: 14,
+    paddingTop: 5,
+    paddingBottom: 'auto',
+  },
 });

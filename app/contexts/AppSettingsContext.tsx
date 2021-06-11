@@ -10,6 +10,7 @@ import {useAsyncStorage} from '@react-native-async-storage/async-storage';
 import {isEqual, merge} from 'lodash/fp';
 import PrayerTimes from '../lib/PrayTimes';
 import I18n from '../I18n';
+import MyDate from '../lib/MyDate';
 
 const settingskey = '@prayer_app:settings';
 
@@ -31,14 +32,17 @@ const AppSettingsContext = createContext<AppSettingsContextInterface>({
   setSettings: () => {},
   getPrayerTimes: (_date?: Date | undefined) => [{label: '', time: new Date()}],
   calculationMethod: () => '',
+  today: new MyDate().beginningOfDay().getTime(),
 });
 
 const prayers = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
 
 const AppSettingsProvider: FC = ({children}) => {
+  const [today, setToday] = useState(new MyDate().beginningOfDay().getTime());
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const {getItem, setItem} = useAsyncStorage(settingskey);
   const PT = useMemo(
+    //@ts-ignore
     () => new PrayerTimes(settings.calculationMethod),
     [settings.calculationMethod],
   );
@@ -50,6 +54,13 @@ const AppSettingsProvider: FC = ({children}) => {
   }, [setItem, settings]);
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      setToday(new MyDate().beginningOfDay().getTime());
+    }, 1000 * 60);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
     async function process() {
       const stored = await getItem();
       setSettings((prev: Settings) =>
@@ -57,7 +68,8 @@ const AppSettingsProvider: FC = ({children}) => {
       );
     }
     process();
-  }, [getItem]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const calculationMethod = () =>
     PT.getDefaults()[settings.calculationMethod].name;
@@ -93,6 +105,7 @@ const AppSettingsProvider: FC = ({children}) => {
         setSettings,
         getPrayerTimes,
         calculationMethod,
+        today,
       }}>
       {children}
     </AppSettingsContext.Provider>

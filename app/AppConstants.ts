@@ -1,7 +1,7 @@
 import I18n from './I18n';
 
 const notificationChannel = 'prayer-time-notifications';
-const numberOfDaysToFetch = 30;
+const numberOfDaysToFetch = 5;
 
 const sounds = {
   ios: {
@@ -12,8 +12,14 @@ const sounds = {
   },
 };
 
+const timeFormat = new Intl.DateTimeFormat('en-US', {
+  hour: 'numeric',
+  minute: 'numeric',
+});
+
 export default {
   notificationChannel,
   numberOfDaysToFetch,
   sounds,
+  timeFormat,
 };

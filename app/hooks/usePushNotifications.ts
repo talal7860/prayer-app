@@ -2,9 +2,7 @@ import {useCallback, useEffect, useState} from 'react';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import PushNotification, {Importance} from 'react-native-push-notification';
 import {useAsyncStorage} from '@react-native-async-storage/async-storage';
-import {last, keys} from 'lodash/fp';
-import {Platform} from 'react-native';
-import MyDate from '../lib/MyDate';
+import {Alert, Platform} from 'react-native';
 import AppConstants from '../AppConstants';
 import I18n from 'i18n-js';
 
@@ -16,7 +14,7 @@ const usePushNotifications = () => {
   useEffect(() => {
     const request = async () => {
       const res = await PushNotificationIOS.requestPermissions();
-      if (res.authorizationStatus === 1) {
+      if (res.authorizationStatus === 2) {
         setRegistered(true);
       } else if (res.authorizationStatus === 0) {
         request();
@@ -27,27 +25,25 @@ const usePushNotifications = () => {
 
   const scheduleNotifications = useCallback(
     (prayerTimes: PrayerTimesByDate) => {
-      getItem().then((value: string | null) => {
-        const date = value ? new Date(value) : new MyDate().prevDay();
-        for (const key in prayerTimes) {
-          if (new MyDate(key).getTime() > date.getTime()) {
-            prayerTimes[key].forEach(time => {
-              PushNotification.localNotificationSchedule({
-                title: I18n.t('notification.title'),
-                playSound: true,
-                soundName: 'Makkah-Azan.wav',
-                message: I18n.t('notification.message', {label: time.label}),
-                date: time.time,
-                actions: [I18n.t('notification.action_ok')],
-                channelId: AppConstants.notificationChannel,
-              });
-            });
-          }
-          setItem(last(keys(prayerTimes)) || '');
-        }
-      });
+      Alert.alert('Scheduling notifications');
+      PushNotification.cancelAllLocalNotifications();
+      for (const key in prayerTimes) {
+        prayerTimes[key].forEach(time => {
+          PushNotification.localNotificationSchedule({
+            title: I18n.t('notification.title', {
+              label: time.label,
+              time: AppConstants.timeFormat.format(time.time),
+            }),
+            playSound: true,
+            soundName: 'Makkah-Azan.wav',
+            date: new Date(time.time),
+            actions: [I18n.t('notification.action_ok')],
+            channelId: AppConstants.notificationChannel,
+          });
+        });
+      }
     },
-    [getItem, setItem],
+    [],
   );
 
   useEffect(() => {

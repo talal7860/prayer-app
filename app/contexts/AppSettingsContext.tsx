@@ -85,7 +85,7 @@ const AppSettingsProvider: FC = ({children}) => {
         '24h',
       );
       return prayers.map(prayer => {
-        const prayerDate = new Date(date.getTime());
+        const prayerDate = new Date(date);
         const time = times[prayer].split(':');
         prayerDate.setHours(time[0]);
         prayerDate.setMinutes(time[1]);
@@ -96,7 +96,8 @@ const AppSettingsProvider: FC = ({children}) => {
         };
       });
     },
-    [PT, settings],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [PT, JSON.stringify(settings)],
   );
   return (
     <AppSettingsContext.Provider

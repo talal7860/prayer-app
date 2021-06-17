@@ -11,11 +11,6 @@ import I18n from '../../I18n';
 import useColorScheme from '../../hooks/useColorScheme';
 import useAppSettings from '../../hooks/useAppSettings';
 
-const timeFormat = new Intl.DateTimeFormat('en-US', {
-  hour: 'numeric',
-  minute: 'numeric',
-});
-
 const displayTime = (time: number) => {
   const value = floor(time);
   if (value < 10) {
@@ -89,6 +84,7 @@ const NextPrayer: FunctionComponent<NextPrayerProps> = ({prayerTimes}) => {
 const HomeScreen = () => {
   const {getPrayerTimes, calculationMethod, today} = useAppSettings();
   const {registered, scheduleNotifications} = usePushNotifications();
+
   const prayerTimes: PrayerTimesByDate = useMemo(() => {
     const data: PrayerTimesByDate = {};
     forEach((index: number) => {
@@ -120,7 +116,7 @@ const HomeScreen = () => {
             <View style={styles.row} key={`time-${time.label}`}>
               <Content style={styles.content}>{time.label}</Content>
               <Content style={[styles.content, styles.time]}>
-                {timeFormat.format(time.time)}
+                {AppConstants.timeFormat.format(time.time)}
               </Content>
             </View>
           ))}

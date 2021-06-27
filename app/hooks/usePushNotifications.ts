@@ -1,16 +1,12 @@
 import {useCallback, useEffect, useState} from 'react';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import PushNotification, {Importance} from 'react-native-push-notification';
-import {useAsyncStorage} from '@react-native-async-storage/async-storage';
-import {Alert, Platform} from 'react-native';
+import {Platform} from 'react-native';
 import AppConstants from '../AppConstants';
 import I18n from 'i18n-js';
 
-const PUSH_NOTIFICATION_SET_TILL = '@prayer_app:push_notification';
-
 const usePushNotifications = () => {
   const [registered, setRegistered] = useState(false);
-  const {getItem, setItem} = useAsyncStorage(PUSH_NOTIFICATION_SET_TILL);
   useEffect(() => {
     const request = async () => {
       const res = await PushNotificationIOS.requestPermissions();
@@ -25,7 +21,6 @@ const usePushNotifications = () => {
 
   const scheduleNotifications = useCallback(
     (prayerTimes: PrayerTimesByDate) => {
-      Alert.alert('Scheduling notifications');
       PushNotification.cancelAllLocalNotifications();
       for (const key in prayerTimes) {
         prayerTimes[key].forEach(time => {

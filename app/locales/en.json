@@ -1,0 +1,25 @@
+{
+  "title": "Prayer Times",
+  "notification": {
+    "title": "It's {{label}} time now - {{time}}",
+    "message": "",
+    "action_ok": "Okay",
+    "channel": {
+      "name": "Prayer Notifications",
+      "description": "Prayer Notifications"
+    }
+  },
+  "prayer": {
+    "fajr": "Fajr",
+    "sunrise": "Sunrise",
+    "dhuhr": "Dhuhr",
+    "asr": "Asr",
+    "maghrib": "Maghrib",
+    "isha": "Isha",
+    "next": "{{label}} in {{time}}"
+  },
+  "sounds": {
+    "mecca": "Mecca Azan",
+    "madina": "Madina Azan"
+  }
+}

@@ -1,4 +1,4 @@
-package com.prayerapp;
+package com.talal7860.prayertimes;
 
 import com.facebook.react.ReactActivity;
 

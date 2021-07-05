@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.prayerapp">
+  package="com.talal7860.prayertimes">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -19,7 +19,7 @@
                     android:resource="@color/white"/> <!-- or @android:color/{name} to use a standard color -->
         <meta-data
           android:name="com.dieam.reactnativepushnotification.default_notification_channel_id"
-          android:value="@string/prayer-time-notifications" />
+          android:value="@string/prayer_time_notifications" />
         <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationActions" />
         <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationPublisher" />
         <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationBootEventReceiver">

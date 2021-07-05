@@ -1,70 +1,91 @@
 import {useCallback, useEffect, useState} from 'react';
-import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import PushNotification, {Importance} from 'react-native-push-notification';
-import {Platform} from 'react-native';
+import {Alert, Platform} from 'react-native';
+import I18n from '../I18n';
 import AppConstants from '../AppConstants';
-import I18n from 'i18n-js';
+import useAppSettings from './useAppSettings';
+
+const createChannel = (options: any) =>
+  new Promise(resolve => {
+    PushNotification.createChannel(options, resolve);
+  });
 
 const usePushNotifications = () => {
   const [registered, setRegistered] = useState(false);
-  useEffect(() => {
-    const request = async () => {
-      const res = await PushNotificationIOS.requestPermissions();
-      if (res.authorizationStatus === 2) {
+  const {settings} = useAppSettings();
+  const requestPermission = useCallback(async () => {
+    try {
+      const res = await PushNotification.requestPermissions();
+      if (res) {
+        // for IOS
+        if (res.authorizationStatus === 2) {
+          setRegistered(true);
+        } else if (res.authorizationStatus === 0) {
+          requestPermission();
+        }
+      } else {
+        // for android
         setRegistered(true);
-      } else if (res.authorizationStatus === 0) {
-        request();
       }
-    };
-    request();
+    } catch (error) {
+      Alert.alert(error.message);
+    }
   }, []);
 
   const scheduleNotifications = useCallback(
     (prayerTimes: PrayerTimesByDate) => {
+      if (!settings.sound) {
+        return;
+      }
       PushNotification.cancelAllLocalNotifications();
       for (const key in prayerTimes) {
         prayerTimes[key].forEach(time => {
+          if (time.time < new Date()) {
+            return;
+          }
           PushNotification.localNotificationSchedule({
+            ...AppConstants.notificationChannels[settings.sound],
             title: I18n.t('notification.title', {
               label: time.label,
-              time: AppConstants.timeFormat.format(time.time),
+              time: AppConstants.timeFormat(time.time),
             }),
+            message: '',
             playSound: true,
-            soundName: 'Makkah-Azan.wav',
-            date: new Date(time.time),
+            date: time.time,
             actions: [I18n.t('notification.action_ok')],
-            channelId: AppConstants.notificationChannel,
           });
         });
       }
     },
-    [],
+    [settings],
   );
 
   useEffect(() => {
-    if (Platform.OS === 'android') {
-      PushNotification.channelExists(
-        AppConstants.notificationChannel,
-        (exists: boolean) => {
-          if (!exists) {
-            PushNotification.createChannel(
-              {
-                channelId: AppConstants.notificationChannel, // (required)
-                channelName: I18n.t('notification.channel.name'), // (required)
-                channelDescription: I18n.t('notification.channel.description'), // (optional) default: undefined.
-                playSound: false, // (optional) default: true
-                soundName: 'default', // (optional) See `soundName` parameter of `localNotification` function
-                importance: Importance.HIGH, // (optional) default: Importance.HIGH. Int value of the Android notification importance
-                vibrate: true, // (optional) default: true. Creates the default vibration patten if true.
-              },
-              (created: any) =>
-                console.log(`createChannel returned '${created}'`), // (optional) callback returns whether the channel was created, false means it already existed.
-            );
-          }
-        },
-      );
+    if (Platform.OS === 'ios') {
+      requestPermission();
     }
-  }, []);
+  }, [requestPermission]);
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      const createChannels = async () => {
+        await Promise.all(
+          Object.values(AppConstants.notificationChannels).map(channel =>
+            createChannel({
+              ...channel,
+              channelName: I18n.t('notification.channel.name'),
+              channelDescription: I18n.t('notification.channel.description'),
+              playSound: true,
+              importance: Importance.HIGH,
+              vibrate: true,
+            }),
+          ),
+        );
+        requestPermission();
+      };
+      createChannels();
+    }
+  }, [requestPermission]);
 
   return {
     registered,

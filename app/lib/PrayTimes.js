@@ -261,6 +261,10 @@ function PrayTimes(method) {
 		jDate = this.julian(date[0], date[1], date[2])- lng/ (15* 24);
 		
 		return this.computeTimes();
+		// const computedTimes = this.computeTimes();
+		// const today = new Date();
+		// computedTimes.maghrib = `${today.getHours()}:${today.getMinutes() + 1}`;
+		// return computedTimes;
 	},
 
 

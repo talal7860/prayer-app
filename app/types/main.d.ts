@@ -26,6 +26,7 @@ type Settings = {
   fajr: string;
   fajrIshaCalculation: FajrIshaCalculation;
   calculationMethod: PrayerCalculationMethod;
+  sound: string;
 };
 
 type SettingKey =
@@ -40,6 +41,12 @@ type Adjustment = Record<string, number>;
 declare module 'react-native-push-notification';
 
 type PrayerTimesByDate = Record<string, PrayerTimeLabel[]>;
+
+type Sounds = Record<string, {name: string; path: string}> | undefined | null;
+type NotificationChannels = Record<
+  string,
+  {channelId: string; soundName: string}
+>;
 
 type ColorScheme = 'light' | 'dark' | 'system' | undefined | null;
 

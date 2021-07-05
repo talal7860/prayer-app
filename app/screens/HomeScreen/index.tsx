@@ -116,7 +116,7 @@ const HomeScreen = () => {
             <View style={styles.row} key={`time-${time.label}`}>
               <Content style={styles.content}>{time.label}</Content>
               <Content style={[styles.content, styles.time]}>
-                {AppConstants.timeFormat.format(time.time)}
+                {AppConstants.timeFormat(time.time)}
               </Content>
             </View>
           ))}

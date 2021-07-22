@@ -39,6 +39,7 @@ type SettingKey =
 type Adjustment = Record<string, number>;
 
 declare module 'react-native-push-notification';
+declare module 'react-native-vector-icons/Ionicons';
 
 type PrayerTimesByDate = Record<string, PrayerTimeLabel[]>;
 

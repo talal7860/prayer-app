@@ -9,28 +9,51 @@
  */
 
 import React from 'react';
-import {SafeAreaView, StatusBar} from 'react-native';
 import HomeScreen from './app/screens/HomeScreen';
-import useColorScheme from './app/hooks/useColorScheme';
-
-import Colors from './app/theme/Colors';
+import SettingsScreen from './app/screens/SettingsScreen';
 import {AppSettingsProvider} from './app/contexts/AppSettingsContext';
+import 'react-native-gesture-handler';
+import {NavigationContainer} from '@react-navigation/native';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const App = () => {
-  const {isDarkMode} = useColorScheme();
+const Tab = createBottomTabNavigator();
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppSettingsProvider>
-        <HomeScreen />
-      </AppSettingsProvider>
-    </SafeAreaView>
-  );
+const tabIconNames: Record<string, any> = {
+  'Prayer Times': {
+    true: 'time-outline',
+    false: 'time',
+  },
+  Settings: {
+    true: 'cog-outline',
+    false: 'cog',
+  },
 };
+
+const App = () => (
+  <NavigationContainer>
+    <AppSettingsProvider>
+      <Tab.Navigator
+        lazy
+        screenOptions={({route}) => ({
+          tabBarIcon: ({focused, color, size}) => (
+            <Ionicons
+              name={tabIconNames[route.name][`${focused}`]}
+              size={size}
+              color={color}
+            />
+          ),
+        })}
+        initialRouteName="Prayer Times"
+        tabBarOptions={{
+          activeTintColor: 'black',
+          inactiveTintColor: 'gray',
+        }}>
+        <Tab.Screen name="Prayer Times" component={HomeScreen} />
+        <Tab.Screen name="Settings" component={SettingsScreen} />
+      </Tab.Navigator>
+    </AppSettingsProvider>
+  </NavigationContainer>
+);
 
 export default App;

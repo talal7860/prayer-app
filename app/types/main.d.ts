@@ -23,7 +23,6 @@ type FajrIshaCalculation = 'Standard' | '90mins';
 type Settings = {
   location: Location;
   asr: AsrJuristics;
-  fajr: string;
   fajrIshaCalculation: FajrIshaCalculation;
   calculationMethod: PrayerCalculationMethod;
   sound: string;
@@ -44,6 +43,7 @@ declare module 'react-native-vector-icons/Ionicons';
 type PrayerTimesByDate = Record<string, PrayerTimeLabel[]>;
 
 type Sounds = Record<string, {name: string; path: string}> | undefined | null;
+type SettingScreenHash = Record<string, {screen: string; name: string}>;
 type NotificationChannels = Record<
   string,
   {channelId: string; soundName: string}
@@ -54,7 +54,13 @@ type ColorScheme = 'light' | 'dark' | 'system' | undefined | null;
 interface AppSettingsContextInterface {
   settings: Settings;
   setSettings: React.Dispatch<React.SetStateAction<Settings>>;
+  setLocation: (location: Location) => void;
   getPrayerTimes: (date?: Date) => PrayerTimeLabel[];
   calculationMethod: () => string;
   today: number;
+}
+
+interface SettingsTitleInterface {
+  label: string;
+  clickable?: boolean;
 }

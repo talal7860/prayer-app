@@ -1,5 +1,18 @@
 {
-  "title": "Prayer Times",
+  "home": {
+    "title": "Prayer Times"
+  },
+  "settings": {
+    "title": "Settings",
+    "location": "Location",
+    "calculationMethod": "Calculation Method",
+    "fajrIshaCalculation": "Fajr Isha Calculation Method",
+    "asr": "Asr Calculation Method",
+    "sound": "Notification Sound"
+  },
+  "locations": {
+    "title": "Manage Location"
+  },
   "notification": {
     "title": "It's {{label}} time now - {{time}}",
     "message": "",

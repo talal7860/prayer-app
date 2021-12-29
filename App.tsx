@@ -13,9 +13,18 @@ import HomeScreen from './app/screens/HomeScreen';
 import SettingsScreen from './app/screens/SettingsScreen';
 import {AppSettingsProvider} from './app/contexts/AppSettingsContext';
 import 'react-native-gesture-handler';
-import {NavigationContainer} from '@react-navigation/native';
+import {
+  NavigationContainer,
+  DefaultTheme,
+  DarkTheme,
+} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import LocationSettingScreen from './app/screens/SettingsScreen/Location';
+import I18n from './app/I18n';
+import useColorScheme from './app/hooks/useColorScheme';
+import Colors from './app/theme/Colors';
 
 const Tab = createBottomTabNavigator();
 
@@ -29,31 +38,51 @@ const tabIconNames: Record<string, any> = {
     false: 'cog',
   },
 };
+const Stack = createNativeStackNavigator();
 
-const App = () => (
-  <NavigationContainer>
-    <AppSettingsProvider>
-      <Tab.Navigator
-        lazy
-        screenOptions={({route}) => ({
-          tabBarIcon: ({focused, color, size}) => (
-            <Ionicons
-              name={tabIconNames[route.name][`${focused}`]}
-              size={size}
-              color={color}
-            />
-          ),
-        })}
-        initialRouteName="Prayer Times"
-        tabBarOptions={{
-          activeTintColor: 'black',
-          inactiveTintColor: 'gray',
-        }}>
-        <Tab.Screen name="Prayer Times" component={HomeScreen} />
-        <Tab.Screen name="Settings" component={SettingsScreen} />
-      </Tab.Navigator>
-    </AppSettingsProvider>
-  </NavigationContainer>
-);
+const HomeTabs = () => {
+  const {isDarkMode} = useColorScheme();
+  return (
+    <Tab.Navigator
+      screenOptions={({route}) => ({
+        tabBarIcon: ({focused, color, size}) => (
+          <Ionicons
+            name={tabIconNames[route.name][`${focused}`]}
+            size={size}
+            color={color}
+          />
+        ),
+        tabBarActiveTintColor: isDarkMode ? Colors.light : Colors.dark,
+        tabBarInactiveTintColor: 'gray',
+        headerShown: false,
+      })}
+      initialRouteName="Prayer Times">
+      <Tab.Screen name="Prayer Times" component={HomeScreen} />
+      <Tab.Screen name="Settings" component={SettingsScreen} />
+    </Tab.Navigator>
+  );
+};
+
+const App = () => {
+  const {isDarkMode} = useColorScheme();
+  return (
+    <NavigationContainer theme={isDarkMode ? DarkTheme : DefaultTheme}>
+      <AppSettingsProvider>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Home"
+            component={HomeTabs}
+            options={{title: I18n.t('home.title'), headerShown: false}}
+          />
+          <Stack.Screen
+            name="Location"
+            component={LocationSettingScreen}
+            options={{title: I18n.t('locations.title')}}
+          />
+        </Stack.Navigator>
+      </AppSettingsProvider>
+    </NavigationContainer>
+  );
+};
 
 export default App;

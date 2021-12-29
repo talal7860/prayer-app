@@ -36,7 +36,7 @@
 		</dict>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>Location Services required for fetching city and country</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>

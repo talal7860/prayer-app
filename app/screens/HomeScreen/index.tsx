@@ -10,6 +10,7 @@ import usePushNotifications from '../../hooks/usePushNotifications';
 import I18n from '../../I18n';
 import useColorScheme from '../../hooks/useColorScheme';
 import useAppSettings from '../../hooks/useAppSettings';
+import Title from '../../components/Title';
 
 const displayTime = (time: number) => {
   const value = floor(time);
@@ -30,15 +31,6 @@ const Content: FunctionComponent<Content> = ({style, ...rest}) => {
   };
 
   return <Text {...rest} style={[styles.content, textColor, style]} />;
-};
-
-const Title = ({...rest}) => {
-  const {isDarkMode} = useColorScheme();
-  const textColor = {
-    color: isDarkMode ? Colors.light : Colors.dark,
-  };
-
-  return <Text {...rest} style={[styles.title, textColor]} />;
 };
 
 interface NextPrayerProps {
@@ -103,7 +95,7 @@ const HomeScreen = () => {
 
   return (
     <Body>
-      <Title>{I18n.t('title')}</Title>
+      <Title>{I18n.t('home.title')}</Title>
       <View style={styles.infoContainer}>
         <Content style={styles.smallText}>
           {new Date(today).toDateString()}

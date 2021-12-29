@@ -22,7 +22,6 @@ const defaultSettings: Settings = Object.freeze({
   },
   calculationMethod: 'Karachi',
   fajrIshaCalculation: '90mins',
-  fajr: '',
   asr: 'Hanafi',
   sound: 'mecca',
 });
@@ -30,6 +29,7 @@ const defaultSettings: Settings = Object.freeze({
 const AppSettingsContext = createContext<AppSettingsContextInterface>({
   settings: defaultSettings,
   setSettings: () => {},
+  setLocation: () => {},
   getPrayerTimes: (_date?: Date | undefined) => [{label: '', time: new Date()}],
   calculationMethod: () => '',
   today: new MyDate().beginningOfDay().getTime(),
@@ -74,13 +74,16 @@ const AppSettingsProvider: FC = ({children}) => {
   const calculationMethod = () =>
     PT.getDefaults()[settings.calculationMethod].name;
 
+  const setLocation = (location: Location) =>
+    setSettings((prev: Settings) => merge(prev)({location}));
+
   const getPrayerTimes = useCallback(
     (date: Date = new Date()): PrayerTimeLabel[] => {
       PT.adjust(settings);
       const times = PT.getTimes(
-        new Date(date),
+        new Date(),
         [settings.location.lat, settings.location.lng],
-        -date.getTimezoneOffset() / 60,
+        -new Date().getTimezoneOffset() / 60,
         0,
         '24h',
       );
@@ -104,6 +107,7 @@ const AppSettingsProvider: FC = ({children}) => {
       value={{
         settings,
         setSettings,
+        setLocation,
         getPrayerTimes,
         calculationMethod,
         today,

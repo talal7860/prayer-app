@@ -27,7 +27,7 @@ const usePushNotifications = () => {
         // for android
         setRegistered(true);
       }
-    } catch (error) {
+    } catch (error: any) {
       Alert.alert(error.message);
     }
   }, []);

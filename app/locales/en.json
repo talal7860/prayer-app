@@ -2,6 +2,12 @@
   "home": {
     "title": "Prayer Times"
   },
+  "locations": {
+    "title": "Manage Location"
+  },
+  "asr": {
+    "title": "Asr Calculation Method"
+  },
   "settings": {
     "title": "Settings",
     "location": "Location",
@@ -9,9 +15,6 @@
     "fajrIshaCalculation": "Fajr Isha Calculation Method",
     "asr": "Asr Calculation Method",
     "sound": "Notification Sound"
-  },
-  "locations": {
-    "title": "Manage Location"
   },
   "notification": {
     "title": "It's {{label}} time now - {{time}}",

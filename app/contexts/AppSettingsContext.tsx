@@ -29,7 +29,7 @@ const defaultSettings: Settings = Object.freeze({
 const AppSettingsContext = createContext<AppSettingsContextInterface>({
   settings: defaultSettings,
   setSettings: () => {},
-  setLocation: () => {},
+  setSetting: () => () => {},
   getPrayerTimes: (_date?: Date | undefined) => [{label: '', time: new Date()}],
   calculationMethod: () => '',
   today: new MyDate().beginningOfDay().getTime(),
@@ -74,8 +74,8 @@ const AppSettingsProvider: FC = ({children}) => {
   const calculationMethod = () =>
     PT.getDefaults()[settings.calculationMethod].name;
 
-  const setLocation = (location: Location) =>
-    setSettings((prev: Settings) => merge(prev)({location}));
+  const setSetting = (key: string) => (value: any) =>
+    setSettings((prev: Settings) => merge(prev)({[key]: value}));
 
   const getPrayerTimes = useCallback(
     (date: Date = new Date()): PrayerTimeLabel[] => {
@@ -107,7 +107,7 @@ const AppSettingsProvider: FC = ({children}) => {
       value={{
         settings,
         setSettings,
-        setLocation,
+        setSetting,
         getPrayerTimes,
         calculationMethod,
         today,

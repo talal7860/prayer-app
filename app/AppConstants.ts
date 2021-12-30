@@ -34,9 +34,12 @@ const timeFormat = (time: Date): string => {
   }:${minutes.length === 1 ? `0${minutes}` : minutes} ${mode}`;
 };
 
+const asrJuristics = ['Standard', 'Hanafi'];
+
 export default {
   notificationChannels,
   numberOfDaysToFetch,
   sounds,
   timeFormat,
+  asrJuristics,
 };

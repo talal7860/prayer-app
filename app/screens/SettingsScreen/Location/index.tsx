@@ -12,12 +12,11 @@ import {
 import Geolocation from 'react-native-geolocation-service';
 import Body from '../../../components/Body';
 import useAppSettings from '../../../hooks/useAppSettings';
-import useColorScheme from '../../../hooks/useColorScheme';
-import Colors from '../../../theme/Colors';
+import useTheme from '../../../hooks/useTheme';
 
 const Location = () => {
-  const {settings, setLocation} = useAppSettings();
-  const {isDarkMode} = useColorScheme();
+  const {settings, setSetting} = useAppSettings();
+  const theme = useTheme();
   const hasPermissionIOS = async () => {
     const openSetting = () => {
       Linking.openSettings().catch(() => {
@@ -98,42 +97,38 @@ const Location = () => {
 
     Geolocation.getCurrentPosition(
       position => {
-        setLocation({
+        setSetting('location')({
           lat: position?.coords?.latitude,
           lng: position?.coords?.longitude,
         });
       },
       error => {
         Alert.alert(`Code ${error.code}`, error.message);
-        // setLocation(null);
         console.log(error);
       },
       {
         accuracy: {
-          android: 'high',
-          ios: 'best',
+          android: 'low',
+          ios: 'reduced',
         },
-        enableHighAccuracy: true,
+        enableHighAccuracy: false,
         timeout: 15000,
         maximumAge: 10000,
-        distanceFilter: 0,
+        // distanceFilter: 0,
         // forceRequestLocation: true,
         // forceLocationManager: true,
         // showLocationDialog: locationDialog,
       },
     );
   };
-  const textColor = {
-    color: isDarkMode ? Colors.light : Colors.dark,
-  };
   return (
     <Body>
       <View>
-        <Text style={textColor}>Current Location:</Text>
-        <Text style={textColor}>Lat:</Text>
-        <Text style={textColor}>{settings.location.lat}</Text>
-        <Text style={textColor}>Lng:</Text>
-        <Text style={textColor}>{settings.location.lng}</Text>
+        <Text style={theme.styles.bodyText}>Current Location:</Text>
+        <Text style={theme.styles.bodyText}>Lat:</Text>
+        <Text style={theme.styles.bodyText}>{settings.location.lat}</Text>
+        <Text style={theme.styles.bodyText}>Lng:</Text>
+        <Text style={theme.styles.bodyText}>{settings.location.lng}</Text>
         <Button title="Get Current Location" onPress={getLocation} />
       </View>
     </Body>

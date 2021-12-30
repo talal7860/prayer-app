@@ -1,15 +1,11 @@
 import React from 'react';
 import {Text} from 'react-native';
-import Colors from '../../theme/Colors';
 import styles from './styles';
-import useColorScheme from '../../hooks/useColorScheme';
+import useTheme from '../../hooks/useTheme';
 
 const Title = ({...rest}) => {
-  const {isDarkMode} = useColorScheme();
-  const textColor = {
-    color: isDarkMode ? Colors.light : Colors.dark,
-  };
+  const theme = useTheme();
 
-  return <Text {...rest} style={[styles.title, textColor]} />;
+  return <Text {...rest} style={[styles.title, theme.styles.bodyText]} />;
 };
 export default Title;

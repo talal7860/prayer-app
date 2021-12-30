@@ -1,16 +1,15 @@
 import React, {useState, useEffect, FunctionComponent, useMemo} from 'react';
 import {Text, View, StyleProp, TextStyle} from 'react-native';
 import {find, floor, range, forEach, flatten} from 'lodash/fp';
+// import {useNavigation} from '@react-navigation/core';
 import Body from '../../components/Body';
 import MyDate from '../../lib/MyDate';
-import Colors from '../../theme/Colors';
 import styles from './styles';
 import AppConstants from '../../AppConstants';
 import usePushNotifications from '../../hooks/usePushNotifications';
 import I18n from '../../I18n';
-import useColorScheme from '../../hooks/useColorScheme';
 import useAppSettings from '../../hooks/useAppSettings';
-import Title from '../../components/Title';
+import useTheme from '../../hooks/useTheme';
 
 const displayTime = (time: number) => {
   const value = floor(time);
@@ -25,12 +24,10 @@ interface Content {
 }
 
 const Content: FunctionComponent<Content> = ({style, ...rest}) => {
-  const {isDarkMode} = useColorScheme();
-  const textColor = {
-    color: isDarkMode ? Colors.light : Colors.dark,
-  };
-
-  return <Text {...rest} style={[styles.content, textColor, style]} />;
+  const theme = useTheme();
+  return (
+    <Text {...rest} style={[styles.content, theme.styles.bodyText, style]} />
+  );
 };
 
 interface NextPrayerProps {
@@ -76,6 +73,11 @@ const NextPrayer: FunctionComponent<NextPrayerProps> = ({prayerTimes}) => {
 const HomeScreen = () => {
   const {getPrayerTimes, calculationMethod, today} = useAppSettings();
   const {registered, scheduleNotifications} = usePushNotifications();
+  // const navigation = useNavigation();
+
+  // useEffect(() => {
+  //   navigation.setOptions({headerTitle: '123'});
+  // }, [navigation]);
 
   const prayerTimes: PrayerTimesByDate = useMemo(() => {
     const data: PrayerTimesByDate = {};
@@ -95,7 +97,6 @@ const HomeScreen = () => {
 
   return (
     <Body>
-      <Title>{I18n.t('home.title')}</Title>
       <View style={styles.infoContainer}>
         <Content style={styles.smallText}>
           {new Date(today).toDateString()}

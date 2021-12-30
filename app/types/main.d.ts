@@ -43,7 +43,7 @@ declare module 'react-native-vector-icons/Ionicons';
 type PrayerTimesByDate = Record<string, PrayerTimeLabel[]>;
 
 type Sounds = Record<string, {name: string; path: string}> | undefined | null;
-type SettingScreenHash = Record<string, {screen: string; name: string}>;
+type SettingScreenMap = Record<string, string>;
 type NotificationChannels = Record<
   string,
   {channelId: string; soundName: string}
@@ -54,13 +54,20 @@ type ColorScheme = 'light' | 'dark' | 'system' | undefined | null;
 interface AppSettingsContextInterface {
   settings: Settings;
   setSettings: React.Dispatch<React.SetStateAction<Settings>>;
-  setLocation: (location: Location) => void;
+  setSetting: (key: string) => (value: any) => void;
   getPrayerTimes: (date?: Date) => PrayerTimeLabel[];
   calculationMethod: () => string;
   today: number;
 }
 
 interface SettingsTitleInterface {
-  label: string;
-  clickable?: boolean;
+  setting: string;
+  selected?: string;
+  setSetting?: (setting: string) => void;
+}
+
+interface SelectListInterface {
+  items: string[];
+  selected: string;
+  onSelect: (value: any) => void;
 }

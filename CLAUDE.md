@@ -36,6 +36,31 @@ npx expo-doctor             # dependency / config health check, keep it at 20/20
 Add or upgrade native packages with `npx expo install <pkg>` so the version matches the SDK.
 For the next SDK bump: `npx expo install expo@^<next> --fix`, then `npx expo-doctor`.
 
+## CI / CD
+
+- `.github/workflows/ci.yml`: on every PR, runs typecheck, lint, tests and `expo-doctor`.
+- `.github/workflows/deploy.yml`: on push to `master` (or a manual run), re-runs CI, then
+  `eas build --platform all --profile production --auto-submit` on EAS. iOS goes to
+  **TestFlight**, Android to the Play **internal testing** track. Releases run one at a time.
+- `eas.json`: `appVersionSource: remote` + `autoIncrement`, so EAS owns the iOS build number
+  and Android `versionCode`. Don't bump them in `app.json`. Bump `expo.version` for a new
+  marketing version.
+- Signing credentials, the App Store Connect API key and the Play service account JSON live
+  in EAS (`eas credentials`), not in the repo. The only GitHub secret is `EXPO_TOKEN`.
+- The workflow uses `--no-wait`: a green Action means "builds queued". Build and submit
+  results are on expo.dev.
+
+One-time setup (needs the account owner):
+1. `npx eas-cli login`, then `npx eas-cli init` (writes `extra.eas.projectId` into `app.json`, commit it).
+2. Create the app in App Store Connect and put its Apple ID in `eas.json` → `submit.production.ios.ascAppId`.
+3. `npx eas-cli credentials -p ios`: let EAS create the distribution cert and profile, and add an App Store Connect API key.
+4. Create the app in Play Console. **Upload the first AAB by hand** (Google rejects API uploads
+   for an app that has never had a release): `npx eas-cli build -p android --profile production`,
+   then upload it to Internal testing.
+5. Create a Play service account with release permissions, then `npx eas-cli credentials -p android` → upload its JSON key.
+6. Create an Expo access token (expo.dev → Account settings → Access tokens) and add it as the
+   `EXPO_TOKEN` repository secret.
+
 ## Native config (in `app.json`)
 
 - Display name "Prayer Times". iOS bundle id `org.personal.talal7860.PrayerTimes`,
@@ -84,3 +109,7 @@ Tracking epic: https://github.com/talal7860/prayer-app/issues/11 (sub-issues #3�
 - The old "Okay" notification action (`notification.action_ok`) was dropped in the
   migration; re-adding it needs `Notifications.setNotificationCategoryAsync`.
 - Custom notification sounds don't work in Expo Go. Use a dev build (`npx expo run:*`).
+- `pod install` (run by `expo run:ios`) crashes with `Unicode Normalization not appropriate
+  for ASCII-8BIT` if the shell locale isn't UTF-8. Run with `LANG=en_US.UTF-8`.
+- `Body` uses safe-area-context's `SafeAreaView` with `edges={['left', 'right']}`. Unlike
+  RN's old `SafeAreaView`, it always pads, and the header and tab bar already cover top/bottom.

@@ -1,0 +1,41 @@
+name: Deploy to TestFlight and Google Play
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# One release at a time; a newer push to master waits for the running one.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  check:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      # Builds both platforms on EAS, bumps the build number remotely, then
+      # submits the iOS build to TestFlight and the Android build to the Play
+      # internal testing track. --no-wait returns once the builds are queued;
+      # follow them on expo.dev.
+      - run: >
+          eas build
+          --platform all
+          --profile production
+          --auto-submit
+          --non-interactive
+          --no-wait

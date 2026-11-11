@@ -51,7 +51,8 @@ For the next SDK bump: `npx expo install expo@^<next> --fix`, then `npx expo-doc
   results are on expo.dev.
 
 One-time setup (needs the account owner):
-1. `npx eas-cli login`, then `npx eas-cli init` (writes `extra.eas.projectId` into `app.json`, commit it).
+1. ~~Link the EAS project~~ Done: `app.json` → `extra.eas.projectId` is
+   `8deab7ae-9106-4150-b064-87578c79a68e`. Run `npx eas-cli login` locally before steps 3–5.
 2. Create the app in App Store Connect and put its Apple ID in `eas.json` → `submit.production.ios.ascAppId`.
 3. `npx eas-cli credentials -p ios`: let EAS create the distribution cert and profile, and add an App Store Connect API key.
 4. Create the app in Play Console. **Upload the first AAB by hand** (Google rejects API uploads

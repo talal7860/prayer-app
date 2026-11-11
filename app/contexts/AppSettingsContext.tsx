@@ -5,6 +5,7 @@ import React, {
   useState,
   createContext,
   FC,
+  PropsWithChildren,
 } from 'react';
 import {useAsyncStorage} from '@react-native-async-storage/async-storage';
 import {isEqual, merge} from 'lodash/fp';
@@ -37,7 +38,7 @@ const AppSettingsContext = createContext<AppSettingsContextInterface>({
 
 const prayers = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
 
-const AppSettingsProvider: FC = ({children}) => {
+const AppSettingsProvider: FC<PropsWithChildren> = ({children}) => {
   const [today, setToday] = useState(new MyDate().beginningOfDay().getTime());
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const {getItem, setItem} = useAsyncStorage(settingskey);
@@ -77,6 +78,7 @@ const AppSettingsProvider: FC = ({children}) => {
   const setSetting = (key: string) => (value: any) =>
     setSettings((prev: Settings) => merge(prev)({[key]: value}));
 
+  const settingsKey = JSON.stringify(settings);
   const getPrayerTimes = useCallback(
     (date: Date = new Date()): PrayerTimeLabel[] => {
       PT.adjust(settings);
@@ -100,7 +102,7 @@ const AppSettingsProvider: FC = ({children}) => {
       });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [PT, JSON.stringify(settings)],
+    [PT, settingsKey],
   );
   return (
     <AppSettingsContext.Provider

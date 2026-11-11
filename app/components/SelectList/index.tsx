@@ -1,7 +1,7 @@
 import {map} from 'lodash/fp';
 import React from 'react';
 import {ScrollView, TouchableOpacity, Text} from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import useColorScheme from '../../hooks/useColorScheme';
 import Colors from '../../theme/Colors';
 import useTheme from '../../hooks/useTheme';

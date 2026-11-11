@@ -19,7 +19,7 @@ const displayTime = (time: number) => {
   return value;
 };
 
-interface Content {
+interface Content extends React.PropsWithChildren {
   style: StyleProp<TextStyle> | undefined;
 }
 

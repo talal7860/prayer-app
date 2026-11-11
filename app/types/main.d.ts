@@ -1,4 +1,4 @@
-type Location = {
+type GeoLocation = {
   lat: number;
   lng: number;
 };
@@ -21,7 +21,7 @@ type AsrJuristics = 'Hanafi' | 'Standard';
 type FajrIshaCalculation = 'Standard' | '90mins';
 
 type Settings = {
-  location: Location;
+  location: GeoLocation;
   asr: AsrJuristics;
   fajrIshaCalculation: FajrIshaCalculation;
   calculationMethod: PrayerCalculationMethod;
@@ -36,9 +36,6 @@ type SettingKey =
   | 'calculationMethod';
 
 type Adjustment = Record<string, number>;
-
-declare module 'react-native-push-notification';
-declare module 'react-native-vector-icons/Ionicons';
 
 type PrayerTimesByDate = Record<string, PrayerTimeLabel[]>;
 

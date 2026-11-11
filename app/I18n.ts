@@ -1,8 +1,10 @@
-import I18n from 'i18n-js';
+import {I18n} from 'i18n-js';
 import en from './locales/en.json';
 
-I18n.locale = 'en';
-I18n.defaultLocale = 'en';
-I18n.translations = {en};
+const i18n = new I18n({en});
 
-export default I18n;
+i18n.defaultLocale = 'en';
+i18n.locale = 'en';
+i18n.enableFallback = true;
+
+export default i18n;

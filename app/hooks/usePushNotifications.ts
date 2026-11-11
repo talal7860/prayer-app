@@ -1,90 +1,89 @@
 import {useCallback, useEffect, useState} from 'react';
-import PushNotification, {Importance} from 'react-native-push-notification';
 import {Alert, Platform} from 'react-native';
+import * as Notifications from 'expo-notifications';
 import I18n from '../I18n';
 import AppConstants from '../AppConstants';
 import useAppSettings from './useAppSettings';
 
-const createChannel = (options: any) =>
-  new Promise(resolve => {
-    PushNotification.createChannel(options, resolve);
-  });
+const createChannels = () =>
+  Promise.all(
+    Object.values(AppConstants.notificationChannels).map(channel =>
+      Notifications.setNotificationChannelAsync(channel.channelId, {
+        name: I18n.t('notification.channel.name'),
+        description: I18n.t('notification.channel.description'),
+        // eslint-disable-next-line import/namespace -- re-exported via `export *` from a .types module
+        importance: Notifications.AndroidImportance.HIGH,
+        sound: channel.soundName === 'default' ? 'default' : channel.soundName,
+        enableVibrate: true,
+      }),
+    ),
+  );
 
 const usePushNotifications = () => {
   const [registered, setRegistered] = useState(false);
   const {settings} = useAppSettings();
+
   const requestPermission = useCallback(async () => {
     try {
-      const res = await PushNotification.requestPermissions();
-      if (res) {
-        // for IOS
-        if (res.authorizationStatus === 2) {
-          setRegistered(true);
-        } else if (res.authorizationStatus === 0) {
-          requestPermission();
-        }
-      } else {
-        // for android
-        setRegistered(true);
-      }
+      const current = await Notifications.getPermissionsAsync();
+      const {granted} = current.granted
+        ? current
+        : await Notifications.requestPermissionsAsync({
+            ios: {allowAlert: true, allowBadge: true, allowSound: true},
+          });
+      setRegistered(granted);
     } catch (error: any) {
       Alert.alert(error.message);
     }
   }, []);
 
   const scheduleNotifications = useCallback(
-    (prayerTimes: PrayerTimesByDate) => {
+    async (prayerTimes: PrayerTimesByDate) => {
       if (!settings.sound) {
         return;
       }
-      PushNotification.cancelAllLocalNotifications();
+      const channel = AppConstants.notificationChannels[settings.sound];
+      await Notifications.cancelAllScheduledNotificationsAsync();
+      const now = new Date();
+      const requests: Promise<string>[] = [];
       for (const key in prayerTimes) {
         prayerTimes[key].forEach(time => {
-          if (time.time < new Date()) {
+          if (time.time < now) {
             return;
           }
-          PushNotification.localNotificationSchedule({
-            ...AppConstants.notificationChannels[settings.sound],
-            title: I18n.t('notification.title', {
-              label: time.label,
-              time: AppConstants.timeFormat(time.time),
+          requests.push(
+            Notifications.scheduleNotificationAsync({
+              content: {
+                title: I18n.t('notification.title', {
+                  label: time.label,
+                  time: AppConstants.timeFormat(time.time),
+                }),
+                body: '',
+                // iOS reads the sound from the content; Android from the channel.
+                sound: channel.soundName,
+              },
+              trigger: {
+                type: Notifications.SchedulableTriggerInputTypes.DATE,
+                date: time.time,
+                channelId: channel.channelId,
+              },
             }),
-            message: '',
-            playSound: true,
-            date: time.time,
-            actions: [I18n.t('notification.action_ok')],
-          });
+          );
         });
       }
+      await Promise.all(requests);
     },
     [settings],
   );
 
   useEffect(() => {
-    if (Platform.OS === 'ios') {
-      requestPermission();
-    }
-  }, [requestPermission]);
-
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      const createChannels = async () => {
-        await Promise.all(
-          Object.values(AppConstants.notificationChannels).map(channel =>
-            createChannel({
-              ...channel,
-              channelName: I18n.t('notification.channel.name'),
-              channelDescription: I18n.t('notification.channel.description'),
-              playSound: true,
-              importance: Importance.HIGH,
-              vibrate: true,
-            }),
-          ),
-        );
-        requestPermission();
-      };
-      createChannels();
-    }
+    const setup = async () => {
+      if (Platform.OS === 'android') {
+        await createChannels();
+      }
+      await requestPermission();
+    };
+    setup();
   }, [requestPermission]);
 
   return {

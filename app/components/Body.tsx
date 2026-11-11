@@ -1,10 +1,10 @@
 import React from 'react';
-import {View} from 'react-native';
-import {SafeAreaView, StatusBar} from 'react-native';
+import {StatusBar, View} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import Colors from '../theme/Colors';
 import useColorScheme from '../hooks/useColorScheme';
 
-const Body: React.FC = ({children}) => {
+const Body: React.FC<React.PropsWithChildren> = ({children}) => {
   const {isDarkMode} = useColorScheme();
 
   const backgroundStyle = {

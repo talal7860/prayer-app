@@ -1,6 +1,5 @@
 import React from 'react';
-import {ScrollView} from 'react-native-gesture-handler';
-import {Text, TouchableOpacity} from 'react-native';
+import {ScrollView, Text, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {map} from 'lodash/fp';
 import Body from '../../components/Body';

@@ -39,7 +39,10 @@ For the next SDK bump: `npx expo install expo@^<next> --fix`, then `npx expo-doc
 ## CI / CD
 
 - `.github/workflows/ci.yml`: on every PR, runs typecheck, lint, tests and `expo-doctor`.
-- `.github/workflows/deploy.yml`: on push to `master` (or a manual run), re-runs CI, then
+- `.github/workflows/deploy.yml`: **automatic deploys are currently disabled** (the `push`
+  trigger is commented out). It only runs manually (Actions → Deploy → Run workflow). Once the
+  one-time setup below is done, uncomment the trigger to deploy on every push to `master`.
+  It re-runs CI, then
   `eas build --platform all --profile production --auto-submit` on EAS. iOS goes to
   **TestFlight**, Android to the Play **internal testing** track. Releases run one at a time.
 - `eas.json`: `appVersionSource: remote` + `autoIncrement`, so EAS owns the iOS build number

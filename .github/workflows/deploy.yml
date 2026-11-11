@@ -1,8 +1,10 @@
 name: Deploy to TestFlight and Google Play
 
+# Automatic deploys are disabled until the one-time setup in CLAUDE.md (CI / CD) is done.
+# To turn them back on, uncomment the push trigger below.
 on:
-  push:
-    branches: [master]
+  # push:
+  #   branches: [master]
   workflow_dispatch:
 
 # One release at a time; a newer push to master waits for the running one.

@@ -9,8 +9,7 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "app/types/**/*.d.ts",
-    "expo-env.d.ts"
+    "app/types/**/*.d.ts"
   ],
   "exclude": [
     "node_modules"

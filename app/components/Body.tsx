@@ -11,12 +11,14 @@ const Body: React.FC<React.PropsWithChildren> = ({children}) => {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
   return (
-    <SafeAreaView style={backgroundStyle}>
+    // The navigator header and tab bar already handle the top and bottom insets.
+    <SafeAreaView edges={['left', 'right']} style={backgroundStyle}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <View
         style={{
           backgroundColor: isDarkMode ? Colors.black : Colors.white,
-        }}>
+        }}
+      >
         {children}
       </View>
     </SafeAreaView>

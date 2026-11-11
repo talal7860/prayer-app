@@ -7,6 +7,7 @@ import {
   NavigationContainer,
   DefaultTheme,
   DarkTheme,
+  getFocusedRouteNameFromRoute,
 } from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -48,7 +49,8 @@ const HomeTabs = () => {
         tabBarInactiveTintColor: 'gray',
         headerShown: false,
       })}
-      initialRouteName="home">
+      initialRouteName="home"
+    >
       <Tab.Screen
         name="home"
         component={HomeScreen}
@@ -73,7 +75,15 @@ const App = () => {
       <NavigationContainer theme={isDarkMode ? DarkTheme : DefaultTheme}>
         <AppSettingsProvider>
           <Stack.Navigator>
-            <Stack.Screen name="home-tabs" component={HomeTabs} />
+            <Stack.Screen
+              name="home-tabs"
+              component={HomeTabs}
+              options={({route}) => ({
+                title: I18n.t(
+                  `${getFocusedRouteNameFromRoute(route) ?? 'home'}.title`,
+                ),
+              })}
+            />
             <Stack.Screen
               name="location"
               component={LocationSettingScreen}

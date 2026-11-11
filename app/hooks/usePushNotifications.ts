@@ -13,7 +13,9 @@ const createChannels = () =>
         description: I18n.t('notification.channel.description'),
         // eslint-disable-next-line import/namespace -- re-exported via `export *` from a .types module
         importance: Notifications.AndroidImportance.HIGH,
-        sound: channel.soundName === 'default' ? 'default' : channel.soundName,
+        // Leaving `sound` out gives the system default. Passing 'default' makes
+        // expo-notifications look for a bundled file called "default".
+        ...(channel.soundName === 'default' ? {} : {sound: channel.soundName}),
         enableVibrate: true,
       }),
     ),
@@ -79,7 +81,8 @@ const usePushNotifications = () => {
   useEffect(() => {
     const setup = async () => {
       if (Platform.OS === 'android') {
-        await createChannels();
+        // A failed channel must not stop the permission request below.
+        await createChannels().catch(error => console.warn(error));
       }
       await requestPermission();
     };

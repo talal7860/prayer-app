@@ -110,6 +110,11 @@ Tracking epic: https://github.com/talal7860/prayer-app/issues/11 (sub-issues #3â
   channel's sound or importance, give it a new `channelId` in `app/AppConstants.ts`.
 - iOS takes the sound from the notification content, Android from the channel; both are
   set in `scheduleNotifications`.
+- For an Android channel with the system default sound, **leave `sound` out**. `sound: 'default'`
+  makes expo-notifications look for a bundled file named "default". That throws, and it used to
+  stop the permission request, so no notifications were scheduled at all.
+- Expo SDK 58 doesn't forward `console.log` from the app to the Metro terminal (`console.error`
+  still shows). If edits don't show up in the app, restart Metro with `npx expo start --clear`.
 - The old "Okay" notification action (`notification.action_ok`) was dropped in the
   migration; re-adding it needs `Notifications.setNotificationCategoryAsync`.
 - Custom notification sounds don't work in Expo Go. Use a dev build (`npx expo run:*`).

@@ -66,4 +66,7 @@ export const fonts = {
   bold: 'Inter_700Bold',
 } as const;
 
+/** The Kaaba marker on the qibla dial: black with a gold band, the same in light and dark. */
+export const kaaba = {body: '#111318', band: '#D9B44A', edge: 'rgba(255,255,255,0.35)'};
+
 export const radius = {card: 18, row: 14, pill: 999, control: 11};

@@ -38,7 +38,7 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
 (epic #21).
 
 - `App.tsx`: loads Inter, waits for the saved settings (`loaded`), then a root stack over
-  bottom tabs `today` / `week` / `settings`, plus `location`, `method`, `highLats`, `sound`.
+  bottom tabs `today` / `week` / `settings`, plus `qibla`, `location`, `method`, `highLats`, `sound`.
   `usePushNotifications()` is mounted once here.
 - **First-run setup** (`app/screens/SetupScreen`): while `settings.onboarded` is false the
   stack has only `setup`. It asks for location (GPS via `useLocate`, or a typed city through
@@ -76,13 +76,21 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
   - Android: **coarse location only** (`ACCESS_FINE_LOCATION` and `FOREGROUND_SERVICE_LOCATION`
     are in `blockedPermissions`; city-level is enough for prayer times). Geofencing needs fine
     location, so the background task (~every 12 h) runs `checkTravel` instead.
+- **Qibla finder** (#38): a stack screen opened from the compass button in Today's top bar (not a
+  4th tab: the redesign has three). `app/lib/qibla.ts` (pure, tested): adhan's `Qibla()` bearing from
+  true north for `settings.location`, distance to the Kaaba, offset/`unwrap` (the dial turns the short
+  way across north), facing within ±5° (stops past ±8°). `useHeading` wraps
+  `watchHeadingAsync` (`trueHeading`, else `magHeading` when it's −1); location permission only, it
+  never prompts unless "Allow location" is tapped. `accuracy` ≤ 1 shows a calibrate hint; no reading in
+  4 s (simulator) shows "No compass". The dial is Views + rotate transforms, and it's geographic, so it
+  doesn't mirror in RTL. No haptic: `expo-haptics` isn't installed.
 - **Adjust times** (Settings → Calculation): per-prayer ± minutes (`settings.adjustments`,
   ±30), adhan's `params.adjustments` in `prayerTimesFor` (on top of the method's own).
 - `useCityName` fills `settings.city` by reverse geocoding when it's missing.
 - Settings model (`Settings` in `main.d.ts`): `muted` (per-prayer bells; Sunrise has no bell,
   isn't in Today's list and is never notified: it's on the sun arc), `headsUp` (extra notification 10 min before), `timeFormat`, `city`, `highLats`
   (`NightMiddle` default / `AngleBased` / `OneSeventh`), `onboarded`, `adjustments`,
-  `travelAlerts`.
+  `travelAlerts`, `liveActivity`.
 - Far north in summer Isha can be after midnight (Calgary, June, Karachi: 01:38).
   adhan returns real instants, so that Isha is already on the next calendar day.
 - Times are always shown in the phone's timezone, even for a searched city elsewhere.
@@ -156,6 +164,11 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
     foreground) and from the background task. `syncLiveActivity` starts / updates / ends the
     Live Activity in the hour before a prayer, on foreground and going to background (iOS only
     lets the app start one while it's open).
+  - **Live Activity setting** (Settings → Notifications, iOS only): `settings.liveActivity`,
+    default on (old saved settings without it get the default). Off makes `activityFor` return
+    null, so `syncLiveActivity` never starts or updates one and ends a running one at once (the
+    settings change re-runs it). One switch covers both the lock screen and the Dynamic Island:
+    they're one ActivityKit activity, and iOS has no API to show it in only one of them.
   - Widget extension bundle id `com.conelabs.adhanapp.widget`, App Group
     `group.com.conelabs.adhanapp` (expo-widgets plugin options in `app.json`).
   - Jest mocks `expo-widgets` in `jest.setup.js`.

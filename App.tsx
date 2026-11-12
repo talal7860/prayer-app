@@ -43,8 +43,8 @@ const Stack = createNativeStackNavigator();
 
 const tabIcons: Record<string, IconName> = {
   today: 'clock',
-  week: 'calendar',
   qibla: 'compass',
+  week: 'calendar',
   settings: 'sliders',
 };
 
@@ -73,11 +73,6 @@ const Tabs = () => {
         options={{title: I18n.t('today.title')}}
       />
       <Tab.Screen
-        name="week"
-        component={WeekScreen}
-        options={{title: I18n.t('week.title')}}
-      />
-      <Tab.Screen
         name="qibla"
         component={QiblaTab}
         options={{
@@ -86,6 +81,11 @@ const Tabs = () => {
           headerShadowVisible: false,
           headerTitleStyle: {fontFamily: fonts.semibold},
         }}
+      />
+      <Tab.Screen
+        name="week"
+        component={WeekScreen}
+        options={{title: I18n.t('week.title')}}
       />
       <Tab.Screen
         name="settings"

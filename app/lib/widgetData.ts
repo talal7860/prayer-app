@@ -54,6 +54,9 @@ export const nextPrayerProps = (settings: Settings, at: Date): NextPrayerProps =
     all.find(p => p.key === info.next.key && p.time.getTime() === nextAt)?.label ??
     String(I18n.t(`prayer.${info.next.key}`));
   const time = formatTime(info.next.time, settings.timeFormat);
+  // During Fajr the countdown is to sunrise, which is when Fajr's time ends.
+  const fajrEnding = info.period === 'fajr' && info.next.key === 'sunrise';
+  const fajr = today.find(p => p.key === 'fajr')?.label ?? String(I18n.t('prayer.fajr'));
   const fmt = (d: Date) => formatTime(d, settings.timeFormat);
 
   // The arc runs Fajr → Isha of the current prayer day (before Fajr, that's still yesterday's).
@@ -74,9 +77,11 @@ export const nextPrayerProps = (settings: Settings, at: Date): NextPrayerProps =
     next,
     nextShort: next.slice(0, 3).toLocaleUpperCase(I18n.locale),
     time,
-    inLabel: I18n.t('today.in', {label: next}),
+    inLabel: fajrEnding ? I18n.t('today.endsIn', {label: fajr}) : I18n.t('today.in', {label: next}),
     atLabel: I18n.t('widget.at', {time}),
-    untilLabel: I18n.t('widget.until', {label: next, time}),
+    untilLabel: fajrEnding
+      ? I18n.t('widget.untilEnd', {label: fajr, time})
+      : I18n.t('widget.until', {label: next, time}),
     at: nextAt,
     prevAt,
     sky: WIDGET_SKIES[info.period],
@@ -138,7 +143,7 @@ export const activityFor = (settings: Settings, now: Date = new Date()): PrayerA
   return {
     next: props.next,
     time: props.time,
-    inLabel: I18n.t('today.in', {label: props.next}),
+    inLabel: props.inLabel,
     city: props.city,
     at: props.at,
   };

@@ -16,9 +16,16 @@ jobs:
   check:
     uses: ./.github/workflows/ci.yml
 
+  # One job per platform, so a failure on one doesn't hide (or fail) the other.
   deploy:
     needs: check
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ios, android]
+    env:
+      EAS_BUILD_NO_EXPO_GO_WARNING: 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -30,13 +37,14 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
-      # Builds both platforms on EAS, bumps the build number remotely, then
-      # submits the iOS build to TestFlight and the Android build to the Play
-      # internal testing track. --no-wait returns once the builds are queued;
-      # follow them on expo.dev.
+      # Builds on EAS with the credentials stored there (set up once, interactively, with
+      # `eas build` or `eas credentials`), bumps the build number remotely, then submits:
+      # iOS to TestFlight (needs the App Store Connect API key on EAS), Android to the Play
+      # internal track (needs the Play service account key on EAS). --no-wait returns once
+      # the build is queued; follow it on expo.dev.
       - run: >
           eas build
-          --platform all
+          --platform ${{ matrix.platform }}
           --profile production
           --auto-submit
           --non-interactive

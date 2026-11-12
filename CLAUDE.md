@@ -130,9 +130,19 @@ For the next SDK bump: `npx expo install expo@^<next> --fix`, then `npx expo-doc
 - `.github/workflows/deploy.yml`: **automatic deploys are currently disabled** (the `push`
   trigger is commented out). It only runs manually (Actions → Deploy → Run workflow). Once the
   one-time setup below is done, uncomment the trigger to deploy on every push to `master`.
-  It re-runs CI, then
-  `eas build --platform all --profile production --auto-submit` on EAS. iOS goes to
-  **TestFlight**, Android to the Play **internal testing** track. Releases run one at a time.
+  It re-runs CI, then one job per platform (matrix, `fail-fast: false`, so one platform failing
+  doesn't hide the other) runs `eas build --platform <p> --profile production --auto-submit
+  --non-interactive` on EAS. iOS goes to **TestFlight**, Android to the Play **internal testing**
+  track. Releases run one at a time.
+- EAS project: `@conelab-it-consultants-inc/prayer-app`. iOS builds two targets (app and the
+  `ExpoWidgetsTarget` widget extension), each with its own provisioning profile. Non-interactive
+  (CI) builds can't create credentials: create them once with an interactive `eas build -p ios`
+  or `eas credentials -p ios` (needs the Apple ID login).
+- Export compliance is declared in `app.json` (`ios.config.usesNonExemptEncryption: false`), so
+  neither EAS nor TestFlight asks.
+- Android release builds run `lintVitalRelease`. Strings in `app/locales/native/*.json` must be
+  under `"ios"` or `"android"`: top-level keys go to both, and iOS keys in Android's
+  `strings.xml` fail lint (`ExtraTranslation`).
 - `eas.json`: `appVersionSource: remote` + `autoIncrement`, so EAS owns the iOS build number
   and Android `versionCode`. Don't bump them in `app.json`. Bump `expo.version` for a new
   marketing version.
@@ -143,15 +153,16 @@ For the next SDK bump: `npx expo install expo@^<next> --fix`, then `npx expo-doc
 
 One-time setup (needs the account owner):
 1. ~~Link the EAS project~~ Done: `app.json` → `extra.eas.projectId` is
-   `8deab7ae-9106-4150-b064-87578c79a68e`. Run `npx eas-cli login` locally before steps 3–5.
-2. Create the app in App Store Connect and put its Apple ID in `eas.json` → `submit.production.ios.ascAppId`.
-3. `npx eas-cli credentials -p ios`: let EAS create the distribution cert and profile, and add an App Store Connect API key.
+   `8deab7ae-9106-4150-b064-87578c79a68e`. Run `npx eas-cli login` locally before steps 2–5.
+2. ~~iOS credentials~~ Done (Nov 2026) with an interactive `eas build -p ios --auto-submit`:
+   distribution cert + profiles for both targets. Put the App Store Connect app's Apple ID in
+   `eas.json` → `submit.production.ios.ascAppId`, and add an App Store Connect API key
+   (`npx eas-cli credentials -p ios`) so CI can submit without an Apple login.
 4. Create the app in Play Console. **Upload the first AAB by hand** (Google rejects API uploads
    for an app that has never had a release): `npx eas-cli build -p android --profile production`,
    then upload it to Internal testing.
 5. Create a Play service account with release permissions, then `npx eas-cli credentials -p android` → upload its JSON key.
-6. Create an Expo access token (expo.dev → Account settings → Access tokens) and add it as the
-   `EXPO_TOKEN` repository secret.
+6. ~~`EXPO_TOKEN` repository secret~~ Done.
 
 ## Native config (in `app.json`)
 

@@ -24,8 +24,12 @@ location, lets the user pick calculation methods, and schedules a local notifica
     when the phone is in Arabic or Urdu. Use `start`/`end` thinking; RN swaps left/right styles.
     `Icon` mirrors `chevron`/`back` in RTL.
   - Dates go through `dateLocale()` (`<lang>-u-nu-latn`: localized names, Latin digits).
-    AM/PM is `time.am`/`time.pm`. Method names (from PrayTimes) and city names stay as they are.
-- Prayer-time math: `app/lib/PrayTimes.js` (vendored, excluded from lint).
+    AM/PM is `time.am`/`time.pm`. Method names and city names stay as they are.
+- Prayer-time math: the **`adhan`** library (`app/lib/prayerTimes.ts`). It replaced the vendored
+  `PrayTimes.js` (Nov 2026); times moved by ≤ 1 min (Asr ≤ 2 min). The saved method keys are
+  still PrayTimes' (`MWL`, `ISNA`, `Egypt`, `Makkah`, `Karachi`, `Tehran`, `Jafari`) and map to
+  adhan presets (`Jafari` = custom 16°/14°/maghrib 4°). `PolarCircleResolution.AqrabBalad` keeps
+  Arctic summers valid.
 - Global types live in `app/types/main.d.ts` (ambient, no imports).
 
 ## App structure (redesign)
@@ -73,19 +77,18 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
     are in `blockedPermissions`; city-level is enough for prayer times). Geofencing needs fine
     location, so the background task (~every 12 h) runs `checkTravel` instead.
 - **Adjust times** (Settings → Calculation): per-prayer ± minutes (`settings.adjustments`,
-  ±30), applied with PrayTimes `tune()` in `prayerTimesFor`. `tune()` merges, so every call
-  sets all six keys.
+  ±30), adhan's `params.adjustments` in `prayerTimesFor` (on top of the method's own).
 - `useCityName` fills `settings.city` by reverse geocoding when it's missing.
-- Settings model (`Settings` in `main.d.ts`): `muted` (per-prayer bells; Sunrise muted by
-  default), `headsUp` (extra notification 10 min before), `timeFormat`, `city`, `highLats`
+- Settings model (`Settings` in `main.d.ts`): `muted` (per-prayer bells; Sunrise has no bell,
+  isn't in Today's list and is never notified: it's on the sun arc), `headsUp` (extra notification 10 min before), `timeFormat`, `city`, `highLats`
   (`NightMiddle` default / `AngleBased` / `OneSeventh`), `onboarded`, `adjustments`,
   `travelAlerts`.
 - Far north in summer Isha can be after midnight (Calgary, June, Karachi: 01:38).
-  `prayerTimesFor` dates a Maghrib/Isha earlier than Dhuhr to the **next** day.
+  adhan returns real instants, so that Isha is already on the next calendar day.
 - Times are always shown in the phone's timezone, even for a searched city elsewhere.
 - Fajr and Isha always come from the calculation method's angles. The old
   `fajrIshaCalculation: '90mins'` rule (Fajr = sunrise − 90 min, Isha = maghrib + 90 min,
-  patched into `PrayTimes.js`) was **removed on purpose**; a saved value is dropped on load.
+  patched into the old `PrayTimes.js`) was **removed on purpose**; a saved value is dropped on load.
   Don't re-add a 90-minute option (the design's "Isha 18° / 90 min" control was dropped too).
 - **Monthly timetable** (Week → "Share the {month} timetable"): `app/lib/timetable.ts` builds an
   A4 HTML page (RTL-aware), `expo-print` makes the PDF, `expo-sharing` opens the share sheet.

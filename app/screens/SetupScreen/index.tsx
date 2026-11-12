@@ -15,14 +15,13 @@ import {Card} from '../../components/ui/Card';
 import ChoiceList from '../../components/ui/ChoiceList';
 import Icon from '../../components/ui/Icon';
 import Text from '../../components/ui/Text';
-import CalculationMethod from '../../constants/calculation-method';
 import useAppSettings from '../../hooks/useAppSettings';
 import useLocate from '../../hooks/useLocate';
 import usePalette from '../../hooks/usePalette';
 import I18n from '../../I18n';
 import {searchPlace, type Place} from '../../lib/geocode';
 import {formatCoords, formatTime} from '../../lib/prayerDay';
-import {methodName, prayerTimesFor} from '../../lib/prayerTimes';
+import {METHOD_KEYS, methodName, prayerTimesFor} from '../../lib/prayerTimes';
 import {isHighLatitude, recommendedAsr, recommendedMethod} from '../../lib/recommend';
 import {fonts, radius} from '../../theme/tokens';
 import {highLatOptions} from '../SettingsScreen/HighLats';
@@ -252,7 +251,7 @@ const SetupScreen = () => {
 
         {step === 'method' ? (
           <ChoiceList
-            options={Object.values(CalculationMethod).map(key => ({
+            options={METHOD_KEYS.map(key => ({
               value: key,
               label: methodName(key),
               detail: key === suggestedMethod ? recommendedLabel : undefined,

@@ -207,7 +207,6 @@
   },
   "qibla": {
     "title": "Qibla",
-    "open": "Qibla finder",
     "starting": "Starting the compass…",
     "facing": "You’re facing the qibla",
     "turnRight": "Turn right {{deg}}°",

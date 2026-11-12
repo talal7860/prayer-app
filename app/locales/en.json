@@ -202,5 +202,31 @@
     "m10": "Shawwal",
     "m11": "Dhuʻl-Qiʻdah",
     "m12": "Dhuʻl-Hijjah"
+  },
+  "qibla": {
+    "title": "Qibla",
+    "open": "Qibla finder",
+    "starting": "Starting the compass…",
+    "facing": "You’re facing the qibla",
+    "turnRight": "Turn right {{deg}}°",
+    "turnLeft": "Turn left {{deg}}°",
+    "direction": "Qibla direction",
+    "bearing": "{{deg}}° from north",
+    "distance": "Distance to Makkah",
+    "km": "{{km}} km",
+    "from": "From",
+    "calibrateTitle": "Compass needs calibrating",
+    "calibrateBody": "Move your phone in a figure 8 a few times, away from metal.",
+    "noCompassTitle": "No compass on this device",
+    "noCompassBody": "Face {{deg}}° from north. Use a compass or a landmark you know.",
+    "deniedTitle": "Location is off",
+    "deniedBody": "The compass needs location permission to find true north and point to the qibla. The direction and distance below are for your saved location.",
+    "allow": "Allow location",
+    "tip": "Hold the phone flat, away from metal and magnets.",
+    "dial": "Qibla compass",
+    "n": "N",
+    "e": "E",
+    "s": "S",
+    "w": "W"
   }
 }

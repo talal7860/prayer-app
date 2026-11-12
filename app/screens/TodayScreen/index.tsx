@@ -22,6 +22,8 @@ import {
 } from '../../lib/prayerDay';
 import {dark, light, skies, skyLocations} from '../../theme/tokens';
 import TravelBanner from './TravelBanner';
+import ExactAlarmPrompt from '../../components/ExactAlarmPrompt';
+import useExactAlarms from '../../hooks/useExactAlarms';
 
 const WHITE_88 = 'rgba(255,255,255,0.88)';
 
@@ -69,6 +71,7 @@ const TodayScreen = () => {
   const {isDark: systemDark} = usePalette();
   const day = usePrayerDay();
   const travel = useTravelCheck();
+  const exactAlarms = useExactAlarms();
   useCityName();
 
   const night = day.period === 'isha' || day.period === 'fajr';
@@ -173,6 +176,11 @@ const TodayScreen = () => {
         </LinearGradient>
 
         <View style={[styles.sheet, {backgroundColor: t.bg}]}>
+          {exactAlarms.needed ? (
+            <View style={styles.prompt}>
+              <ExactAlarmPrompt onAllow={exactAlarms.allow} palette={t} />
+            </View>
+          ) : null}
           <View style={styles.sheetHead}>
             <Text weight="semibold" size={13} color={t.muted} style={styles.caps}>
               {I18n.t('today.title').toUpperCase()}
@@ -286,6 +294,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   caps: {letterSpacing: 0.8},
+  prompt: {paddingTop: 16},
   shrink: {flexShrink: 1},
   row: {
     height: 52,

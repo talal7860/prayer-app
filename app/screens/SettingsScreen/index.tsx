@@ -19,6 +19,7 @@ import Text from '../../components/ui/Text';
 import Toggle from '../../components/ui/Toggle';
 import AppConstants from '../../AppConstants';
 import useAppSettings from '../../hooks/useAppSettings';
+import useExactAlarms from '../../hooks/useExactAlarms';
 import usePalette from '../../hooks/usePalette';
 import I18n from '../../I18n';
 import {formatCoords} from '../../lib/prayerDay';
@@ -31,6 +32,7 @@ const SettingsScreen = () => {
   const insets = useSafeAreaInsets();
   const {t, isDark} = usePalette();
   const {settings, setSetting, calculationMethod} = useAppSettings();
+  const exactAlarms = useExactAlarms();
 
   const setTravelAlerts = async (on: boolean) => {
     if (!on) {
@@ -131,6 +133,23 @@ const SettingsScreen = () => {
 
         <SectionLabel>{I18n.t('settings.notificationsSection')}</SectionLabel>
         <Card>
+          {exactAlarms.needed ? (
+            // Android 12+: without "Alarms & reminders" the adhan can be late.
+            <Row title={I18n.t('exactAlarm.title')} subtitle={I18n.t('exactAlarm.settingsHint')}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`${I18n.t('exactAlarm.allow')}: ${I18n.t('exactAlarm.title')}`}
+                onPress={exactAlarms.allow}
+                style={({pressed}) => [
+                  styles.allow,
+                  {backgroundColor: t.accent, opacity: pressed ? 0.85 : 1},
+                ]}>
+                <Text weight="semibold" size={14} color={t.onAccent}>
+                  {I18n.t('exactAlarm.allow')}
+                </Text>
+              </Pressable>
+            </Row>
+          ) : null}
           <Row
             title={I18n.t('settings.adhan')}
             value={AppConstants.soundName(settings.sound)}
@@ -183,6 +202,7 @@ const SettingsScreen = () => {
 const styles = StyleSheet.create({
   root: {flex: 1},
   scroll: {paddingHorizontal: 16, paddingBottom: 24},
+  allow: {paddingHorizontal: 14, height: 34, borderRadius: 17, justifyContent: 'center'},
   title: {paddingHorizontal: 4, paddingBottom: 6, letterSpacing: -0.6},
   locationCard: {
     flexDirection: 'row',

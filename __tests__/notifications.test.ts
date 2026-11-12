@@ -1,5 +1,5 @@
 import * as Notifications from 'expo-notifications';
-import {rescheduleNotifications} from '../app/lib/notifications';
+import {notificationId, rescheduleNotifications} from '../app/lib/notifications';
 import {MAX_PENDING} from '../app/lib/schedule';
 import {defaultSettings, SETTINGS_KEY} from '../app/lib/settingsStore';
 
@@ -11,6 +11,8 @@ jest.mock('expo-notifications', () => ({
   getPermissionsAsync: jest.fn(() => Promise.resolve({granted: true})),
   cancelAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve()),
   scheduleNotificationAsync: jest.fn(() => Promise.resolve('id')),
+  getAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve([])),
+  cancelScheduledNotificationAsync: jest.fn(() => Promise.resolve()),
   SchedulableTriggerInputTypes: {DATE: 'date'},
 }));
 
@@ -74,4 +76,35 @@ it('the background task reschedules from the saved settings', async () => {
   // Isha is muted in the saved settings, so none is scheduled.
   expect(scheduled().length).toBeGreaterThan(20);
   expect(scheduled().some(r => r.content.title.includes('Isha'))).toBe(false);
+});
+
+it('gives every notification a fixed id, and removes pending ones that are not in the plan', async () => {
+  const now = new Date(2026, 10, 11, 9);
+  await rescheduleNotifications(defaultSettings, now);
+  const ids = scheduled().map(r => r.identifier as string);
+  expect(new Set(ids).size).toBe(MAX_PENDING);
+  expect(ids[0]).toMatch(/^prayer:adhan:dhuhr:\d+$/);
+  // The same plan gets the same ids, so scheduling again replaces instead of duplicating.
+  jest.clearAllMocks();
+  await rescheduleNotifications(defaultSettings, now);
+  expect(scheduled().map(r => r.identifier)).toEqual(ids);
+
+  // A leftover from another run (a minute off) is cancelled; the plan's own are kept.
+  (Notifications.getAllScheduledNotificationsAsync as jest.Mock).mockResolvedValueOnce([
+    {identifier: ids[0]},
+    {identifier: 'prayer:adhan:dhuhr:1'},
+    {identifier: 'some-old-random-id'},
+  ]);
+  await rescheduleNotifications(defaultSettings, now);
+  const cancelled = (Notifications.cancelScheduledNotificationAsync as jest.Mock).mock.calls.map(
+    ([id]) => id,
+  );
+  expect(cancelled).toEqual(['prayer:adhan:dhuhr:1', 'some-old-random-id']);
+});
+
+it('the id is the kind, the prayer and the minute', () => {
+  const date = new Date(2026, 10, 11, 12, 53, 20);
+  expect(notificationId({kind: 'headsUp', prayer: 'dhuhr', title: '', date})).toBe(
+    `prayer:headsUp:dhuhr:${Math.floor(date.getTime() / 60000)}`,
+  );
 });

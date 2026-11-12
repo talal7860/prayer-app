@@ -3,7 +3,14 @@ import * as Notifications from 'expo-notifications';
 import AppConstants from '../AppConstants';
 import {addDays} from './prayerDay';
 import {prayerTimesFor} from './prayerTimes';
-import {DAYS_AHEAD, fillSchedule} from './schedule';
+import {DAYS_AHEAD, fillSchedule, type PlannedNotification} from './schedule';
+
+/**
+ * A fixed id per notification (kind, prayer, minute). Scheduling the same one again replaces
+ * it instead of adding a second copy, whatever ran before.
+ */
+export const notificationId = (n: PlannedNotification) =>
+  `prayer:${n.kind}:${n.prayer ?? '-'}:${Math.floor(n.date.getTime() / 60000)}`;
 
 const startOfDay = (date: Date) => {
   const d = new Date(date);
@@ -26,6 +33,7 @@ const run = async (settings: Settings, now: Date) => {
     plan.map(n => {
       const channel = n.kind === 'adhan' ? adhan : plain;
       return Notifications.scheduleNotificationAsync({
+        identifier: notificationId(n),
         content: {
           title: n.title,
           body: '',
@@ -41,6 +49,16 @@ const run = async (settings: Settings, now: Date) => {
         },
       });
     }),
+  );
+  // The final say: drop anything pending that isn't in this plan (left by an earlier run, e.g.
+  // the background task and the app rescheduling at the same moment). Two copies of the same
+  // prayer a minute apart showed up on an iPhone without this.
+  const keep = new Set(plan.map(notificationId));
+  const pending = await Notifications.getAllScheduledNotificationsAsync();
+  await Promise.all(
+    pending
+      .filter(p => !keep.has(p.identifier))
+      .map(p => Notifications.cancelScheduledNotificationAsync(p.identifier)),
   );
   return plan.length;
 };

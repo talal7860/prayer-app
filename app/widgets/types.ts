@@ -45,6 +45,12 @@ export type NextPrayerProps = {
   sunT: number;
   marks: ArcMark[];
   prayers: WidgetPrayer[];
+  /**
+   * Android only: what to show from each moment on (now, then every prayer time for two days).
+   * Android widgets take no timeline, so the layout picks the entry for `Date.now()` whenever it
+   * renders, and a native alarm re-renders it when the countdown reaches zero.
+   */
+  entries?: {from: number; props: NextPrayerProps}[];
 };
 
 export type PrayerActivityProps = {

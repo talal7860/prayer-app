@@ -4078,6 +4078,11 @@ expo-font@~58.0.12:
   resolved "https://registry.yarnpkg.com/expo-font/-/expo-font-58.0.12.tgz#5ff24feba8c7d32626e034bd93b5b58aa3c34433"
   integrity sha512-5m8TJrQ27DT1815P066HBtcHINgD8yuIqH4ca2ZyYwCsPa4QZ8UzOBDtrHnAMWMAlAgol+PGVj9aKeoYov70JA==
 
+expo-haptics@~58.0.8:
+  version "58.0.8"
+  resolved "https://registry.yarnpkg.com/expo-haptics/-/expo-haptics-58.0.8.tgz#f884ca7951b44414858f2c913095c2a9fb36f69c"
+  integrity sha512-hxW9LoJQhAJ4hRlGx0DZ10ncs2NFqC/0nfKSnGy1PcpH6e8dJ4/oJO9eOcAG/vFg8k5oonbZkWL7RK9G3729Tg==
+
 expo-keep-awake@~58.0.4:
   version "58.0.4"
   resolved "https://registry.yarnpkg.com/expo-keep-awake/-/expo-keep-awake-58.0.4.tgz#2e184c222bcf0870d246fc073220c021ba84d4cc"

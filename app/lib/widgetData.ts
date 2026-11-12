@@ -1,6 +1,7 @@
 import I18n from '../I18n';
 import type {NextPrayerProps, PrayerActivityProps} from '../widgets/types';
-import {addDays, formatTime, periodAt, toDayTimes} from './prayerDay';
+import {addDays, formatTime, hijriLabel, hijriShort, periodAt, toDayTimes} from './prayerDay';
+import type {Period} from '../theme/tokens';
 import {prayerTimesFor} from './prayerTimes';
 
 /** iOS widgets follow a timeline this long without the app running. */
@@ -14,30 +15,87 @@ const startOfDay = (date: Date) => {
   return d;
 };
 
-/** What the widget shows at `at`: the next prayer then, and that day's times. */
+/** Sky gradients per period, from the design's Widgets board. */
+export const WIDGET_SKIES: Record<Period, [string, string]> = {
+  fajr: ['#161D45', '#7A5683'],
+  morning: ['#1E4B86', '#7A6E9C'],
+  dhuhr: ['#164A8A', '#3271B0'],
+  asr: ['#1C4872', '#85602D'],
+  maghrib: ['#281C4C', '#A8432C'],
+  isha: ['#060A1C', '#1B2650'],
+};
+
+/** The five prayers. Sunrise is on the arc as the sun, not in the lists. */
+const LISTED: PrayerKey[] = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+const SHORT: Record<PrayerKey, string> = {
+  fajr: 'week.fajr',
+  sunrise: 'week.rise',
+  dhuhr: 'week.dhuhr',
+  asr: 'week.asr',
+  maghrib: 'week.magh',
+  isha: 'week.isha',
+};
+
+/** What the widgets show at `at`: the next prayer then, its day's times, the sky and sun. */
 export const nextPrayerProps = (settings: Settings, at: Date): NextPrayerProps => {
   const day = startOfDay(at);
   const [yesterday, today, tomorrow] = [-1, 0, 1].map(i =>
     prayerTimesFor(settings, addDays(day, i)),
   );
   const info = periodAt(at, toDayTimes(yesterday), toDayTimes(today), toDayTimes(tomorrow));
+  const all = [...yesterday, ...today, ...tomorrow];
+  const t = at.getTime();
+  const nextAt = info.next.time.getTime();
+  // The progress bars and rings run from the last prayer time to the next one.
+  const earlier = all.map(p => p.time.getTime()).filter(ms => ms <= t);
+  const prevAt = earlier.length ? Math.max(...earlier) : t - 3600000;
   // Its own label, so Friday's Dhuhr reads "Jumu’ah".
-  const label = (key: PrayerKey, time: Date): string =>
-    [...today, ...tomorrow].find(p => p.key === key && p.time.getTime() === time.getTime())
-      ?.label ?? I18n.t(`prayer.${key}`);
+  const next: string =
+    all.find(p => p.key === info.next.key && p.time.getTime() === nextAt)?.label ??
+    String(I18n.t(`prayer.${info.next.key}`));
+  const time = formatTime(info.next.time, settings.timeFormat);
+  const fmt = (d: Date) => formatTime(d, settings.timeFormat);
+
+  // The arc runs Fajr → Isha of the current prayer day (before Fajr, that's still yesterday's).
+  const arc = toDayTimes(t < toDayTimes(today).fajr.getTime() ? yesterday : today);
+  const span = arc.isha.getTime() - arc.fajr.getTime();
+  const along = (d: Date) => Math.min(1, Math.max(0, (d.getTime() - arc.fajr.getTime()) / span));
+  const sunUp = t >= arc.sunrise.getTime() && t <= arc.maghrib.getTime();
+
+  // After Isha the next prayer is tomorrow's Fajr: list tomorrow's times then.
+  const listDay = nextAt > today[today.length - 1].time.getTime() ? tomorrow : today;
+  const isNext = (p: PrayerTimeLabel) => p.key === info.next.key && p.time.getTime() === nextAt;
+
   return {
     city: settings.city?.split(',')[0] ?? I18n.t('settings.unknownCity'),
-    heading: I18n.t('widget.next'),
-    next: label(info.next.key, info.next.time),
-    time: formatTime(info.next.time, settings.timeFormat),
-    at: info.next.time.getTime(),
-    // After Isha the next prayer is tomorrow's Fajr: show tomorrow's times then.
-    prayers: (info.next.time > today[today.length - 1].time ? tomorrow : today).map(p => ({
-      name: p.label,
-      time: formatTime(p.time, settings.timeFormat),
-      current: p.key === info.current,
-      next: p.key === info.next.key && info.next.time.getTime() === p.time.getTime(),
-    })),
+    cityFull: settings.city ?? I18n.t('settings.unknownCity'),
+    hijri: hijriLabel(at),
+    hijriShort: hijriShort(at),
+    next,
+    nextShort: next.slice(0, 3).toLocaleUpperCase(I18n.locale),
+    time,
+    inLabel: I18n.t('today.in', {label: next}),
+    atLabel: I18n.t('widget.at', {time}),
+    untilLabel: I18n.t('widget.until', {label: next, time}),
+    at: nextAt,
+    prevAt,
+    sky: WIDGET_SKIES[info.period],
+    sunT: sunUp ? along(at) : -1,
+    marks: LISTED.map(key => {
+      const d = arc[key];
+      const nxt = key === info.next.key && d.getTime() === nextAt;
+      return {t: along(d), next: nxt, past: !nxt && d.getTime() <= t};
+    }),
+    prayers: listDay
+      .filter(p => LISTED.includes(p.key))
+      .map(p => ({
+        name: p.label,
+        label: p.key === 'dhuhr' && p.label !== I18n.t('prayer.dhuhr') ? p.label : I18n.t(SHORT[p.key]),
+        time: fmt(p.time),
+        hm: formatTime(p.time, settings.timeFormat, false),
+        next: isNext(p),
+        past: !isNext(p) && p.time.getTime() <= t,
+      })),
   };
 };
 
@@ -47,14 +105,22 @@ export const nextPrayerProps = (settings: Settings, at: Date): NextPrayerProps =
  */
 export const widgetTimeline = (settings: Settings, now: Date = new Date()) => {
   const base = startOfDay(now);
-  const changes = Array.from({length: TIMELINE_DAYS + 1}, (_, i) =>
+  const end = addDays(base, TIMELINE_DAYS + 1).getTime();
+  const prayers = Array.from({length: TIMELINE_DAYS + 1}, (_, i) =>
     prayerTimesFor(settings, addDays(base, i)),
   )
     .flat()
-    .map(p => p.time)
-    .filter(t => t > now)
-    .sort((a, b) => a.getTime() - b.getTime());
-  return [now, ...changes].map(date => ({date, props: nextPrayerProps(settings, date)}));
+    .map(p => p.time.getTime());
+  // Every half hour too, so the sun moves along the arc between prayers.
+  const ticks: number[] = [];
+  for (let ms = Math.ceil(now.getTime() / 1800000) * 1800000; ms < end; ms += 1800000) {
+    ticks.push(ms);
+  }
+  const dates = [...new Set([...prayers, ...ticks])]
+    .filter(ms => ms > now.getTime() && ms < end)
+    .sort((a, b) => a - b)
+    .map(ms => new Date(ms));
+  return [now, ...dates].map(date => ({date, props: nextPrayerProps(settings, date)}));
 };
 
 /** The Live Activity for the next prayer, if it's within the hour; otherwise null. */

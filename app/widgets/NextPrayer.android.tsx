@@ -1,45 +1,57 @@
 import {Column, Row, Spacer, Text} from '@expo/ui/jetpack-compose';
-import {background, fillMaxSize, fillMaxWidth, paddingAll} from '@expo/ui/jetpack-compose/modifiers';
+import {
+  background,
+  cornerRadius,
+  fillMaxSize,
+  fillMaxWidth,
+  paddingAll,
+} from '@expo/ui/jetpack-compose/modifiers';
 import {createWidget} from 'expo-widgets';
 import type {NextPrayerProps} from './types';
 
-// Runs in the widget's own JS runtime: no hooks, imports or module-level values at runtime.
-// Android widgets don't tick, so this shows the time, not a countdown. The app refreshes it
-// on open, at each prayer change while open, and from the background task.
-const NextPrayer = (props: NextPrayerProps) => {
+// The medium widget from the "Widgets & lock screen" board (#34), as far as Android widgets
+// go: they can't tick, draw gradients or rings, so it's the period's sky colour, the next
+// prayer and the day's times. The app refreshes it on open, while open and from the
+// background task. Runs in the widget's own JS runtime: no hooks, imports or module values.
+const NextPrayer = (p: NextPrayerProps) => {
   'widget';
+  const soft = '#DCE6FF';
   return (
-    <Row
-      horizontalArrangement={{spacedBy: 16}}
-      modifiers={[fillMaxSize(), background('#2453B3'), paddingAll(14)]}>
+    <Column
+      verticalArrangement={{spacedBy: 8}}
+      modifiers={[fillMaxSize(), background(p.sky[0]), paddingAll(14)]}>
+      <Row modifiers={[fillMaxWidth()]}>
+        <Text color={soft} maxLines={1} style={{fontSize: 12}}>
+          {p.city}
+        </Text>
+        <Spacer modifiers={[fillMaxWidth()]} />
+        <Text color={soft} maxLines={1} style={{fontSize: 12}}>
+          {p.hijriShort}
+        </Text>
+      </Row>
       <Column verticalArrangement={{spacedBy: 2}}>
-        <Text color="#DCE6FF" maxLines={1} style={{fontSize: 12}}>
-          {props.city}
+        <Text color="#FFFFFF" maxLines={1} style={{fontSize: 22, fontWeight: 'bold'}}>
+          {p.next}
         </Text>
-        <Text color="#DCE6FF" style={{fontSize: 12}}>
-          {props.heading}
-        </Text>
-        <Text color="#FFFFFF" maxLines={1} style={{fontSize: 24, fontWeight: 'bold'}}>
-          {props.next}
-        </Text>
-        <Text color="#FFFFFF" style={{fontSize: 14, fontWeight: '600'}}>
-          {props.time}
+        <Text color={soft} style={{fontSize: 13}}>
+          {p.atLabel}
         </Text>
       </Column>
-      <Column verticalArrangement={{spacedBy: 2}} modifiers={[fillMaxWidth()]}>
-        {props.prayers.map(p => (
-          <Row key={p.name} modifiers={[fillMaxWidth()]}>
-            <Text color={p.next ? '#FFFFFF' : '#DCE6FF'} style={{fontSize: 13, fontWeight: p.next ? 'bold' : 'normal'}}>
-              {p.name}
+      <Row
+        horizontalArrangement="spaceBetween"
+        modifiers={[fillMaxWidth(), background('#33000000'), cornerRadius(12), paddingAll(6)]}>
+        {p.prayers.map(r => (
+          <Column key={r.label} horizontalAlignment="center">
+            <Text color={r.next ? '#FFE7A3' : soft} maxLines={1} style={{fontSize: 10, fontWeight: '600'}}>
+              {r.label.toUpperCase()}
             </Text>
-            <Spacer modifiers={[fillMaxWidth()]} />
-            <Text color={p.next ? '#FFFFFF' : '#DCE6FF'} style={{fontSize: 13, fontWeight: p.next ? 'bold' : 'normal'}}>
-              {p.time}
+            <Text color="#FFFFFF" maxLines={1} style={{fontSize: 13, fontWeight: r.next ? 'bold' : 'normal'}}>
+              {r.hm}
             </Text>
-          </Row>
+          </Column>
         ))}
-      </Column>
-    </Row>
+      </Row>
+    </Column>
   );
 };
 

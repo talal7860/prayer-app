@@ -69,6 +69,7 @@
     "title": "آج",
     "in": "{{label}} میں باقی",
     "at": "{{time}} پر · {{now}}",
+    "atTomorrow": "کل {{time}} پر · {{now}}",
     "nowTime": "ابھی {{label}} کا وقت ہے",
     "fajrEnded": "فجر کا وقت ختم ہو گیا",
     "now": "ابھی",

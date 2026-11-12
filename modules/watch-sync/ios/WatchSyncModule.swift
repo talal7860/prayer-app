@@ -19,7 +19,9 @@ public class WatchSyncModule: Module {
 
 final class WatchLink: NSObject, WCSessionDelegate {
   static let shared = WatchLink()
-  private var pending: String?
+  /// The latest settings, kept so they can be sent again when the session activates or the watch
+  /// app gets installed later (a new watch, or the watch app installed after the phone was set up).
+  private var latest: String?
 
   func activate() {
     guard WCSession.isSupported() else { return }
@@ -28,21 +30,25 @@ final class WatchLink: NSObject, WCSessionDelegate {
   }
 
   func send(_ json: String) {
-    guard WCSession.isSupported() else { return }
+    latest = json
+    flush()
+  }
+
+  private func flush() {
+    guard WCSession.isSupported(), let json = latest else { return }
     let session = WCSession.default
-    guard session.activationState == .activated else {
-      pending = json
-      return
-    }
-    guard session.isPaired, session.isWatchAppInstalled else { return }
+    guard session.activationState == .activated, session.isPaired, session.isWatchAppInstalled
+    else { return }
     try? session.updateApplicationContext(["settings": json])
   }
 
   func session(_ session: WCSession, activationDidCompleteWith state: WCSessionActivationState, error: Error?) {
-    if state == .activated, let json = pending {
-      pending = nil
-      send(json)
-    }
+    flush()
+  }
+
+  /// Paired, unpaired, or the watch app installed or removed.
+  func sessionWatchStateDidChange(_ session: WCSession) {
+    flush()
   }
 
   func sessionDidBecomeInactive(_ session: WCSession) {}

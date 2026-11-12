@@ -108,6 +108,20 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
     -scheme AdhanWatch -destination 'generic/platform=watchOS Simulator' CODE_SIGNING_ALLOWED=NO build`.
     Big SwiftUI closures can time out the Swift type checker ("failed to produce diagnostic"):
     split them into small views/functions.
+  - Running it in the simulator: the watchOS runtime pairs only with the same-generation iOS
+    runtime (watchOS 27 ↔ iOS 27). `xcrun simctl create` an iPhone and a watch, `simctl pair`
+    them, build the `AdhanWatch` scheme for the watch's id and `simctl install` the `.app`.
+    To skip the phone, write settings straight into the App Group:
+    `xcrun simctl spawn <watch> defaults write group.com.conelabs.adhanapp watchSettings -string '<json>'`
+    (the shape `watchPayload` sends). To test the real sync, build `AdhanApp` (Release bundles
+    the JS), install it on the iPhone, then install its `Watch/AdhanWatch.app` on the watch (the
+    phone doesn't install it by itself here) and relaunch the watch app. `WatchLink` keeps the
+    latest settings and resends them when the watch app gets installed (`sessionWatchStateDidChange`).
+    An unsigned build has no App Group, so `simctl spawn … defaults read` won't see what the app
+    saved; check the screen. Complications: add the rectangular one from the Smart Stack
+    (swipe up on the face → Edit → + → Adhan); most faces in the simulator have no free slots.
+  - Files in `targets/_shared` other than Swift sources get copied into every bundle, which is why
+    the vendored library's licence is a comment-only `Adhan/LICENSE.swift`.
   - EAS signs two more bundle ids; the first build after adding them needs an interactive
     `eas build -p ios` (or `eas credentials`) to create their profiles.
 - **Monthly timetable** (Week → "Share the {month} timetable"): `app/lib/timetable.ts` builds an

@@ -78,7 +78,7 @@ describe('fillSchedule', () => {
     expect(plan[MAX_PENDING - 1]).toMatchObject({
       kind: 'reminder',
       date: new Date(last.date.getTime() + 60000),
-      title: 'Open Adhan App to keep getting prayer notifications',
+      title: 'Open Adhan Times to keep getting prayer notifications',
     });
   });
 

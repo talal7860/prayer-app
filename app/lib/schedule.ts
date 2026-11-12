@@ -20,7 +20,7 @@ type Options = Pick<Settings, 'muted' | 'headsUp' | 'timeFormat'>;
 /** Every notification to schedule for these days, in time order. Past ones are dropped. */
 export const planNotifications = (
   days: PrayerTimeLabel[][],
-  {muted = {}, headsUp, timeFormat}: Options,
+  {muted, headsUp, timeFormat}: Options,
   now: Date = new Date(),
 ): PlannedNotification[] => {
   const plan: PlannedNotification[] = [];
@@ -62,7 +62,7 @@ export const fillSchedule = (
   now: Date = new Date(),
 ): PlannedNotification[] => {
   const plan = planNotifications(days, options, now).slice(0, MAX_PENDING - 1);
-  const last = plan[plan.length - 1];
+  const last = plan.at(-1);
   if (!last) {
     return plan;
   }

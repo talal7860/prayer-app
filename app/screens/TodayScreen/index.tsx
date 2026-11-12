@@ -2,6 +2,7 @@ import React, {useLayoutEffect} from 'react';
 import {Pressable, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
 import {useNavigation} from '@react-navigation/native';
+import type {TabNavigation} from '../../navigation';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Svg, {Circle, Path} from 'react-native-svg';
 import Icon from '../../components/ui/Icon';
@@ -21,13 +22,29 @@ import {
 } from '../../lib/prayerDay';
 import {dark, light, skies, skyLocations} from '../../theme/tokens';
 import TravelBanner from './TravelBanner';
+import ExactAlarmPrompt from '../../components/ExactAlarmPrompt';
+import useExactAlarms from '../../hooks/useExactAlarms';
 
 const WHITE_88 = 'rgba(255,255,255,0.88)';
 
-const SunArc = ({sun, sunrise, sunset}: {sun: {x: number; y: number} | null; sunrise: string; sunset: string}) => (
+const SunArc = ({
+  sun,
+  sunrise,
+  sunset,
+}: {
+  sun: {x: number; y: number} | null;
+  sunrise: string;
+  sunset: string;
+}) => (
   <View style={styles.arc}>
     <Svg width="100%" height={96} viewBox="0 0 342 96" preserveAspectRatio="none" aria-hidden>
-      <Path d="M16 78 Q171 -30 326 78" stroke="rgba(255,255,255,0.45)" strokeWidth={1.5} strokeDasharray="3 5" fill="none" />
+      <Path
+        d="M16 78 Q171 -30 326 78"
+        stroke="rgba(255,255,255,0.45)"
+        strokeWidth={1.5}
+        strokeDasharray="3 5"
+        fill="none"
+      />
       <Path d="M0 78 H342" stroke="rgba(255,255,255,0.35)" strokeWidth={1} />
       {sun ? (
         <>
@@ -37,19 +54,24 @@ const SunArc = ({sun, sunrise, sunset}: {sun: {x: number; y: number} | null; sun
       ) : null}
     </Svg>
     <View style={styles.arcLabels}>
-      <Text size={12} color="rgba(255,255,255,0.9)">{I18n.t('today.sunrise', {time: sunrise})}</Text>
-      <Text size={12} color="rgba(255,255,255,0.9)">{I18n.t('today.sunset', {time: sunset})}</Text>
+      <Text size={12} color="rgba(255,255,255,0.9)">
+        {I18n.t('today.sunrise', {time: sunrise})}
+      </Text>
+      <Text size={12} color="rgba(255,255,255,0.9)">
+        {I18n.t('today.sunset', {time: sunset})}
+      </Text>
     </View>
   </View>
 );
 
 const TodayScreen = () => {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<TabNavigation>();
   const insets = useSafeAreaInsets();
   const {settings, setSetting, calculationMethod} = useAppSettings();
   const {isDark: systemDark} = usePalette();
   const day = usePrayerDay();
   const travel = useTravelCheck();
+  const exactAlarms = useExactAlarms();
   useCityName();
 
   const night = day.period === 'isha' || day.period === 'fajr';
@@ -71,18 +93,17 @@ const TodayScreen = () => {
   // During Fajr the countdown is to sunrise, which is when Fajr's time ends.
   const fajrEnding = day.period === 'fajr' && day.next.key === 'sunrise';
   const fajrLabel = day.list.find(p => p.key === 'fajr')?.label ?? I18n.t('prayer.fajr');
+  const ishaLabel = I18n.t('prayer.isha');
   const nowLine =
     day.period === 'morning'
       ? I18n.t('today.fajrEnded')
       : I18n.t('today.nowTime', {
-          label: day.current
-            ? day.list.find(p => p.key === day.current)?.label
-            : I18n.t('prayer.isha'),
+          label: day.current ? day.list.find(p => p.key === day.current)?.label : ishaLabel,
         });
+  const asrName = I18n.t(`asrNames.${settings.asr}`);
   const city = settings.city ?? formatCoords(settings.location);
-  const muted = settings.muted ?? {};
-  const toggleBell = (key: PrayerKey) =>
-    setSetting('muted')({...muted, [key]: !muted[key]});
+  const {muted} = settings;
+  const toggleBell = (key: PrayerKey) => setSetting('muted')({...muted, [key]: !muted[key]});
 
   return (
     <View style={[styles.root, {backgroundColor: t.bg}]}>
@@ -109,7 +130,9 @@ const TodayScreen = () => {
             <Text weight="medium" size={15} color="#FFFFFF">
               {formatDate(day.now, {weekday: 'long', month: 'long', day: 'numeric'})}
             </Text>
-            <Text size={13} color="rgba(255,255,255,0.85)">{hijriLabel(day.now)}</Text>
+            <Text size={13} color="rgba(255,255,255,0.85)">
+              {hijriLabel(day.now)}
+            </Text>
           </View>
 
           <View style={styles.next} accessible accessibilityLiveRegion="none">
@@ -126,7 +149,9 @@ const TodayScreen = () => {
                 ? I18n.t('today.endsAt', {time: fmt(day.next.time)})
                 : I18n.t(
                     // After Isha the countdown is to tomorrow's Fajr, which isn't the Fajr in the list.
-                    day.next.time.toDateString() === day.now.toDateString() ? 'today.at' : 'today.atTomorrow',
+                    day.next.time.toDateString() === day.now.toDateString()
+                      ? 'today.at'
+                      : 'today.atTomorrow',
                     {time: fmt(day.next.time), now: nowLine},
                   )}
             </Text>
@@ -151,6 +176,11 @@ const TodayScreen = () => {
         </LinearGradient>
 
         <View style={[styles.sheet, {backgroundColor: t.bg}]}>
+          {exactAlarms.needed ? (
+            <View style={styles.prompt}>
+              <ExactAlarmPrompt onAllow={exactAlarms.allow} palette={t} />
+            </View>
+          ) : null}
           <View style={styles.sheetHead}>
             <Text weight="semibold" size={13} color={t.muted} style={styles.caps}>
               {I18n.t('today.title').toUpperCase()}
@@ -158,49 +188,56 @@ const TodayScreen = () => {
             <Text size={13} color={t.muted} numberOfLines={1} style={styles.shrink}>
               {I18n.t('today.asrLabel', {
                 method: calculationMethod().split(',').pop()?.trim(),
-                asr: I18n.t(`asrNames.${settings.asr}`),
+                asr: asrName,
               })}
             </Text>
           </View>
           {/* Sunrise is on the sun arc above, so the list has only the five prayers. */}
-          {day.list.filter(p => p.key !== 'sunrise').map(p => {
-            const isNow = p.key === day.current;
-            const past = p.time.getTime() <= day.now.getTime() && !isNow;
-            const off = !!muted[p.key];
-            return (
-              <View key={p.key} style={[styles.row, isNow && {backgroundColor: t.hi}]}>
-                <Icon name={p.key} size={20} color={isNow ? t.accent : t.muted} />
-                <Text weight={isNow ? 'semibold' : 'medium'} size={16} color={past ? t.past : t.text}>
-                  {p.label}
-                </Text>
-                {isNow ? (
-                  <View style={[styles.nowPill, {backgroundColor: t.accent}]}>
-                    <Text weight="bold" size={11} color={t.onAccent} style={styles.caps}>
-                      {I18n.t('today.now').toUpperCase()}
-                    </Text>
-                  </View>
-                ) : null}
-                <Text
-                  weight={isNow ? 'semibold' : 'medium'}
-                  size={16}
-                  color={past ? t.past : t.text}
-                  style={styles.time}>
-                  {fmt(p.time)}
-                </Text>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={I18n.t(off ? 'today.bellOff' : 'today.bellOn', {label: p.label})}
-                  onPress={() => toggleBell(p.key)}
-                  style={styles.bell}>
-                  <Icon
-                    name={off ? 'bellOff' : 'bell'}
-                    size={19}
-                    color={off ? t.past : isNow ? t.accent : t.text}
-                  />
-                </Pressable>
-              </View>
-            );
-          })}
+          {day.list
+            .filter(p => p.key !== 'sunrise')
+            .map(p => {
+              const isNow = p.key === day.current;
+              const past = p.time.getTime() <= day.now.getTime() && !isNow;
+              const off = !!muted[p.key];
+              return (
+                <View key={p.key} style={[styles.row, isNow && {backgroundColor: t.hi}]}>
+                  <Icon name={p.key} size={20} color={isNow ? t.accent : t.muted} />
+                  <Text
+                    weight={isNow ? 'semibold' : 'medium'}
+                    size={16}
+                    color={past ? t.past : t.text}>
+                    {p.label}
+                  </Text>
+                  {isNow ? (
+                    <View style={[styles.nowPill, {backgroundColor: t.accent}]}>
+                      <Text weight="bold" size={11} color={t.onAccent} style={styles.caps}>
+                        {I18n.t('today.now').toUpperCase()}
+                      </Text>
+                    </View>
+                  ) : null}
+                  <Text
+                    weight={isNow ? 'semibold' : 'medium'}
+                    size={16}
+                    color={past ? t.past : t.text}
+                    style={styles.time}>
+                    {fmt(p.time)}
+                  </Text>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t(off ? 'today.bellOff' : 'today.bellOn', {
+                      label: p.label,
+                    })}
+                    onPress={() => toggleBell(p.key)}
+                    style={styles.bell}>
+                    <Icon
+                      name={off ? 'bellOff' : 'bell'}
+                      size={19}
+                      color={off ? t.past : isNow ? t.accent : t.text}
+                    />
+                  </Pressable>
+                </View>
+              );
+            })}
         </View>
       </ScrollView>
     </View>
@@ -229,7 +266,14 @@ const styles = StyleSheet.create({
   countdown: {lineHeight: 68, letterSpacing: -1.9, fontVariant: ['tabular-nums']},
   skyBottom: {marginTop: 'auto', paddingTop: 20, paddingBottom: 34},
   arc: {height: 104},
-  arcLabels: {position: 'absolute', left: 0, right: 0, top: 82, flexDirection: 'row', justifyContent: 'space-between'},
+  arcLabels: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 82,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
   sheet: {
     flex: 1,
     marginTop: -24,
@@ -240,10 +284,27 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     gap: 2,
   },
-  sheetHead: {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingTop: 14, paddingBottom: 10, paddingHorizontal: 8},
+  sheetHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingTop: 14,
+    paddingBottom: 10,
+    paddingHorizontal: 8,
+  },
   caps: {letterSpacing: 0.8},
+  prompt: {paddingTop: 16},
   shrink: {flexShrink: 1},
-  row: {height: 52, flexDirection: 'row', alignItems: 'center', gap: 14, paddingLeft: 14, paddingRight: 4, borderRadius: 14},
+  row: {
+    height: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    paddingLeft: 14,
+    paddingRight: 4,
+    borderRadius: 14,
+  },
   nowPill: {paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999},
   time: {marginLeft: 'auto', fontVariant: ['tabular-nums']},
   bell: {width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center'},

@@ -52,13 +52,20 @@ it('runs calls one at a time, so cancels never interleave', async () => {
       order.push('schedule');
     }
   });
-  await Promise.all([rescheduleNotifications(defaultSettings), rescheduleNotifications(defaultSettings)]);
+  await Promise.all([
+    rescheduleNotifications(defaultSettings),
+    rescheduleNotifications(defaultSettings),
+  ]);
   expect(order).toEqual(['cancel', 'schedule', 'cancel', 'schedule']);
 });
 
 it('the background task reschedules from the saved settings', async () => {
   const AsyncStorage = require('@react-native-async-storage/async-storage');
-  const edmonton = {location: {lat: 53.5461, lng: -113.4938}, city: 'Edmonton, AB', muted: {isha: true}};
+  const edmonton = {
+    location: {lat: 53.5461, lng: -113.4938},
+    city: 'Edmonton, AB',
+    muted: {isha: true},
+  };
   await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(edmonton));
   const TaskManager = require('expo-task-manager');
   require('../app/backgroundTask');

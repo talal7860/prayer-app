@@ -89,7 +89,9 @@ it('during Fajr counts down to the end of Fajr (sunrise)', () => {
   expect(props.at).toBe(at('sunrise').getTime());
   expect(props.inLabel).toBe('Fajr ends in');
   expect(props.untilLabel).toBe(`until Fajr ends · ${props.time}`);
-  expect(activityFor(on, new Date(at('sunrise').getTime() - minutes(20)))?.inLabel).toBe('Fajr ends in');
+  expect(activityFor(on, new Date(at('sunrise').getTime() - minutes(20)))?.inLabel).toBe(
+    'Fajr ends in',
+  );
   // Outside Fajr it's the usual "{Prayer} in".
   expect(nextPrayerProps(settings, beforeDhuhr).inLabel).toBe('Dhuhr in');
 });

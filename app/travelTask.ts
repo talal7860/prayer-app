@@ -29,7 +29,7 @@ export const checkTravel = async (settings: Settings): Promise<boolean> => {
     return false;
   }
   const last = await AsyncStorage.getItem(NOTIFIED_KEY).catch(() => null);
-  if (last && !movedEnough(settings, JSON.parse(last), here)) {
+  if (last && !movedEnough(settings, JSON.parse(last) as GeoLocation, here)) {
     return false;
   }
   const city = (await cityName(here))?.split(',')[0];
@@ -50,7 +50,7 @@ export const checkTravel = async (settings: Settings): Promise<boolean> => {
 TaskManager.defineTask<{eventType: ExpoLocation.GeofencingEventType}>(
   TRAVEL_TASK,
   async ({data, error}) => {
-    if (error || data?.eventType !== ExpoLocation.GeofencingEventType.Exit) {
+    if (error || data.eventType !== ExpoLocation.GeofencingEventType.Exit) {
       return;
     }
     try {

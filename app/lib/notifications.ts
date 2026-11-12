@@ -75,6 +75,8 @@ export const rescheduleNotifications = (
   now: Date = new Date(),
 ): Promise<number> => {
   const next = queue.then(() => run(settings, now));
-  queue = next.catch(() => {});
+  queue = next.catch(() => {
+    // The caller gets the error from `next`; the queue just moves on.
+  });
   return next;
 };

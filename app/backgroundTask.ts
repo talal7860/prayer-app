@@ -18,7 +18,7 @@ TaskManager.defineTask(RESCHEDULE_TASK, async () => {
     await rescheduleNotifications(settings);
     // Android travel alerts: no geofence without fine location, so check here instead.
     if (Platform.OS === 'android' && settings.travelAlerts) {
-      await checkTravel(settings).catch(error => console.warn(error));
+      await checkTravel(settings).catch((error: unknown) => console.warn(error));
     }
     return BackgroundTask.BackgroundTaskResult.Success;
   } catch (error) {

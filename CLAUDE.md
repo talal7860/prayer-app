@@ -191,7 +191,9 @@ npx expo run:ios            # prebuild if needed, build and run on the iOS simul
 npx expo run:android        # same for Android
 npx expo prebuild --clean   # regenerate ios/ and android/ after app.json changes
 yarn typecheck              # tsc --noEmit
-yarn lint                   # expo lint (ESLint 9 flat config, eslint-config-expo)
+yarn lint                   # expo lint . --max-warnings 0 (strict, see below)
+yarn format                 # prettier --write .
+yarn format:check           # prettier --check . (CI)
 yarn test                   # jest-expo + @testing-library/react-native
 npx expo-doctor             # dependency / config health check, keep it at 20/20
 ```
@@ -199,9 +201,23 @@ npx expo-doctor             # dependency / config health check, keep it at 20/20
 Add or upgrade native packages with `npx expo install <pkg>` so the version matches the SDK.
 For the next SDK bump: `npx expo install expo@^<next> --fix`, then `npx expo-doctor`.
 
+**Formatting and lint**
+- Prettier (`.prettierrc`): single quotes, no bracket spacing, trailing commas, `arrowParens: avoid`,
+  `bracketSameLine`, width 100. `.prettierignore` skips generated native dirs, `.claude/`, the vendored
+  `targets/_shared/Adhan`, lockfiles and **Markdown** (Prettier renumbers lists and re-indents code spans
+  in the hand-written docs).
+- ESLint (`eslint.config.js`): `eslint-config-expo` + typescript-eslint `strictTypeChecked` and
+  `stylisticTypeChecked` (type-aware, `projectService`) on `.ts`/`.tsx`, then `eslint-config-prettier`.
+  React hooks rules are errors. Tuned rules (each with a comment in the config): `type` over
+  `interface`, arrow-shorthand void returns allowed in handlers, numbers allowed in template literals;
+  in `__tests__/` the `no-unsafe-*`, `no-require-imports`, `import/first`, `no-non-null-assertion` and
+  `require-await` rules are off (jest mocks).
+- Inline disables need a reason (`-- why`, or a comment above).
+
 ## CI / CD
 
-- `.github/workflows/ci.yml`: on every PR, runs typecheck, lint, tests and `expo-doctor`.
+- `.github/workflows/ci.yml`: on every PR, runs typecheck, `format:check`, lint (strict, 0 warnings),
+  tests and `expo-doctor`.
 - `.github/workflows/deploy.yml`: **automatic deploys are currently disabled** (the `push`
   trigger is commented out). It only runs manually (Actions → Deploy → Run workflow). Once the
   one-time setup below is done, uncomment the trigger to deploy on every push to `master`.
@@ -275,6 +291,14 @@ One-time setup (needs the account owner):
   channel id (the WAV one is `adhan-makkah`; the old `prayer-time-notifications-mecca` is deleted
   on launch).
 - Android permissions include `SCHEDULE_EXACT_ALARM` so prayer notifications fire on time.
+  **Android 14+ doesn't grant it to new installs**: without it Android may deliver the adhan
+  (and the widget's re-render alarm) tens of minutes late (`dumpsys alarm` shows `window=+38m`).
+  The local module `modules/exact-alarm` (Android only) checks `canScheduleExactAlarms()` and
+  opens the app's "Alarms & reminders" page. `useExactAlarms` re-checks on every foreground, and
+  `ExactAlarmPrompt` asks on Today, at the end of the setup and in Settings → Notifications
+  while it's off. Coming back from that page is a foreground, so `usePushNotifications`
+  reschedules everything, exact this time. (Not `USE_EXACT_ALARM`: Play allows that only for
+  alarm-clock and calendar apps.)
   Location is coarse only (see Travel alerts).
 
 ## Upgrade history (RN 0.65.1 → 0.88.1, Nov 2026)
@@ -304,6 +328,15 @@ Tracking epic: https://github.com/talal7860/prayer-app/issues/11 (sub-issues #3�
   Add any other global `@types/*` package there.
 - **ESLint 10 breaks `eslint-plugin-react`** (`getFilename is not a function`). Stay on
   ESLint 9 until eslint-config-expo supports 10.
+- **`expo lint` with no path only lints `app/`** (Expo Router's default dirs), so `yarn lint` passes `.`
+  to cover `App.tsx`, `__tests__/` and `modules/` too.
+- **Run Jest from a `.claude/worktrees/*` checkout** with
+  `npx jest --testPathIgnorePatterns /node_modules/ --modulePathIgnorePatterns /none/`: the config
+  ignores `/.claude/` paths (so the main checkout skips other worktrees), which there means every test.
+- `I18n.t(...)` nested inside another `I18n.t`'s options is typed `any` (the options' index
+  signature); put it in a `const` first (`no-unsafe-assignment`).
+- Fire-and-forget promises in effects/handlers take `void` (`no-floating-promises`); the async
+  calls are deliberately not awaited; add a `.catch` where a failure must be handled.
 - `import/namespace` falsely flags `Notifications.AndroidImportance` (re-exported from a
   `.types` module); there is an inline disable for it.
 - **Jest runs in `America/Edmonton`** (`jest.globalSetup.js`), the zone of the Calgary test data.

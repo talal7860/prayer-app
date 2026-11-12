@@ -15,9 +15,13 @@ it('Edmonton is far enough to suggest switching', () => {
 
 it('adjustments shift only that prayer, by that many minutes', () => {
   const base = prayerTimesFor({...calc, location: calgary}, date);
-  const tuned = prayerTimesFor({...calc, location: calgary, adjustments: {isha: -3, fajr: 2}}, date);
+  const tuned = prayerTimesFor(
+    {...calc, location: calgary, adjustments: {isha: -3, fajr: 2}},
+    date,
+  );
   const gap = (k: PrayerKey) =>
-    (tuned.find(p => p.key === k)!.time.getTime() - base.find(p => p.key === k)!.time.getTime()) / 60000;
+    (tuned.find(p => p.key === k)!.time.getTime() - base.find(p => p.key === k)!.time.getTime()) /
+    60000;
   expect(gap('fajr')).toBe(2);
   expect(gap('isha')).toBe(-3);
   expect(gap('dhuhr')).toBe(0);

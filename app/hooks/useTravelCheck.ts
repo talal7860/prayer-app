@@ -18,8 +18,13 @@ const round = ({lat, lng}: GeoLocation) => ({
 const useTravelCheck = () => {
   const {settings, setSetting, setSettings} = useAppSettings();
   const [prompt, setPrompt] = useState<{city: string; location: GeoLocation} | null>(null);
-  const {location: saved, travelDismissedAt: dismissed, calculationMethod, asr, highLats} =
-    settings;
+  const {
+    location: saved,
+    travelDismissedAt: dismissed,
+    calculationMethod,
+    asr,
+    highLats,
+  } = settings;
 
   const check = useCallback(async () => {
     try {
@@ -49,12 +54,11 @@ const useTravelCheck = () => {
   }, [saved, dismissed, calculationMethod, asr, highLats]);
 
   useEffect(() => {
-    // check() only sets state after awaiting the OS, never synchronously.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    check();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- check() only sets state after awaiting the OS, never synchronously
+    void check();
     const sub = AppState.addEventListener('change', state => {
       if (state === 'active') {
-        check();
+        void check();
       }
     });
     return () => sub.remove();

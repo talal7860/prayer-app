@@ -9,6 +9,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import {Card, Row} from '../../components/ui/Card';
 import Icon from '../../components/ui/Icon';
 import Text from '../../components/ui/Text';
@@ -149,6 +150,12 @@ const QiblaScreen = () => {
   if (nowFacing !== facing) {
     setFacing(nowFacing);
   }
+  // A light tap when you turn onto the qibla, so you can feel it without watching the screen.
+  useEffect(() => {
+    if (facing) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    }
+  }, [facing]);
 
   // Turn the dial the short way round (359° → 1° is +2°, not −358°).
   const [rotation] = useState(() => new Animated.Value(0));

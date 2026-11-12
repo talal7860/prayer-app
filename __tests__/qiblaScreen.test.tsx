@@ -1,6 +1,7 @@
 import React from 'react';
 import {act, render, screen} from '@testing-library/react-native';
 import * as ExpoLocation from 'expo-location';
+import * as Haptics from 'expo-haptics';
 import QiblaScreen from '../app/screens/QiblaScreen';
 
 jest.mock('@react-native-async-storage/async-storage', () =>
@@ -9,6 +10,11 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 
 jest.mock('../app/hooks/useAppSettings', () => () => ({
   settings: {location: {lat: 51.05, lng: -114.07}, city: 'Calgary, AB'},
+}));
+
+jest.mock('expo-haptics', () => ({
+  impactAsync: jest.fn(() => Promise.resolve()),
+  ImpactFeedbackStyle: {Light: 'light'},
 }));
 
 let onHeading: (h: {trueHeading: number; magHeading: number; accuracy: number}) => void;
@@ -53,14 +59,19 @@ it('tells you which way to turn, then that you are facing the qibla', async () =
   expect(screen.getByText('Turn right 25°')).toBeTruthy();
   await act(async () => onHeading({trueHeading: 60, magHeading: 70, accuracy: 3}));
   expect(screen.getByText('Turn left 35°')).toBeTruthy();
+  expect(Haptics.impactAsync).not.toHaveBeenCalled();
   await act(async () => onHeading({trueHeading: 22, magHeading: 30, accuracy: 3}));
   expect(screen.getByText('You’re facing the qibla')).toBeTruthy();
+  expect(Haptics.impactAsync).toHaveBeenCalledTimes(1);
   // Hysteresis: 7° off still counts once facing.
   await act(async () => onHeading({trueHeading: 18, magHeading: 30, accuracy: 3}));
   expect(screen.getByText('You’re facing the qibla')).toBeTruthy();
+  // One tap per time you line up, not one per compass reading.
+  expect(Haptics.impactAsync).toHaveBeenCalledTimes(1);
 });
 
 it('asks to calibrate when accuracy is low', async () => {
+  (Haptics.impactAsync as jest.Mock).mockClear();
   granted(true);
   await render(<QiblaScreen />);
   await act(async () => onHeading({trueHeading: -1, magHeading: 25, accuracy: 1}));

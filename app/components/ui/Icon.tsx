@@ -1,4 +1,5 @@
 import React from 'react';
+import {I18nManager} from 'react-native';
 import Svg, {Circle, Path, Rect} from 'react-native-svg';
 
 // Stroke icons from the redesign canvas (24x24 grid).
@@ -33,7 +34,11 @@ type Props = {
   strokeWidth?: number;
 };
 
+// Arrows that point "forward" or "back" swap sides in right-to-left layouts.
+const DIRECTIONAL: IconName[] = ['chevron', 'back'];
+
 const Icon = ({name, size = 20, color, strokeWidth = 1.8}: Props) => {
+  const mirror = I18nManager.isRTL && DIRECTIONAL.includes(name);
   const common = {
     stroke: color,
     strokeWidth,
@@ -42,7 +47,12 @@ const Icon = ({name, size = 20, color, strokeWidth = 1.8}: Props) => {
     fill: 'none',
   };
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" aria-hidden>
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      aria-hidden
+      style={mirror ? {transform: [{scaleX: -1}]} : undefined}>
       {name === 'sliders' ? (
         <>
           <Path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12" {...common} />

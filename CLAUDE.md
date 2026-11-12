@@ -16,7 +16,15 @@ location, lets the user pick calculation methods, and schedules a local notifica
   `app/lib/notifications.ts`), kept topped up by `expo-background-task` (`app/backgroundTask.ts`).
 - Location: `expo-location` (`app/screens/SettingsScreen/Location/index.tsx`).
 - Storage: `@react-native-async-storage/async-storage` 2.x (Expo-pinned, not 3.x).
-- i18n: `i18n-js` v4 (`app/I18n.ts`, strings in `app/locales/en.json`).
+- i18n: `i18n-js` v4 (`app/I18n.ts`). **English, Arabic and Urdu** (`app/locales/{en,ar,ur}.json`),
+  picked from the phone's preferred languages with `expo-localization`. A test keeps the keys and
+  `{{placeholders}}` of all three in sync: add every new string to all three files.
+  - Right to left: `app.json` → `extra.supportsRTL` plus native `locales`
+    (`app/locales/native/*.json`: app name, permission prompts) make iOS/Android mirror the layout
+    when the phone is in Arabic or Urdu. Use `start`/`end` thinking; RN swaps left/right styles.
+    `Icon` mirrors `chevron`/`back` in RTL.
+  - Dates go through `dateLocale()` (`<lang>-u-nu-latn`: localized names, Latin digits).
+    AM/PM is `time.am`/`time.pm`. Method names (from PrayTimes) and city names stay as they are.
 - Prayer-time math: `app/lib/PrayTimes.js` (vendored, excluded from lint).
 - Global types live in `app/types/main.d.ts` (ambient, no imports).
 
@@ -76,6 +84,8 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
   `fajrIshaCalculation: '90mins'` rule (Fajr = sunrise − 90 min, Isha = maghrib + 90 min,
   patched into `PrayTimes.js`) was **removed on purpose**; a saved value is dropped on load.
   Don't re-add a 90-minute option (the design's "Isha 18° / 90 min" control was dropped too).
+- **Monthly timetable** (Week → "Share the {month} timetable"): `app/lib/timetable.ts` builds an
+  A4 HTML page (RTL-aware), `expo-print` makes the PDF, `expo-sharing` opens the share sheet.
 - `getPrayerTimes(date)` computes that date (it used to ignore `date`), and labels Friday's
   Dhuhr "Jumu’ah".
 - **Widgets and Live Activity** (`expo-widgets` + `@expo/ui`, #20):

@@ -100,7 +100,8 @@
     "longer": "{{min}} min longer than yesterday",
     "shorter": "{{min}} min shorter than yesterday",
     "friday": "Friday is Jumu’ah",
-    "chooseWeek": "Choose week"
+    "chooseWeek": "Choose week",
+    "length": "{{h}}h {{m}}m"
   },
   "methods": {
     "title": "Calculation method"
@@ -166,5 +167,35 @@
   },
   "widget": {
     "next": "Next prayer"
+  },
+  "timetable": {
+    "title": "Prayer times · {{month}}",
+    "share": "Share the {{month}} timetable",
+    "hint": "A PDF to print, save or send",
+    "failed": "Couldn't make the timetable"
+  },
+  "time": {
+    "am": "AM",
+    "pm": "PM"
+  },
+  "asrNames": {
+    "Standard": "Standard",
+    "Hanafi": "Hanafi",
+    "label": "{{asr}} Asr"
+  },
+  "hijri": {
+    "date": "{{month}} {{day}}, {{year}} AH",
+    "m1": "Muharram",
+    "m2": "Safar",
+    "m3": "Rabiʻ I",
+    "m4": "Rabiʻ II",
+    "m5": "Jumada I",
+    "m6": "Jumada II",
+    "m7": "Rajab",
+    "m8": "Shaʻban",
+    "m9": "Ramadan",
+    "m10": "Shawwal",
+    "m11": "Dhuʻl-Qiʻdah",
+    "m12": "Dhuʻl-Hijjah"
   }
 }

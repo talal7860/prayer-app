@@ -1,5 +1,7 @@
 import React, {useMemo, useState} from 'react';
-import {ScrollView, StatusBar, StyleSheet, View} from 'react-native';
+import {ActivityIndicator, Alert, Pressable, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Card} from '../../components/ui/Card';
 import Icon from '../../components/ui/Icon';
@@ -7,7 +9,7 @@ import Segmented from '../../components/ui/Segmented';
 import Text from '../../components/ui/Text';
 import useAppSettings from '../../hooks/useAppSettings';
 import usePalette from '../../hooks/usePalette';
-import I18n from '../../I18n';
+import I18n, {formatDate} from '../../I18n';
 import {
   addDays,
   daylightMinutes,
@@ -16,6 +18,7 @@ import {
   isFriday,
   toDayTimes,
 } from '../../lib/prayerDay';
+import {timetableHtml} from '../../lib/timetable';
 
 type Week = 'this' | 'next';
 const COLUMNS: PrayerKey[] = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
@@ -43,10 +46,27 @@ const WeekScreen = () => {
     return {now, delta: Math.round(now - prev)};
   }, [getPrayerTimes, today]);
 
+  const [sharing, setSharing] = useState(false);
+  const monthName = formatDate(new Date(today), {month: 'long'});
+  const shareMonth = async () => {
+    setSharing(true);
+    try {
+      const {uri} = await Print.printToFileAsync({html: timetableHtml(settings, new Date(today))});
+      await Sharing.shareAsync(uri, {mimeType: 'application/pdf', UTI: 'com.adobe.pdf'});
+    } catch (error: any) {
+      Alert.alert(I18n.t('timetable.failed'), error?.message);
+    } finally {
+      setSharing(false);
+    }
+  };
+
   const hm = (d: Date) => formatTime(d, settings.timeFormat, false);
   const city = settings.city ?? formatCoords(settings.location);
   const method = calculationMethod().split(',').pop()?.trim();
-  const length = `${Math.floor(daylight.now / 60)}h ${String(Math.round(daylight.now % 60)).padStart(2, '0')}m`;
+  const length = I18n.t('week.length', {
+    h: Math.floor(daylight.now / 60),
+    m: String(Math.round(daylight.now % 60)).padStart(2, '0'),
+  });
   const deltaText =
     daylight.delta === 0
       ? I18n.t('week.same')
@@ -61,7 +81,7 @@ const WeekScreen = () => {
             {I18n.t(week === 'this' ? 'week.thisWeek' : 'week.nextWeek')}
           </Text>
           <Text size={14} color={t.muted}>
-            {`${city} · ${method} · ${settings.asr} Asr`}
+            {`${city} · ${method} · ${I18n.t('asrNames.label', {asr: I18n.t(`asrNames.${settings.asr}`)})}`}
           </Text>
         </View>
 
@@ -103,14 +123,14 @@ const WeekScreen = () => {
                 ]}>
                 <View style={styles.dayCol}>
                   <Text weight="semibold" size={13.5} color={isToday ? t.accent : t.text}>
-                    {`${date.toLocaleDateString('en-US', {weekday: 'short'})} ${date.getDate()}`}
+                    {`${formatDate(date, {weekday: 'short'})} ${date.getDate()}`}
                   </Text>
                   <Text size={11} color={t.muted}>
                     {isToday
                       ? I18n.t('week.today')
                       : fri
                         ? I18n.t('prayer.jumuah')
-                        : date.toLocaleDateString('en-US', {month: 'short'})}
+                        : formatDate(date, {month: 'short'})}
                   </Text>
                 </View>
                 {COLUMNS.map(k => (
@@ -141,6 +161,29 @@ const WeekScreen = () => {
             </Text>
           </View>
         </Card>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('timetable.share', {month: monthName})}
+          disabled={sharing}
+          onPress={shareMonth}
+          style={({pressed}) => [
+            styles.share,
+            {backgroundColor: pressed ? t.hi : t.bg, borderColor: t.border},
+          ]}>
+          <View style={[styles.badge, {backgroundColor: t.hi}]}>
+            <Icon name="calendar" size={20} color={t.accent} />
+          </View>
+          <View style={styles.daylightText}>
+            <Text weight="semibold" size={15} color={t.text}>
+              {I18n.t('timetable.share', {month: monthName})}
+            </Text>
+            <Text size={13} color={t.muted}>
+              {I18n.t('timetable.hint')}
+            </Text>
+          </View>
+          {sharing ? <ActivityIndicator color={t.accent} /> : null}
+        </Pressable>
       </ScrollView>
     </View>
   );
@@ -161,6 +204,7 @@ const styles = StyleSheet.create({
   cell: {flex: 1, textAlign: 'center', fontVariant: ['tabular-nums']},
   caps: {letterSpacing: 0.4},
   daylight: {marginTop: 14, marginHorizontal: 16, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 14},
+  share: {marginTop: 14, marginHorizontal: 16, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 18, borderWidth: 1, minHeight: 44},
   badge: {width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center'},
   daylightText: {flex: 1, minWidth: 0, gap: 2},
 });

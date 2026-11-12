@@ -102,8 +102,8 @@ const SettingsScreen = () => {
             <Segmented
               accessibilityLabel={I18n.t('settings.asr')}
               options={[
-                {value: 'Standard', label: 'Standard'},
-                {value: 'Hanafi', label: 'Hanafi'},
+                {value: 'Standard', label: I18n.t('asrNames.Standard')},
+                {value: 'Hanafi', label: I18n.t('asrNames.Hanafi')},
               ]}
               value={settings.asr}
               onChange={setSetting('asr')}

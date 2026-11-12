@@ -1,0 +1,5 @@
+{
+  "CFBundleDisplayName": "اذان ایپ",
+  "NSLocationWhenInUseUsageDescription": "آپ کا مقام آپ کی جگہ کے نماز کے اوقات نکالنے کے لیے استعمال ہوتا ہے۔",
+  "NSLocationAlwaysAndWhenInUseUsageDescription": "سفر کی اطلاعات پس منظر میں آپ کا مقام استعمال کرتی ہیں تاکہ کسی اور شہر میں ہونے پر نماز کے اوقات بدلنے کا بتا سکیں۔"
+}

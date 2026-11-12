@@ -178,6 +178,19 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
   - Widget extension bundle id `com.conelabs.adhanapp.widget`, App Group
     `group.com.conelabs.adhanapp` (expo-widgets plugin options in `app.json`).
   - Jest mocks `expo-widgets` in `jest.setup.js`.
+  - **Android widget countdown** (`NextPrayer.android.tsx`): Android widgets are Glance; expo-widgets
+    maps no `weight`/`spaceBetween` and doesn't pass the widget size, so the layout uses `Box`
+    layers and fixed-width chips. Colours are `rgba()` (RN reads `#RRGGBBAA`, not `#AARRGGBB`).
+    The ticking countdown is a **`ChronometerView`**, added by `patches/expo-widgets+*.patch`
+    (`patch-package`, run on `postinstall`): a RemoteViews `Chronometer` the system ticks every
+    second, plus an alarm (`WidgetTicker`) that re-renders the widgets when it reaches zero. The app
+    sends `androidWidgetProps` (an entry from every prayer time for two days) and the layout picks
+    the entry for `Date.now()`, so the widget moves on without the app. Give the countdown and its
+    column `fillMaxWidth()`, or it's clipped to the column's first width. The widget's JS is
+    bundled into the APK at build time: layout changes need a native rebuild to show.
+    To change the patch: edit `node_modules/expo-widgets`, then
+    `npx patch-package expo-widgets --exclude '^package\.json$|android/build|android/\.cxx|\.gradle'`
+    (without the exclude it picks up 1.5 MB of build output).
 
 ## Commands
 

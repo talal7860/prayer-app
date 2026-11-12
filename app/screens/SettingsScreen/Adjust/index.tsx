@@ -18,7 +18,15 @@ export const adjustmentSummary = (adjustments: Settings['adjustments']) => {
   return parts.length ? parts.join(' · ') : I18n.t('adjust.none');
 };
 
-const Step = ({label, onPress, disabled}: {label: string; onPress: () => void; disabled: boolean}) => {
+const Step = ({
+  label,
+  onPress,
+  disabled,
+}: {
+  label: string;
+  onPress: () => void;
+  disabled: boolean;
+}) => {
   const {t} = usePalette();
   return (
     <Pressable
@@ -29,7 +37,11 @@ const Step = ({label, onPress, disabled}: {label: string; onPress: () => void; d
       hitSlop={6}
       style={({pressed}) => [
         styles.step,
-        {borderColor: t.border, backgroundColor: pressed ? t.hi : t.bg, opacity: disabled ? 0.4 : 1},
+        {
+          borderColor: t.border,
+          backgroundColor: pressed ? t.hi : t.bg,
+          opacity: disabled ? 0.4 : 1,
+        },
       ]}>
       <Text weight="semibold" size={18} color={t.accent}>
         {label === '+' ? '+' : '−'}
@@ -60,7 +72,10 @@ const AdjustScreen = () => {
           return (
             <View
               key={p.key}
-              style={[styles.row, i < today.length - 1 && {borderBottomWidth: 1, borderBottomColor: t.divider}]}>
+              style={[
+                styles.row,
+                i < today.length - 1 && {borderBottomWidth: 1, borderBottomColor: t.divider},
+              ]}>
               <View style={styles.flex}>
                 <Text weight="medium" size={15} color={t.text}>
                   {I18n.t(`prayer.${p.key}`)}
@@ -92,7 +107,14 @@ const styles = StyleSheet.create({
   hint: {paddingHorizontal: 8, lineHeight: 19},
   row: {flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 60, paddingHorizontal: 16},
   flex: {flex: 1, gap: 2},
-  step: {width: 44, height: 44, borderRadius: 12, borderWidth: 1, alignItems: 'center', justifyContent: 'center'},
+  step: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   value: {width: 36, textAlign: 'center'},
 });
 

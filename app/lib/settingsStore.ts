@@ -30,7 +30,10 @@ export const parseSettings = (
   base: Settings = defaultSettings,
 ): Settings => {
   // `fajrIshaCalculation` (the old 90-minute rule) was removed; drop it if saved.
-  const {fajrIshaCalculation: _removed, ...parsed}: Partial<Settings> & {
+  const {
+    fajrIshaCalculation: _removed,
+    ...parsed
+  }: Partial<Settings> & {
     fajrIshaCalculation?: string;
   } = stored ? JSON.parse(stored) : {};
   const next: Settings = merge(base)(parsed);

@@ -42,10 +42,16 @@ const NextPrayer = (p: NextPrayerProps) => {
         modifiers={[fillMaxWidth(), background('#33000000'), cornerRadius(12), paddingAll(6)]}>
         {p.prayers.map(r => (
           <Column key={r.label} horizontalAlignment="center">
-            <Text color={r.next ? '#FFE7A3' : soft} maxLines={1} style={{fontSize: 10, fontWeight: '600'}}>
+            <Text
+              color={r.next ? '#FFE7A3' : soft}
+              maxLines={1}
+              style={{fontSize: 10, fontWeight: '600'}}>
               {r.label.toUpperCase()}
             </Text>
-            <Text color="#FFFFFF" maxLines={1} style={{fontSize: 13, fontWeight: r.next ? 'bold' : 'normal'}}>
+            <Text
+              color="#FFFFFF"
+              maxLines={1}
+              style={{fontSize: 13, fontWeight: r.next ? 'bold' : 'normal'}}>
               {r.hm}
             </Text>
           </Column>

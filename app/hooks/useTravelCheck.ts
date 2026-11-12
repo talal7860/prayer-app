@@ -18,8 +18,13 @@ const round = ({lat, lng}: GeoLocation) => ({
 const useTravelCheck = () => {
   const {settings, setSetting, setSettings} = useAppSettings();
   const [prompt, setPrompt] = useState<{city: string; location: GeoLocation} | null>(null);
-  const {location: saved, travelDismissedAt: dismissed, calculationMethod, asr, highLats} =
-    settings;
+  const {
+    location: saved,
+    travelDismissedAt: dismissed,
+    calculationMethod,
+    asr,
+    highLats,
+  } = settings;
 
   const check = useCallback(async () => {
     try {

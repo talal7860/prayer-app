@@ -5,7 +5,10 @@ import {methodName, prayerTimesFor} from './prayerTimes';
 const COLUMNS: PrayerKey[] = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
 
 const escape = (s: string) =>
-  s.replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[c]!);
+  s.replace(
+    /[&<>"']/g,
+    c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[c]!,
+  );
 
 /** Every day of `month`'s month, with that day's prayer times. */
 export const monthDays = (settings: Settings, month: Date) => {

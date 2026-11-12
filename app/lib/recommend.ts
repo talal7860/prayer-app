@@ -26,8 +26,6 @@ export const recommendedMethod = (countryCode?: string): PrayerCalculationMethod
   (countryCode && METHOD_BY_COUNTRY[countryCode.toUpperCase()]) || 'MWL';
 
 export const recommendedAsr = (countryCode?: string): AsrJuristics =>
-  countryCode && HANAFI_COUNTRIES.includes(countryCode.toUpperCase())
-    ? 'Hanafi'
-    : 'Standard';
+  countryCode && HANAFI_COUNTRIES.includes(countryCode.toUpperCase()) ? 'Hanafi' : 'Standard';
 
 export const isHighLatitude = ({lat}: GeoLocation) => Math.abs(lat) >= HIGH_LATITUDE;

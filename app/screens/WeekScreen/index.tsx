@@ -1,5 +1,13 @@
 import React, {useMemo, useState} from 'react';
-import {ActivityIndicator, Alert, Pressable, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  View,
+} from 'react-native';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -70,14 +78,21 @@ const WeekScreen = () => {
   const deltaText =
     daylight.delta === 0
       ? I18n.t('week.same')
-      : I18n.t(daylight.delta > 0 ? 'week.longer' : 'week.shorter', {min: Math.abs(daylight.delta)});
+      : I18n.t(daylight.delta > 0 ? 'week.longer' : 'week.shorter', {
+          min: Math.abs(daylight.delta),
+        });
 
   return (
     <View style={[styles.root, {backgroundColor: t.surface}]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <ScrollView contentContainerStyle={[styles.scroll, {paddingTop: insets.top + 16}]}>
         <View style={styles.head}>
-          <Text weight="bold" size={30} color={t.text} accessibilityRole="header" style={styles.title}>
+          <Text
+            weight="bold"
+            size={30}
+            color={t.text}
+            accessibilityRole="header"
+            style={styles.title}>
             {I18n.t(week === 'this' ? 'week.thisWeek' : 'week.nextWeek')}
           </Text>
           <Text size={14} color={t.muted}>
@@ -104,7 +119,12 @@ const WeekScreen = () => {
               {I18n.t('week.day').toUpperCase()}
             </Text>
             {HEADERS.map(h => (
-              <Text key={h} weight="semibold" size={11} color={t.muted} style={[styles.cell, styles.caps]}>
+              <Text
+                key={h}
+                weight="semibold"
+                size={11}
+                color={t.muted}
+                style={[styles.cell, styles.caps]}>
                 {I18n.t(`week.${h}`).toUpperCase()}
               </Text>
             ))}
@@ -203,8 +223,25 @@ const styles = StyleSheet.create({
   dayCol: {width: 64, gap: 1},
   cell: {flex: 1, textAlign: 'center', fontVariant: ['tabular-nums']},
   caps: {letterSpacing: 0.4},
-  daylight: {marginTop: 14, marginHorizontal: 16, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 14},
-  share: {marginTop: 14, marginHorizontal: 16, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 18, borderWidth: 1, minHeight: 44},
+  daylight: {
+    marginTop: 14,
+    marginHorizontal: 16,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  share: {
+    marginTop: 14,
+    marginHorizontal: 16,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    borderRadius: 18,
+    borderWidth: 1,
+    minHeight: 44,
+  },
   badge: {width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center'},
   daylightText: {flex: 1, minWidth: 0, gap: 2},
 });

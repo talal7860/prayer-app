@@ -12,13 +12,7 @@ type PrayerTimeLabel = {
 };
 
 type PrayerCalculationMethod =
-  | 'MWL'
-  | 'ISNA'
-  | 'Egypt'
-  | 'Makkah'
-  | 'Karachi'
-  | 'Tehran'
-  | 'Jafari';
+  'MWL' | 'ISNA' | 'Egypt' | 'Makkah' | 'Karachi' | 'Tehran' | 'Jafari';
 
 type AsrJuristics = 'Hanafi' | 'Standard';
 
@@ -52,12 +46,7 @@ type Settings = {
   travelDismissedAt?: GeoLocation;
 };
 
-type SettingKey =
-  | 'location'
-  | 'asr'
-  | 'fajr'
-  | 'fajrFromSunrise'
-  | 'calculationMethod';
+type SettingKey = 'location' | 'asr' | 'fajr' | 'fajrFromSunrise' | 'calculationMethod';
 
 type Adjustment = Record<string, number>;
 
@@ -65,10 +54,7 @@ type PrayerTimesByDate = Record<string, PrayerTimeLabel[]>;
 
 type Sounds = Record<string, {name: string; path: string}> | undefined | null;
 type SettingScreenMap = Record<string, string>;
-type NotificationChannels = Record<
-  string,
-  {channelId: string; soundName: string}
->;
+type NotificationChannels = Record<string, {channelId: string; soundName: string}>;
 
 type ColorScheme = 'light' | 'dark' | 'system' | undefined | null;
 

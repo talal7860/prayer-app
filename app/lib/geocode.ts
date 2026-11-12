@@ -14,7 +14,7 @@ const describe = (place: ExpoLocation.LocationGeocodedAddress): Place => {
   const region =
     place.region && place.region.length <= 3
       ? place.region
-      : place.isoCountryCode ?? place.region;
+      : (place.isoCountryCode ?? place.region);
   return {
     city: [city, region].filter(Boolean).join(', ') || undefined,
     countryCode: place.isoCountryCode ?? undefined,
@@ -36,8 +36,7 @@ export const placeFor = async ({lat, lng}: GeoLocation): Promise<Place> => {
 };
 
 /** "Calgary, AB" for a coordinate, or undefined if the platform geocoder can't tell. */
-export const cityName = async (location: GeoLocation) =>
-  (await placeFor(location)).city;
+export const cityName = async (location: GeoLocation) => (await placeFor(location)).city;
 
 /** The first match for a typed city name, or null. Uses the platform geocoder. */
 export const searchPlace = async (

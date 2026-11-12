@@ -22,11 +22,7 @@ const paths = {
   compass: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M15.5 8.5l-2.2 4.8-4.8 2.2 2.2-4.8z',
 } as const;
 
-export type IconName =
-  | keyof typeof paths
-  | 'sliders'
-  | 'clock'
-  | 'calendar';
+export type IconName = keyof typeof paths | 'sliders' | 'clock' | 'calendar';
 
 type Props = {
   name: IconName;

@@ -67,11 +67,7 @@ const Tabs = () => {
           <Icon name={tabIcons[route.name]} size={22} color={color} strokeWidth={2} />
         ),
       })}>
-      <Tab.Screen
-        name="today"
-        component={TodayScreen}
-        options={{title: I18n.t('today.title')}}
-      />
+      <Tab.Screen name="today" component={TodayScreen} options={{title: I18n.t('today.title')}} />
       <Tab.Screen
         name="qibla"
         component={QiblaTab}
@@ -82,11 +78,7 @@ const Tabs = () => {
           headerTitleStyle: {fontFamily: fonts.semibold},
         }}
       />
-      <Tab.Screen
-        name="week"
-        component={WeekScreen}
-        options={{title: I18n.t('week.title')}}
-      />
+      <Tab.Screen name="week" component={WeekScreen} options={{title: I18n.t('week.title')}} />
       <Tab.Screen
         name="settings"
         component={SettingsScreen}
@@ -133,10 +125,18 @@ const Root = () => {
           contentStyle: {backgroundColor: t.surface},
         }}>
         {settings.onboarded ? (
-          <Stack.Screen name="tabs" component={Tabs} options={{headerShown: false, animation: 'fade'}} />
+          <Stack.Screen
+            name="tabs"
+            component={Tabs}
+            options={{headerShown: false, animation: 'fade'}}
+          />
         ) : (
           // Until the first-run setup is done it's the only screen. Finishing it swaps in the tabs.
-          <Stack.Screen name="setup" component={SetupScreen} options={{headerShown: false, animation: 'fade'}} />
+          <Stack.Screen
+            name="setup"
+            component={SetupScreen}
+            options={{headerShown: false, animation: 'fade'}}
+          />
         )}
         <Stack.Screen
           name="location"

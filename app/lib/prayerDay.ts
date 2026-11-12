@@ -2,14 +2,7 @@
 import type {Period} from '../theme/tokens';
 import I18n, {latinDigits} from '../I18n';
 
-export const PRAYER_KEYS: PrayerKey[] = [
-  'fajr',
-  'sunrise',
-  'dhuhr',
-  'asr',
-  'maghrib',
-  'isha',
-];
+export const PRAYER_KEYS: PrayerKey[] = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
 
 export type DayTimes = Record<PrayerKey, Date>;
 
@@ -19,11 +12,7 @@ export const toDayTimes = (list: PrayerTimeLabel[]): DayTimes =>
 const pad = (n: number) => `${n}`.padStart(2, '0');
 
 /** "7:16 AM" / "19:24". `withPeriod: false` drops AM/PM (the Week table). */
-export const formatTime = (
-  time: Date,
-  format: TimeFormat = '12h',
-  withPeriod = true,
-): string => {
+export const formatTime = (time: Date, format: TimeFormat = '12h', withPeriod = true): string => {
   const h = time.getHours();
   const m = pad(time.getMinutes());
   if (format === '24h') {
@@ -60,18 +49,16 @@ export const periodAt = (
   tomorrow: DayTimes,
 ): PeriodInfo => {
   const t = now.getTime();
-  const bounds: {period: Period; current: PrayerKey | null; s: Date; e: Date}[] =
-    [
-      {period: 'isha', current: null, s: yesterday.isha, e: today.fajr},
-      {period: 'fajr', current: 'fajr', s: today.fajr, e: today.sunrise},
-      {period: 'morning', current: null, s: today.sunrise, e: today.dhuhr},
-      {period: 'dhuhr', current: 'dhuhr', s: today.dhuhr, e: today.asr},
-      {period: 'asr', current: 'asr', s: today.asr, e: today.maghrib},
-      {period: 'maghrib', current: 'maghrib', s: today.maghrib, e: today.isha},
-      {period: 'isha', current: 'isha', s: today.isha, e: tomorrow.fajr},
-    ];
-  const found =
-    bounds.find(b => t >= b.s.getTime() && t < b.e.getTime()) ?? bounds[6];
+  const bounds: {period: Period; current: PrayerKey | null; s: Date; e: Date}[] = [
+    {period: 'isha', current: null, s: yesterday.isha, e: today.fajr},
+    {period: 'fajr', current: 'fajr', s: today.fajr, e: today.sunrise},
+    {period: 'morning', current: null, s: today.sunrise, e: today.dhuhr},
+    {period: 'dhuhr', current: 'dhuhr', s: today.dhuhr, e: today.asr},
+    {period: 'asr', current: 'asr', s: today.asr, e: today.maghrib},
+    {period: 'maghrib', current: 'maghrib', s: today.maghrib, e: today.isha},
+    {period: 'isha', current: 'isha', s: today.isha, e: tomorrow.fajr},
+  ];
+  const found = bounds.find(b => t >= b.s.getTime() && t < b.e.getTime()) ?? bounds[6];
   const upcoming = PRAYER_KEYS.map(key => ({key, time: today[key]}))
     .concat({key: 'fajr', time: tomorrow.fajr})
     .find(p => p.time.getTime() > t) ?? {key: 'fajr', time: tomorrow.fajr};
@@ -79,10 +66,7 @@ export const periodAt = (
 };
 
 /** The sun's position on the header arc, or null between sunset and sunrise. */
-export const sunPosition = (
-  now: Date,
-  today: DayTimes,
-): {x: number; y: number} | null => {
+export const sunPosition = (now: Date, today: DayTimes): {x: number; y: number} | null => {
   const start = today.sunrise.getTime();
   const end = today.maghrib.getTime();
   const t = now.getTime();
@@ -108,13 +92,10 @@ export const addDays = (date: Date, days: number) => {
   return d;
 };
 
-
 /** Tabular (arithmetic) Islamic calendar. Can differ from Umm al-Qura by a day. */
 export const tabularHijri = (date: Date) => {
   const jd =
-    Math.floor(
-      Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000,
-    ) + 2440588;
+    Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000) + 2440588;
   const l0 = jd - 1948440 + 10632;
   const n = Math.floor((l0 - 1) / 10631);
   const l1 = l0 - 10631 * n + 354;
@@ -136,11 +117,13 @@ export const tabularHijri = (date: Date) => {
 export const hijriLabel = (date: Date): string => {
   try {
     // A single -u-ca tag: Hermes ignores the `calendar` option and combined extensions.
-    const label = latinDigits(new Intl.DateTimeFormat(`${I18n.locale}-u-ca-islamic-umalqura`, {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }).format(date));
+    const label = latinDigits(
+      new Intl.DateTimeFormat(`${I18n.locale}-u-ca-islamic-umalqura`, {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }).format(date),
+    );
     // Engines without the Islamic calendar silently give the Gregorian date.
     if (/14\d\d|15\d\d/.test(label) && !label.includes(`${date.getFullYear()}`)) {
       return label;
@@ -163,8 +146,7 @@ export const distanceKm = (a: GeoLocation, b: GeoLocation) => {
   const dLat = rad(b.lat - a.lat);
   const dLng = rad(b.lng - a.lng);
   const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+    Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(h));
 };
 

@@ -14,8 +14,7 @@ const usePrayerDay = () => {
 
   const days = useMemo(() => {
     const base = new Date(today);
-    const at = (offset: number): DayTimes =>
-      toDayTimes(getPrayerTimes(addDays(base, offset)));
+    const at = (offset: number): DayTimes => toDayTimes(getPrayerTimes(addDays(base, offset)));
     return {
       yesterday: at(-1),
       today: at(0),

@@ -29,7 +29,9 @@ describe.each([
   it('keeps the {{placeholders}}', () => {
     Object.entries(english)
       .filter(([key]) => !key.startsWith('adjust.minutes'))
-      .forEach(([key, value]) => expect([key, placeholders(translated[key])]).toEqual([key, placeholders(value)]));
+      .forEach(([key, value]) =>
+        expect([key, placeholders(translated[key])]).toEqual([key, placeholders(value)]),
+      );
   });
 });
 

@@ -33,7 +33,12 @@ const PrayerRing = (p: NextPrayerProps, env: WidgetEnvironment) => {
 
   const ring = (
     <ZStack modifiers={[frame({width: size, height: size})]}>
-      <Circle modifiers={[foregroundStyle('rgba(0,0,0,0)'), strokeBorder({shape: 'circle', color: track, style: {lineWidth: line}})]} />
+      <Circle
+        modifiers={[
+          foregroundStyle('rgba(0,0,0,0)'),
+          strokeBorder({shape: 'circle', color: track, style: {lineWidth: line}}),
+        ]}
+      />
       <Circle
         modifiers={[
           // A Circle fills itself: make it clear, and stroke its outline (strokeBorder's
@@ -42,7 +47,11 @@ const PrayerRing = (p: NextPrayerProps, env: WidgetEnvironment) => {
           strokeBorder({
             shape: 'circle',
             color: fill,
-            style: {lineWidth: line, lineCap: 'round', dash: [Math.max(0.01, frac * circumference), circumference]},
+            style: {
+              lineWidth: line,
+              lineCap: 'round',
+              dash: [Math.max(0.01, frac * circumference), circumference],
+            },
           }),
           rotationEffect(-90),
         ]}
@@ -59,7 +68,14 @@ const PrayerRing = (p: NextPrayerProps, env: WidgetEnvironment) => {
           <Text
             date={at}
             dateStyle="timer"
-            modifiers={[font({size: 11, weight: 'bold'}), monospacedDigit(), lineLimit(1), minimumScaleFactor(0.5), multilineTextAlignment('center'), frame({width: 40})]}
+            modifiers={[
+              font({size: 11, weight: 'bold'}),
+              monospacedDigit(),
+              lineLimit(1),
+              minimumScaleFactor(0.5),
+              multilineTextAlignment('center'),
+              frame({width: 40}),
+            ]}
           />
         </VStack>
       </ZStack>
@@ -70,13 +86,29 @@ const PrayerRing = (p: NextPrayerProps, env: WidgetEnvironment) => {
     <ZStack modifiers={[containerBackground('#141A2C', 'widget'), foregroundStyle('#FFFFFF')]}>
       {ring}
       <VStack spacing={2}>
-        <Text modifiers={[font({size: 12, weight: 'semibold'}), foregroundStyle('#A4ABC2'), lineLimit(1)]}>{p.next}</Text>
+        <Text
+          modifiers={[
+            font({size: 12, weight: 'semibold'}),
+            foregroundStyle('#A4ABC2'),
+            lineLimit(1),
+          ]}>
+          {p.next}
+        </Text>
         <Text
           date={at}
           dateStyle="timer"
-          modifiers={[font({size: 20, weight: 'semibold'}), monospacedDigit(), lineLimit(1), minimumScaleFactor(0.6), multilineTextAlignment('center'), frame({width: 88})]}
+          modifiers={[
+            font({size: 20, weight: 'semibold'}),
+            monospacedDigit(),
+            lineLimit(1),
+            minimumScaleFactor(0.6),
+            multilineTextAlignment('center'),
+            frame({width: 88}),
+          ]}
         />
-        <Text modifiers={[font({size: 11}), monospacedDigit(), foregroundStyle('#A4ABC2')]}>{p.time}</Text>
+        <Text modifiers={[font({size: 11}), monospacedDigit(), foregroundStyle('#A4ABC2')]}>
+          {p.time}
+        </Text>
       </VStack>
     </ZStack>
   );

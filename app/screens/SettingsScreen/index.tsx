@@ -1,5 +1,14 @@
 import React from 'react';
-import {Alert, Linking, Platform, Pressable, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
+import {
+  Alert,
+  Linking,
+  Platform,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  View,
+} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Card, Row, SectionLabel} from '../../components/ui/Card';
@@ -42,7 +51,12 @@ const SettingsScreen = () => {
     <View style={[styles.root, {backgroundColor: t.surface}]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <ScrollView contentContainerStyle={[styles.scroll, {paddingTop: insets.top + 24}]}>
-        <Text weight="bold" size={30} color={t.text} accessibilityRole="header" style={styles.title}>
+        <Text
+          weight="bold"
+          size={30}
+          color={t.text}
+          accessibilityRole="header"
+          style={styles.title}>
           {I18n.t('settings.title')}
         </Text>
 
@@ -70,7 +84,10 @@ const SettingsScreen = () => {
           </Pressable>
         </Card>
         <Card style={styles.below}>
-          <Row title={I18n.t('settings.travelAlerts')} subtitle={I18n.t('settings.travelAlertsHint')} last>
+          <Row
+            title={I18n.t('settings.travelAlerts')}
+            subtitle={I18n.t('settings.travelAlertsHint')}
+            last>
             <Toggle
               value={!!settings.travelAlerts}
               onChange={setTravelAlerts}
@@ -166,7 +183,13 @@ const styles = StyleSheet.create({
   root: {flex: 1},
   scroll: {paddingHorizontal: 16, paddingBottom: 24},
   title: {paddingHorizontal: 4, paddingBottom: 6, letterSpacing: -0.6},
-  locationCard: {flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 16},
+  locationCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+  },
   badge: {width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center'},
   flex: {flex: 1, minWidth: 0, gap: 2},
   below: {marginTop: 10},

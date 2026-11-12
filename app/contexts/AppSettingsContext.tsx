@@ -1,20 +1,9 @@
-import React, {
-  useCallback,
-  useEffect,
-  useState,
-  createContext,
-  FC,
-  PropsWithChildren,
-} from 'react';
+import React, {useCallback, useEffect, useState, createContext, FC, PropsWithChildren} from 'react';
 import {useAsyncStorage} from '@react-native-async-storage/async-storage';
 import {merge} from 'lodash/fp';
 import MyDate from '../lib/MyDate';
 import {methodName, prayerTimesFor} from '../lib/prayerTimes';
-import {
-  SETTINGS_KEY,
-  defaultSettings,
-  parseSettings,
-} from '../lib/settingsStore';
+import {SETTINGS_KEY, defaultSettings, parseSettings} from '../lib/settingsStore';
 
 const AppSettingsContext = createContext<AppSettingsContextInterface>({
   settings: defaultSettings,

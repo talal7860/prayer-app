@@ -72,7 +72,9 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
       items.push(dot('sun', p.sunT, 10, gold, 1));
     }
     return (
-      <ZStack alignment="topLeading" modifiers={[frame({width: w, height: h, alignment: 'topLeading'})]}>
+      <ZStack
+        alignment="topLeading"
+        modifiers={[frame({width: w, height: h, alignment: 'topLeading'})]}>
         {items}
       </ZStack>
     );
@@ -127,14 +129,23 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
           <HStack modifiers={[padding({horizontal: 4})]}>
             <Text modifiers={[font({size: 11}), foregroundStyle(soft)]}>{p.city}</Text>
             <Spacer />
-            <Text modifiers={[font({size: 11}), foregroundStyle(soft), lineLimit(1)]}>{p.hijriShort}</Text>
+            <Text modifiers={[font({size: 11}), foregroundStyle(soft), lineLimit(1)]}>
+              {p.hijriShort}
+            </Text>
           </HStack>
           <VStack spacing={2} modifiers={[padding({top: 46})]}>
             {countdown(30, true)}
-            <Text modifiers={[font({size: 12}), foregroundStyle(soft), lineLimit(1)]}>{p.untilLabel}</Text>
+            <Text modifiers={[font({size: 12}), foregroundStyle(soft), lineLimit(1)]}>
+              {p.untilLabel}
+            </Text>
           </VStack>
         </ZStack>
-        <HStack spacing={2} modifiers={[padding({all: 5}), background('rgba(0,0,0,0.24)', shapes.roundedRectangle({cornerRadius: 12}))]}>
+        <HStack
+          spacing={2}
+          modifiers={[
+            padding({all: 5}),
+            background('rgba(0,0,0,0.24)', shapes.roundedRectangle({cornerRadius: 12})),
+          ]}>
           {p.prayers.map(r => (
             <VStack
               key={r.label}
@@ -142,12 +153,26 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
               modifiers={[
                 frame({height: 36}),
                 frame({maxWidth: 1000}),
-                background(r.next ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0)', shapes.roundedRectangle({cornerRadius: 10})),
+                background(
+                  r.next ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0)',
+                  shapes.roundedRectangle({cornerRadius: 10}),
+                ),
               ]}>
-              <Text modifiers={[font({size: 10, weight: 'semibold'}), foregroundStyle(r.next ? gold : 'rgba(255,255,255,0.82)'), lineLimit(1), minimumScaleFactor(0.7)]}>
+              <Text
+                modifiers={[
+                  font({size: 10, weight: 'semibold'}),
+                  foregroundStyle(r.next ? gold : 'rgba(255,255,255,0.82)'),
+                  lineLimit(1),
+                  minimumScaleFactor(0.7),
+                ]}>
                 {r.label.toUpperCase()}
               </Text>
-              <Text modifiers={[font({size: 13, weight: r.next ? 'bold' : 'medium'}), monospacedDigit(), opacity(r.past ? 0.74 : 1)]}>
+              <Text
+                modifiers={[
+                  font({size: 13, weight: r.next ? 'bold' : 'medium'}),
+                  monospacedDigit(),
+                  opacity(r.past ? 0.74 : 1),
+                ]}>
                 {r.hm}
               </Text>
             </VStack>
@@ -159,18 +184,29 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
 
   if (family === 'systemLarge') {
     return (
-      <VStack spacing={8} modifiers={[containerBackground('#141A2C', 'widget'), foregroundStyle(white)]}>
+      <VStack
+        spacing={8}
+        modifiers={[containerBackground('#141A2C', 'widget'), foregroundStyle(white)]}>
         <ZStack
           alignment="top"
-          modifiers={[frame({height: 162}), frame({maxWidth: 1000}), padding({horizontal: 2}), background(sky, shapes.roundedRectangle({cornerRadius: 18}))]}>
+          modifiers={[
+            frame({height: 162}),
+            frame({maxWidth: 1000}),
+            padding({horizontal: 2}),
+            background(sky, shapes.roundedRectangle({cornerRadius: 18})),
+          ]}>
           <VStack modifiers={[padding({top: 30})]}>{arc(290, 110, 40, true)}</VStack>
           <HStack modifiers={[padding({horizontal: 14, top: 10})]}>
             <Text modifiers={[font({size: 12}), foregroundStyle(soft)]}>{p.cityFull}</Text>
             <Spacer />
-            <Text modifiers={[font({size: 12}), foregroundStyle(soft), lineLimit(1)]}>{p.hijri}</Text>
+            <Text modifiers={[font({size: 12}), foregroundStyle(soft), lineLimit(1)]}>
+              {p.hijri}
+            </Text>
           </HStack>
           <VStack spacing={3} modifiers={[padding({top: 62})]}>
-            <Text modifiers={[font({size: 13, weight: 'semibold'}), foregroundStyle(soft)]}>{p.inLabel}</Text>
+            <Text modifiers={[font({size: 13, weight: 'semibold'}), foregroundStyle(soft)]}>
+              {p.inLabel}
+            </Text>
             {countdown(42, true)}
             <Text modifiers={[font({size: 12}), foregroundStyle(soft)]}>{p.atLabel}</Text>
           </VStack>
@@ -183,17 +219,36 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
               modifiers={[
                 padding({horizontal: 10}),
                 frame({height: 30}),
-                background(r.next ? '#1E2848' : 'rgba(0,0,0,0)', shapes.roundedRectangle({cornerRadius: 9})),
+                background(
+                  r.next ? '#1E2848' : 'rgba(0,0,0,0)',
+                  shapes.roundedRectangle({cornerRadius: 9}),
+                ),
               ]}>
-              <Circle modifiers={[foregroundStyle(r.next ? gold : r.past ? '#3A4262' : '#8FA2D9'), frame({width: 7, height: 7})]} />
-              <Text modifiers={[font({size: 14, weight: r.next ? 'bold' : 'medium'}), foregroundStyle(r.next ? white : r.past ? '#8C93AA' : '#D5D9E6')]}>
+              <Circle
+                modifiers={[
+                  foregroundStyle(r.next ? gold : r.past ? '#3A4262' : '#8FA2D9'),
+                  frame({width: 7, height: 7}),
+                ]}
+              />
+              <Text
+                modifiers={[
+                  font({size: 14, weight: r.next ? 'bold' : 'medium'}),
+                  foregroundStyle(r.next ? white : r.past ? '#8C93AA' : '#D5D9E6'),
+                ]}>
                 {r.name}
               </Text>
               {r.next ? (
-                <Text modifiers={[font({size: 10, weight: 'bold'}), foregroundStyle(gold)]}>NEXT</Text>
+                <Text modifiers={[font({size: 10, weight: 'bold'}), foregroundStyle(gold)]}>
+                  NEXT
+                </Text>
               ) : null}
               <Spacer />
-              <Text modifiers={[font({size: 14, weight: r.next ? 'bold' : 'medium'}), monospacedDigit(), foregroundStyle(r.next ? white : r.past ? '#8C93AA' : '#D5D9E6')]}>
+              <Text
+                modifiers={[
+                  font({size: 14, weight: r.next ? 'bold' : 'medium'}),
+                  monospacedDigit(),
+                  foregroundStyle(r.next ? white : r.past ? '#8C93AA' : '#D5D9E6'),
+                ]}>
                 {r.time}
               </Text>
             </HStack>
@@ -205,12 +260,21 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
 
   // systemSmall: the "sky" small widget.
   return (
-    <VStack alignment="leading" spacing={0} modifiers={[containerBackground(sky, 'widget'), foregroundStyle(white)]}>
-      <Text modifiers={[font({size: 13, weight: 'semibold'}), foregroundStyle('rgba(255,255,255,0.9)'), lineLimit(1)]}>
+    <VStack
+      alignment="leading"
+      spacing={0}
+      modifiers={[containerBackground(sky, 'widget'), foregroundStyle(white)]}>
+      <Text
+        modifiers={[
+          font({size: 13, weight: 'semibold'}),
+          foregroundStyle('rgba(255,255,255,0.9)'),
+          lineLimit(1),
+        ]}>
         {p.inLabel}
       </Text>
       <VStack modifiers={[padding({top: 6})]}>{countdown(32)}</VStack>
-      <Text modifiers={[font({size: 13}), monospacedDigit(), foregroundStyle(soft), padding({top: 6})]}>
+      <Text
+        modifiers={[font({size: 13}), monospacedDigit(), foregroundStyle(soft), padding({top: 6})]}>
         {p.atLabel}
       </Text>
       <Spacer />

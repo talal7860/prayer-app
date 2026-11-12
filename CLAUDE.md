@@ -95,16 +95,29 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
 - `getPrayerTimes(date)` computes that date (it used to ignore `date`), and labels Friday's
   Dhuhr "Jumu’ah".
 - **Widgets and Live Activity** (`expo-widgets` + `@expo/ui`, #20):
-  - `app/widgets/NextPrayer.ios.tsx` (SwiftUI: small, medium, lock screen circular /
-    rectangular / inline) and `NextPrayer.android.tsx` (Jetpack Compose). `PrayerActivity.ios.tsx`
-    is the Live Activity / Dynamic Island countdown. The plain `.ts` files are no-op stand-ins
-    for Jest and other platforms; Metro picks the platform file.
+  - Design: the canvas's "Widgets & lock screen" board (#34). Two widgets in the gallery:
+    `NextPrayer.ios.tsx` ("Next prayer": sky small, medium with arc + chips, large with arc +
+    list, lock screen rectangular with a progress bar, inline) and `PrayerRing.ios.tsx` ("Prayer
+    ring": dark small with a gold ring, lock screen circle). `NextPrayer.android.tsx` is the
+    Compose version (sky colour, next prayer, chips; no ticking or rings on Android).
+    `PrayerActivity.ios.tsx` is the Live Activity / Dynamic Island countdown.
+  - The plain `.tsx` files are no-op stand-ins for Jest and other platforms. **Keep them `.tsx`**:
+    Metro tries every `.ts` candidate (plain included) before any `.tsx`, so a `NextPrayer.ts`
+    shadows `NextPrayer.ios.tsx` and the widgets stay blank.
+  - Drawing tricks (no custom paths in `@expo/ui`): the dotted sun arc is small `Circle`s placed
+    with `offset` in a `ZStack`. Rings are a clear `Circle` with
+    `strokeBorder({shape: 'circle', dash: [fraction × circumference, circumference]})` rotated
+    −90° (`strokeBorder` defaults to a rectangle, and a `Circle` fills itself). A timer `Text`
+    takes the full width: centre it with `multilineTextAlignment('center')`.
+  - The widget gallery caches previews; add the widget to the home screen to see a change.
   - A layout function has the `'widget'` directive and runs in the widget's **own JS runtime**:
     no hooks, no app imports, no module-level values. Only `@expo/ui` components/modifiers
     (globals there). Pass everything already formatted through props (`app/widgets/types.ts`).
-  - Data: `app/lib/widgetData.ts` (pure, tested). iOS gets a timeline: an entry now and one at
-    every prayer time for 2 days, so it advances by itself, with a live `dateStyle="timer"`
-    countdown. Android widgets can't tick or take a timeline: it's a snapshot.
+  - Data: `app/lib/widgetData.ts` (pure, tested): next prayer, its progress range (`prevAt` →
+    `at`), the period's sky (`WIDGET_SKIES`), the sun and prayers on the arc, and the five
+    prayers (no Sunrise in lists). iOS gets a 2-day timeline: an entry at every prayer time and
+    every half hour (so the sun and ring move), with a live `dateStyle="timer"` countdown.
+    Android widgets can't tick or take a timeline: it's a snapshot.
   - `refreshWidgets` runs with the notification reschedule (settings change, day change,
     foreground) and from the background task. `syncLiveActivity` starts / updates / ends the
     Live Activity in the hour before a prayer, on foreground and going to background (iOS only

@@ -158,7 +158,8 @@ const TodayScreen = () => {
               })}
             </Text>
           </View>
-          {day.list.map(p => {
+          {/* Sunrise is on the sun arc above, so the list has only the five prayers. */}
+          {day.list.filter(p => p.key !== 'sunrise').map(p => {
             const isNow = p.key === day.current;
             const past = p.time.getTime() <= day.now.getTime() && !isNow;
             const off = !!muted[p.key];

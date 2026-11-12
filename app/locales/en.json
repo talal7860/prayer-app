@@ -1,9 +1,19 @@
 {
   "home": {
-    "title": "Prayer Times"
+    "title": "Adhan App"
   },
   "locations": {
-    "title": "Manage Location"
+    "title": "Location",
+    "useCurrent": "Use current location",
+    "coords": "Coordinates",
+    "hint": "Prayer times are calculated for this place.",
+    "servicesOff": "Turn on Location Services to let Adhan App find your location.",
+    "goToSettings": "Go to Settings",
+    "dontUse": "Don't Use Location",
+    "denied": "Location permission denied",
+    "revoked": "Location permission is off. Turn it on in Settings.",
+    "failed": "Unable to get location",
+    "cantOpenSettings": "Unable to open Settings"
   },
   "asr": {
     "title": "Asr Calculation Method"
@@ -12,18 +22,34 @@
     "title": "Settings",
     "location": "Location",
     "calculationMethod": "Calculation Method",
-    "fajrIshaCalculation": "Fajr Isha Calculation Method",
-    "asr": "Asr Calculation Method",
-    "sound": "Notification Sound"
+    "asr": "Asr",
+    "sound": "Notification Sound",
+    "locationSection": "Location",
+    "calculationSection": "Calculation",
+    "notificationsSection": "Notifications",
+    "displaySection": "Display",
+    "change": "Change",
+    "method": "Method",
+    "adhan": "Adhan sound",
+    "headsUp": "Heads-up reminder",
+    "headsUpHint": "10 minutes before each prayer",
+    "timeFormat": "Time format",
+    "unknownCity": "Current location",
+    "highLats": "High latitudes",
+    "adjust": "Adjust times",
+    "travelAlerts": "Travel alerts",
+    "travelAlertsHint": "Notify me when I'm in another city"
   },
   "notification": {
-    "title": "It's {{label}} time now - {{time}}",
+    "title": "It's {{label}} time - {{time}}",
     "message": "",
     "action_ok": "Okay",
     "channel": {
       "name": "Prayer Notifications",
       "description": "Prayer Notifications"
-    }
+    },
+    "headsUp": "{{label}} in 10 minutes - {{time}}",
+    "reminder": "Open Adhan App to keep getting prayer notifications"
   },
   "prayer": {
     "fajr": "Fajr",
@@ -32,10 +58,113 @@
     "asr": "Asr",
     "maghrib": "Maghrib",
     "isha": "Isha",
-    "next": "{{label}} in {{time}}"
+    "next": "{{label}} in {{time}}",
+    "jumuah": "Jumu’ah"
   },
   "sounds": {
-    "mecca": "Mecca Azan",
-    "madina": "Madina Azan"
+    "mecca": "Makkah",
+    "default": "Default"
+  },
+  "today": {
+    "title": "Today",
+    "in": "{{label}} in",
+    "at": "at {{time}} · {{now}}",
+    "nowTime": "{{label}} time now",
+    "fajrEnded": "Fajr has ended",
+    "now": "Now",
+    "sunrise": "Sunrise {{time}}",
+    "sunset": "Sunset {{time}}",
+    "asrLabel": "{{method}} · {{asr}} Asr",
+    "bellOn": "Turn off {{label}} reminder",
+    "bellOff": "Turn on {{label}} reminder",
+    "travelTitle": "Looks like you’re in {{city}} now",
+    "travelBody": "Prayer times are still set for {{saved}}",
+    "keep": "Keep {{saved}}",
+    "update": "Update prayer times",
+    "settings": "Settings"
+  },
+  "week": {
+    "title": "Week",
+    "thisWeek": "This week",
+    "nextWeek": "Next week",
+    "day": "Day",
+    "fajr": "Fajr",
+    "rise": "Rise",
+    "dhuhr": "Dhuhr",
+    "asr": "Asr",
+    "magh": "Magh",
+    "isha": "Isha",
+    "today": "Today",
+    "daylight": "Daylight {{length}} today",
+    "same": "Same as yesterday",
+    "longer": "{{min}} min longer than yesterday",
+    "shorter": "{{min}} min shorter than yesterday",
+    "friday": "Friday is Jumu’ah",
+    "chooseWeek": "Choose week"
+  },
+  "methods": {
+    "title": "Calculation method"
+  },
+  "soundsScreen": {
+    "title": "Adhan sound"
+  },
+  "highLats": {
+    "title": "High latitudes",
+    "hint": "Far from the equator, twilight can last all night in summer, so Fajr and Isha angles never happen. This picks how they're set on those nights.",
+    "NightMiddle": "Middle of the night",
+    "NightMiddleDetail": "Fajr and Isha are no further than half the night from sunset and sunrise",
+    "AngleBased": "Angle-based",
+    "AngleBasedDetail": "A share of the night set by the method's angle (angle / 60)",
+    "OneSeventh": "One-seventh of the night",
+    "OneSeventhDetail": "Isha a seventh of the night after sunset, Fajr a seventh before sunrise"
+  },
+  "setup": {
+    "step": "Step {{n}} of {{total}}",
+    "continue": "Continue",
+    "back": "Back",
+    "finish": "Start",
+    "welcome": "Assalamu alaikum",
+    "locationTitle": "Where are you?",
+    "locationHint": "Prayer times depend on where you are. Your location stays on this phone.",
+    "useCurrent": "Use my location",
+    "searchPlaceholder": "Or type a city",
+    "search": "Search",
+    "notFound": "Couldn't find “{{query}}”. Try adding the country.",
+    "locationNeeded": "Choose a location to continue.",
+    "methodTitle": "Calculation method",
+    "methodHint": "Methods use different sun angles for Fajr and Isha. Use the one your local mosque follows.",
+    "recommended": "Common in {{country}}",
+    "recommendedHere": "Common where you are",
+    "asrTitle": "Asr",
+    "asrHint": "Hanafi Asr starts when shadows are twice an object's length; the others (Shafi‘i, Maliki, Hanbali) when they're the same length.",
+    "asrStandard": "Standard",
+    "asrStandardDetail": "Shafi‘i, Maliki, Hanbali. Shadow equal to the object",
+    "asrHanafi": "Hanafi",
+    "asrHanafiDetail": "Shadow twice the object. Later Asr",
+    "reviewTitle": "Your prayer times today",
+    "reviewHint": "Check these against your mosque's timetable. You can change any of this later in Settings.",
+    "notifyHint": "Next, allow notifications to get the adhan at each prayer time."
+  },
+  "adjust": {
+    "title": "Adjust times",
+    "hint": "Add or remove minutes to match your local mosque. Notifications and widgets use the adjusted times.",
+    "none": "None",
+    "earlier": "1 minute earlier",
+    "later": "1 minute later",
+    "minutes": {
+      "one": "{{count}} minute",
+      "other": "{{count}} minutes"
+    }
+  },
+  "travel": {
+    "title": "You're in {{city}}",
+    "titleNoCity": "You're somewhere new",
+    "body": "Tap to update prayer times.",
+    "needsAlways": "Allow location \"Always\"",
+    "needsAlwaysBody": "Travel alerts check your location in the background. Allow it in Settings: Location → Always.",
+    "notNow": "Not now"
+  },
+  "widget": {
+    "next": "Next prayer"
   }
 }

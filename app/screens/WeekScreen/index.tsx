@@ -1,0 +1,168 @@
+import React, {useMemo, useState} from 'react';
+import {ScrollView, StatusBar, StyleSheet, View} from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {Card} from '../../components/ui/Card';
+import Icon from '../../components/ui/Icon';
+import Segmented from '../../components/ui/Segmented';
+import Text from '../../components/ui/Text';
+import useAppSettings from '../../hooks/useAppSettings';
+import usePalette from '../../hooks/usePalette';
+import I18n from '../../I18n';
+import {
+  addDays,
+  daylightMinutes,
+  formatCoords,
+  formatTime,
+  isFriday,
+  toDayTimes,
+} from '../../lib/prayerDay';
+
+type Week = 'this' | 'next';
+const COLUMNS: PrayerKey[] = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
+const HEADERS = ['fajr', 'rise', 'dhuhr', 'asr', 'magh', 'isha'];
+
+const WeekScreen = () => {
+  const insets = useSafeAreaInsets();
+  const {t, isDark} = usePalette();
+  const {settings, getPrayerTimes, today, calculationMethod} = useAppSettings();
+  const [week, setWeek] = useState<Week>('this');
+  const offset = week === 'this' ? 0 : 7;
+
+  const days = useMemo(() => {
+    const base = new Date(today);
+    return Array.from({length: 7}, (_, i) => {
+      const date = addDays(base, offset + i);
+      return {date, times: toDayTimes(getPrayerTimes(date))};
+    });
+  }, [getPrayerTimes, today, offset]);
+
+  const daylight = useMemo(() => {
+    const base = new Date(today);
+    const now = daylightMinutes(toDayTimes(getPrayerTimes(base)));
+    const prev = daylightMinutes(toDayTimes(getPrayerTimes(addDays(base, -1))));
+    return {now, delta: Math.round(now - prev)};
+  }, [getPrayerTimes, today]);
+
+  const hm = (d: Date) => formatTime(d, settings.timeFormat, false);
+  const city = settings.city ?? formatCoords(settings.location);
+  const method = calculationMethod().split(',').pop()?.trim();
+  const length = `${Math.floor(daylight.now / 60)}h ${String(Math.round(daylight.now % 60)).padStart(2, '0')}m`;
+  const deltaText =
+    daylight.delta === 0
+      ? I18n.t('week.same')
+      : I18n.t(daylight.delta > 0 ? 'week.longer' : 'week.shorter', {min: Math.abs(daylight.delta)});
+
+  return (
+    <View style={[styles.root, {backgroundColor: t.surface}]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      <ScrollView contentContainerStyle={[styles.scroll, {paddingTop: insets.top + 16}]}>
+        <View style={styles.head}>
+          <Text weight="bold" size={30} color={t.text} accessibilityRole="header" style={styles.title}>
+            {I18n.t(week === 'this' ? 'week.thisWeek' : 'week.nextWeek')}
+          </Text>
+          <Text size={14} color={t.muted}>
+            {`${city} · ${method} · ${settings.asr} Asr`}
+          </Text>
+        </View>
+
+        <View style={styles.segment}>
+          <Segmented
+            stretch
+            accessibilityLabel={I18n.t('week.chooseWeek')}
+            options={[
+              {value: 'this', label: I18n.t('week.thisWeek')},
+              {value: 'next', label: I18n.t('week.nextWeek')},
+            ]}
+            value={week}
+            onChange={setWeek}
+          />
+        </View>
+
+        <Card style={styles.table}>
+          <View style={[styles.tr, styles.th, {borderBottomColor: t.border}]}>
+            <Text weight="semibold" size={11} color={t.muted} style={[styles.dayCol, styles.caps]}>
+              {I18n.t('week.day').toUpperCase()}
+            </Text>
+            {HEADERS.map(h => (
+              <Text key={h} weight="semibold" size={11} color={t.muted} style={[styles.cell, styles.caps]}>
+                {I18n.t(`week.${h}`).toUpperCase()}
+              </Text>
+            ))}
+          </View>
+          {days.map(({date, times}, i) => {
+            const isToday = week === 'this' && i === 0;
+            const fri = isFriday(date);
+            return (
+              <View
+                key={date.toDateString()}
+                style={[
+                  styles.tr,
+                  styles.td,
+                  {backgroundColor: isToday ? t.hi : t.bg, borderBottomColor: t.divider},
+                  i === days.length - 1 && styles.lastRow,
+                ]}>
+                <View style={styles.dayCol}>
+                  <Text weight="semibold" size={13.5} color={isToday ? t.accent : t.text}>
+                    {`${date.toLocaleDateString('en-US', {weekday: 'short'})} ${date.getDate()}`}
+                  </Text>
+                  <Text size={11} color={t.muted}>
+                    {isToday
+                      ? I18n.t('week.today')
+                      : fri
+                        ? I18n.t('prayer.jumuah')
+                        : date.toLocaleDateString('en-US', {month: 'short'})}
+                  </Text>
+                </View>
+                {COLUMNS.map(k => (
+                  <Text
+                    key={k}
+                    weight={k === 'dhuhr' && fri ? 'bold' : 'regular'}
+                    size={13.5}
+                    color={k === 'sunrise' ? t.muted : k === 'dhuhr' && fri ? t.accent : t.text}
+                    style={styles.cell}>
+                    {hm(times[k])}
+                  </Text>
+                ))}
+              </View>
+            );
+          })}
+        </Card>
+
+        <Card style={styles.daylight}>
+          <View style={[styles.badge, {backgroundColor: t.hi}]}>
+            <Icon name="sunrise" size={20} color={t.accent} />
+          </View>
+          <View style={styles.daylightText}>
+            <Text weight="semibold" size={15} color={t.text}>
+              {I18n.t('week.daylight', {length})}
+            </Text>
+            <Text size={13} color={t.muted}>
+              {`${deltaText} · ${I18n.t('week.friday')}`}
+            </Text>
+          </View>
+        </Card>
+      </ScrollView>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  root: {flex: 1},
+  scroll: {paddingBottom: 24},
+  head: {paddingHorizontal: 20, gap: 4},
+  title: {letterSpacing: -0.6},
+  segment: {marginTop: 18, marginHorizontal: 20},
+  table: {marginTop: 16, marginHorizontal: 16},
+  tr: {flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8},
+  th: {height: 40, borderBottomWidth: 1},
+  td: {height: 56, borderBottomWidth: 1},
+  lastRow: {borderBottomWidth: 0},
+  dayCol: {width: 64, gap: 1},
+  cell: {flex: 1, textAlign: 'center', fontVariant: ['tabular-nums']},
+  caps: {letterSpacing: 0.4},
+  daylight: {marginTop: 14, marginHorizontal: 16, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 14},
+  badge: {width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center'},
+  daylightText: {flex: 1, minWidth: 0, gap: 2},
+});
+
+export default WeekScreen;

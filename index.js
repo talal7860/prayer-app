@@ -1,6 +1,10 @@
 import {registerRootComponent} from 'expo';
 import * as Notifications from 'expo-notifications';
 import App from './App';
+// Defines the background task that keeps prayer notifications scheduled.
+import './app/backgroundTask';
+// Defines the opt-in travel alert (geofence) task.
+import './app/travelTask';
 
 // Show prayer-time notifications even while the app is in the foreground.
 Notifications.setNotificationHandler({

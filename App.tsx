@@ -31,6 +31,7 @@ import SoundScreen from './app/screens/SettingsScreen/Sound';
 import HighLatsScreen from './app/screens/SettingsScreen/HighLats';
 import AdjustScreen from './app/screens/SettingsScreen/Adjust';
 import SetupScreen from './app/screens/SetupScreen';
+import QiblaScreen from './app/screens/QiblaScreen';
 import useAppSettings from './app/hooks/useAppSettings';
 import {fonts} from './app/theme/tokens';
 
@@ -121,6 +122,11 @@ const Root = () => {
           // Until the first-run setup is done it's the only screen. Finishing it swaps in the tabs.
           <Stack.Screen name="setup" component={SetupScreen} options={{headerShown: false, animation: 'fade'}} />
         )}
+        <Stack.Screen
+          name="qibla"
+          component={QiblaScreen}
+          options={{title: I18n.t('qibla.title')}}
+        />
         <Stack.Screen
           name="location"
           component={LocationScreen}

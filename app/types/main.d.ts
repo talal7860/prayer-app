@@ -3,7 +3,10 @@ type GeoLocation = {
   lng: number;
 };
 
+type PrayerKey = 'fajr' | 'sunrise' | 'dhuhr' | 'asr' | 'maghrib' | 'isha';
+
 type PrayerTimeLabel = {
+  key: PrayerKey;
   label: string;
   time: Date;
 };
@@ -18,14 +21,23 @@ type PrayerCalculationMethod =
   | 'Jafari';
 
 type AsrJuristics = 'Hanafi' | 'Standard';
-type FajrIshaCalculation = 'Standard' | '90mins';
+
+type TimeFormat = '12h' | '24h';
 
 type Settings = {
   location: GeoLocation;
+  /** Display name for `location`, e.g. "Calgary, AB". From reverse geocoding. */
+  city?: string;
   asr: AsrJuristics;
-  fajrIshaCalculation: FajrIshaCalculation;
   calculationMethod: PrayerCalculationMethod;
   sound: string;
+  /** Prayers whose reminder bell is off. */
+  muted: Partial<Record<PrayerKey, boolean>>;
+  /** Extra reminder 10 minutes before each prayer. */
+  headsUp: boolean;
+  timeFormat: TimeFormat;
+  /** Location (rounded) the user chose to keep when the travel prompt showed. */
+  travelDismissedAt?: GeoLocation;
 };
 
 type SettingKey =
@@ -61,10 +73,4 @@ interface SettingsTitleInterface {
   setting: string;
   selected?: string;
   setSetting?: (setting: string) => void;
-}
-
-interface SelectListInterface {
-  items: string[];
-  selected: string;
-  onSelect: (value: any) => void;
 }

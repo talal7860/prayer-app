@@ -1,63 +1,70 @@
-import React from 'react';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
-import HomeScreen from './app/screens/HomeScreen';
-import SettingsScreen from './app/screens/SettingsScreen';
-import {AppSettingsProvider} from './app/contexts/AppSettingsContext';
+import React, {useEffect} from 'react';
 import {
-  NavigationContainer,
-  DefaultTheme,
+  Inter_300Light,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  useFonts,
+} from '@expo-google-fonts/inter';
+import {
   DarkTheme,
-  getFocusedRouteNameFromRoute,
+  DefaultTheme,
+  NavigationContainer,
+  type Theme,
 } from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import LocationSettingScreen from './app/screens/SettingsScreen/Location';
-import AsrMethodScreen from './app/screens/SettingsScreen/Asr';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import * as SplashScreen from 'expo-splash-screen';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+import Icon, {type IconName} from './app/components/ui/Icon';
+import {AppSettingsProvider} from './app/contexts/AppSettingsContext';
+import usePalette from './app/hooks/usePalette';
+import usePushNotifications from './app/hooks/usePushNotifications';
 import I18n from './app/I18n';
-import useColorScheme from './app/hooks/useColorScheme';
-import Colors from './app/theme/Colors';
+import TodayScreen from './app/screens/TodayScreen';
+import WeekScreen from './app/screens/WeekScreen';
+import SettingsScreen from './app/screens/SettingsScreen';
+import LocationScreen from './app/screens/SettingsScreen/Location';
+import MethodScreen from './app/screens/SettingsScreen/Method';
+import SoundScreen from './app/screens/SettingsScreen/Sound';
+import {fonts} from './app/theme/tokens';
+
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 const Tab = createBottomTabNavigator();
-
-const tabIconNames: Record<string, any> = {
-  home: {
-    true: 'time-outline',
-    false: 'time',
-  },
-  settings: {
-    true: 'cog-outline',
-    false: 'cog',
-  },
-};
 const Stack = createNativeStackNavigator();
 
-const HomeTabs = () => {
-  const {isDarkMode} = useColorScheme();
+const tabIcons: Record<string, IconName> = {
+  today: 'clock',
+  week: 'calendar',
+  settings: 'sliders',
+};
+
+const Tabs = () => {
+  const {t} = usePalette();
   return (
     <Tab.Navigator
+      initialRouteName="today"
       screenOptions={({route}) => ({
-        tabBarIcon: ({focused, color, size}) => (
-          <Ionicons
-            name={tabIconNames[route.name][`${focused}`]}
-            size={size}
-            color={color}
-          />
-        ),
-        headerTitle: I18n.t(`${route.name}.title`),
-        tabBarActiveTintColor: isDarkMode ? Colors.light : Colors.dark,
-        tabBarInactiveTintColor: 'gray',
         headerShown: false,
-      })}
-      initialRouteName="home"
-    >
+        tabBarActiveTintColor: t.accent,
+        tabBarInactiveTintColor: t.muted,
+        tabBarStyle: {backgroundColor: t.bg, borderTopColor: t.border},
+        tabBarLabelStyle: {fontFamily: fonts.semibold, fontSize: 11},
+        tabBarIcon: ({color}) => (
+          <Icon name={tabIcons[route.name]} size={22} color={color} strokeWidth={2} />
+        ),
+      })}>
       <Tab.Screen
-        name="home"
-        component={HomeScreen}
-        options={{
-          title: I18n.t('home.title'),
-          tabBarLabel: I18n.t('home.title'),
-        }}
+        name="today"
+        component={TodayScreen}
+        options={{title: I18n.t('today.title')}}
+      />
+      <Tab.Screen
+        name="week"
+        component={WeekScreen}
+        options={{title: I18n.t('week.title')}}
       />
       <Tab.Screen
         name="settings"
@@ -68,35 +75,76 @@ const HomeTabs = () => {
   );
 };
 
+const Root = () => {
+  const {t, isDark} = usePalette();
+  // Keeps the scheduled prayer notifications in sync with the settings.
+  usePushNotifications();
+  const base = isDark ? DarkTheme : DefaultTheme;
+  const theme: Theme = {
+    ...base,
+    colors: {
+      ...base.colors,
+      primary: t.accent,
+      background: t.surface,
+      card: t.bg,
+      text: t.text,
+      border: t.border,
+    },
+  };
+  return (
+    <NavigationContainer theme={theme}>
+      <Stack.Navigator
+        screenOptions={{
+          headerTitleStyle: {fontFamily: fonts.semibold},
+          headerBackButtonDisplayMode: 'minimal',
+          headerShadowVisible: false,
+          contentStyle: {backgroundColor: t.surface},
+        }}>
+        <Stack.Screen name="tabs" component={Tabs} options={{headerShown: false}} />
+        <Stack.Screen
+          name="location"
+          component={LocationScreen}
+          options={{title: I18n.t('locations.title')}}
+        />
+        <Stack.Screen
+          name="method"
+          component={MethodScreen}
+          options={{title: I18n.t('methods.title')}}
+        />
+        <Stack.Screen
+          name="sound"
+          component={SoundScreen}
+          options={{title: I18n.t('soundsScreen.title')}}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
 const App = () => {
-  const {isDarkMode} = useColorScheme();
+  const [loaded, error] = useFonts({
+    Inter_300Light,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
+  const ready = loaded || !!error;
+
+  useEffect(() => {
+    if (ready) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [ready]);
+
+  if (!ready) {
+    return null;
+  }
   return (
     <SafeAreaProvider>
-      <NavigationContainer theme={isDarkMode ? DarkTheme : DefaultTheme}>
-        <AppSettingsProvider>
-          <Stack.Navigator>
-            <Stack.Screen
-              name="home-tabs"
-              component={HomeTabs}
-              options={({route}) => ({
-                title: I18n.t(
-                  `${getFocusedRouteNameFromRoute(route) ?? 'home'}.title`,
-                ),
-              })}
-            />
-            <Stack.Screen
-              name="location"
-              component={LocationSettingScreen}
-              options={{title: I18n.t('locations.title')}}
-            />
-            <Stack.Screen
-              name="asr"
-              component={AsrMethodScreen}
-              options={{title: I18n.t('asr.title')}}
-            />
-          </Stack.Navigator>
-        </AppSettingsProvider>
-      </NavigationContainer>
+      <AppSettingsProvider>
+        <Root />
+      </AppSettingsProvider>
     </SafeAreaProvider>
   );
 };

@@ -1,9 +1,12 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
+import {range} from 'lodash/fp';
 import {Alert, Platform} from 'react-native';
 import * as Notifications from 'expo-notifications';
 import I18n from '../I18n';
 import AppConstants from '../AppConstants';
 import useAppSettings from './useAppSettings';
+import {addDays} from '../lib/prayerDay';
+import {planNotifications} from '../lib/schedule';
 
 const createChannels = () =>
   Promise.all(
@@ -23,7 +26,7 @@ const createChannels = () =>
 
 const usePushNotifications = () => {
   const [registered, setRegistered] = useState(false);
-  const {settings} = useAppSettings();
+  const {settings, getPrayerTimes, today} = useAppSettings();
 
   const requestPermission = useCallback(async () => {
     try {
@@ -39,44 +42,44 @@ const usePushNotifications = () => {
     }
   }, []);
 
-  const scheduleNotifications = useCallback(
-    async (prayerTimes: PrayerTimesByDate) => {
-      if (!settings.sound) {
-        return;
-      }
-      const channel = AppConstants.notificationChannels[settings.sound];
+  const plan = useMemo(() => {
+    const base = new Date(today);
+    const days = range(0, AppConstants.numberOfDaysToFetch).map(i =>
+      getPrayerTimes(addDays(base, i)),
+    );
+    return planNotifications(days, settings);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getPrayerTimes, today, settings.muted, settings.headsUp, settings.timeFormat]);
+
+  useEffect(() => {
+    if (!registered || !settings.sound) {
+      return;
+    }
+    const adhan = AppConstants.notificationChannels[settings.sound];
+    const plain = AppConstants.notificationChannels.default;
+    const schedule = async () => {
       await Notifications.cancelAllScheduledNotificationsAsync();
-      const now = new Date();
-      const requests: Promise<string>[] = [];
-      for (const key in prayerTimes) {
-        prayerTimes[key].forEach(time => {
-          if (time.time < now) {
-            return;
-          }
-          requests.push(
-            Notifications.scheduleNotificationAsync({
-              content: {
-                title: I18n.t('notification.title', {
-                  label: time.label,
-                  time: AppConstants.timeFormat(time.time),
-                }),
-                body: '',
-                // iOS reads the sound from the content; Android from the channel.
-                sound: channel.soundName,
-              },
-              trigger: {
-                type: Notifications.SchedulableTriggerInputTypes.DATE,
-                date: time.time,
-                channelId: channel.channelId,
-              },
-            }),
-          );
-        });
-      }
-      await Promise.all(requests);
-    },
-    [settings],
-  );
+      await Promise.all(
+        plan.map(n => {
+          const channel = n.kind === 'adhan' ? adhan : plain;
+          return Notifications.scheduleNotificationAsync({
+            content: {
+              title: n.title,
+              body: '',
+              // iOS reads the sound from the content; Android from the channel.
+              sound: channel.soundName,
+            },
+            trigger: {
+              type: Notifications.SchedulableTriggerInputTypes.DATE,
+              date: n.date,
+              channelId: channel.channelId,
+            },
+          });
+        }),
+      );
+    };
+    schedule().catch(error => console.warn(error));
+  }, [registered, plan, settings.sound]);
 
   useEffect(() => {
     const setup = async () => {
@@ -89,10 +92,7 @@ const usePushNotifications = () => {
     setup();
   }, [requestPermission]);
 
-  return {
-    registered,
-    scheduleNotifications,
-  };
+  return {registered};
 };
 
 export default usePushNotifications;

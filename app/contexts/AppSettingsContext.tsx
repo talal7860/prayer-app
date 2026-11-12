@@ -21,22 +21,32 @@ const defaultSettings: Settings = Object.freeze({
     lat: 51.05011,
     lng: -114.08529,
   },
+  city: 'Calgary, AB',
   calculationMethod: 'Karachi',
-  fajrIshaCalculation: '90mins',
   asr: 'Hanafi',
   sound: 'mecca',
+  muted: {sunrise: true},
+  headsUp: false,
+  timeFormat: '12h',
 });
 
 const AppSettingsContext = createContext<AppSettingsContextInterface>({
   settings: defaultSettings,
   setSettings: () => {},
   setSetting: () => () => {},
-  getPrayerTimes: (_date?: Date | undefined) => [{label: '', time: new Date()}],
+  getPrayerTimes: (_date?: Date | undefined) => [],
   calculationMethod: () => '',
   today: new MyDate().beginningOfDay().getTime(),
 });
 
-const prayers = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
+const prayers: PrayerKey[] = [
+  'fajr',
+  'sunrise',
+  'dhuhr',
+  'asr',
+  'maghrib',
+  'isha',
+];
 
 const AppSettingsProvider: FC<PropsWithChildren> = ({children}) => {
   const [today, setToday] = useState(new MyDate().beginningOfDay().getTime());
@@ -64,9 +74,15 @@ const AppSettingsProvider: FC<PropsWithChildren> = ({children}) => {
   useEffect(() => {
     async function process() {
       const stored = await getItem();
-      setSettings((prev: Settings) =>
-        merge(prev)(stored ? JSON.parse(stored) : {}),
-      );
+      // `fajrIshaCalculation` (the old 90-minute rule) was removed; drop it if saved.
+      const {fajrIshaCalculation: _removed, ...parsed}: Partial<Settings> & {
+        fajrIshaCalculation?: string;
+      } = stored ? JSON.parse(stored) : {};
+      setSettings((prev: Settings) => {
+        const next: Settings = merge(prev)(parsed);
+        // Saved before city names existed: don't show the default city for it.
+        return parsed.location && !parsed.city ? {...next, city: undefined} : next;
+      });
     }
     process();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -81,24 +97,25 @@ const AppSettingsProvider: FC<PropsWithChildren> = ({children}) => {
   const settingsKey = JSON.stringify(settings);
   const getPrayerTimes = useCallback(
     (date: Date = new Date()): PrayerTimeLabel[] => {
-      PT.adjust(settings);
+      // Reset to the method's own parameters, then apply the user's choices.
+      PT.setMethod(settings.calculationMethod);
+      PT.adjust({asr: settings.asr});
       const times = PT.getTimes(
-        new Date(),
+        date,
         [settings.location.lat, settings.location.lng],
-        -new Date().getTimezoneOffset() / 60,
+        -date.getTimezoneOffset() / 60,
         0,
         '24h',
       );
       return prayers.map(prayer => {
         const prayerDate = new Date(date);
-        const time = times[prayer].split(':');
-        prayerDate.setHours(time[0]);
-        prayerDate.setMinutes(time[1]);
-        prayerDate.setSeconds(0);
-        return {
-          label: I18n.t(`prayer.${prayer}`),
-          time: prayerDate,
-        };
+        const [hours, minutes] = times[prayer].split(':').map(Number);
+        prayerDate.setHours(hours, minutes, 0, 0);
+        const label =
+          prayer === 'dhuhr' && prayerDate.getDay() === 5
+            ? I18n.t('prayer.jumuah')
+            : I18n.t(`prayer.${prayer}`);
+        return {key: prayer, label, time: prayerDate};
       });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

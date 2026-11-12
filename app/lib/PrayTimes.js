@@ -145,11 +145,6 @@ function PrayTimes(method) {
 		'12h',         // 12-hour format
 		'12hNS',       // 12-hour format with no suffix
 		'Float'        // floating point number 
-	],
-
-	fajrIshaCalculations : [
-		'Standard', // Based on formula
-		'90mins'
 	]
 	*/	
 
@@ -163,8 +158,7 @@ function PrayTimes(method) {
 		imsak    : '10 min',
 		dhuhr    : '0 min',  
 		asr      : 'Standard',
-		highLats : 'NightMiddle',
-		fajrIshaCalculation: 'Standard'
+		highLats : 'NightMiddle'
 	},
 
 	timeFormat = '24h',
@@ -388,10 +382,6 @@ function PrayTimes(method) {
 		times.midnight = (setting.midnight == 'Jafari') ? 
 				times.sunset+ this.timeDiff(times.sunset, times.fajr)/ 2 :
 				times.sunset+ this.timeDiff(times.sunset, times.sunrise)/ 2;
-		if (setting.fajrIshaCalculation === '90mins') {
-			times.fajr = times.sunrise + this.eval('-90 min') / 60;
-			times.isha = times.maghrib + this.eval('90 min') / 60;
-		}
 		times = this.tuneTimes(times);
 		return this.modifyFormats(times);
 	},

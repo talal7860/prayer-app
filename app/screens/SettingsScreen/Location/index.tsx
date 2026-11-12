@@ -1,9 +1,22 @@
 import React from 'react';
-import {Alert, Button, Linking, Text, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import * as ExpoLocation from 'expo-location';
-import Body from '../../../components/Body';
+import {Card} from '../../../components/ui/Card';
+import Icon from '../../../components/ui/Icon';
+import Text from '../../../components/ui/Text';
 import useAppSettings from '../../../hooks/useAppSettings';
-import useTheme from '../../../hooks/useTheme';
+import usePalette from '../../../hooks/usePalette';
+import I18n from '../../../I18n';
+import {cityName} from '../../../lib/geocode';
+import {formatCoords} from '../../../lib/prayerDay';
 
 // City-level accuracy is enough. Never ask the user to turn on Google Location
 // Accuracy: declining that dialog fails the request outright. Try a recent fix,
@@ -29,7 +42,8 @@ const findPosition = async (): Promise<ExpoLocation.LocationObject> => {
 
 const Location = () => {
   const {settings, setSetting} = useAppSettings();
-  const theme = useTheme();
+  const {t} = usePalette();
+  const [busy, setBusy] = React.useState(false);
 
   const openSettings = () => {
     Linking.openSettings().catch(() => {
@@ -73,28 +87,75 @@ const Location = () => {
       return;
     }
 
+    setBusy(true);
     try {
       const position = await findPosition();
-      setSetting('location')({
+      const location = {
         lat: position.coords.latitude,
         lng: position.coords.longitude,
-      });
+      };
+      setSetting('location')(location);
+      setSetting('city')(await cityName(location));
     } catch (error: any) {
       Alert.alert('Unable to get location', error?.message);
+    } finally {
+      setBusy(false);
     }
   };
+
   return (
-    <Body>
-      <View>
-        <Text style={theme.styles.bodyText}>Current Location:</Text>
-        <Text style={theme.styles.bodyText}>Lat:</Text>
-        <Text style={theme.styles.bodyText}>{settings.location.lat}</Text>
-        <Text style={theme.styles.bodyText}>Lng:</Text>
-        <Text style={theme.styles.bodyText}>{settings.location.lng}</Text>
-        <Button title="Get Current Location" onPress={getLocation} />
-      </View>
-    </Body>
+    <ScrollView contentContainerStyle={styles.scroll}>
+      <Card style={styles.card}>
+        <View style={[styles.badge, {backgroundColor: t.hi}]}>
+          <Icon name="pin" size={20} color={t.accent} />
+        </View>
+        <View style={styles.flex}>
+          <Text weight="semibold" size={16} color={t.text}>
+            {settings.city ?? I18n.t('settings.unknownCity')}
+          </Text>
+          <Text size={13} color={t.muted}>
+            {formatCoords(settings.location)}
+          </Text>
+        </View>
+      </Card>
+      <Text size={13} color={t.muted} style={styles.hint}>
+        {I18n.t('locations.hint')}
+      </Text>
+      <Pressable
+        accessibilityRole="button"
+        disabled={busy}
+        onPress={getLocation}
+        style={({pressed}) => [
+          styles.button,
+          {backgroundColor: t.accent, opacity: pressed || busy ? 0.8 : 1},
+        ]}>
+        {busy ? (
+          <ActivityIndicator color={t.onAccent} />
+        ) : (
+          <Icon name="navigate" size={18} color={t.onAccent} strokeWidth={2} />
+        )}
+        <Text weight="semibold" size={15} color={t.onAccent}>
+          {I18n.t('locations.useCurrent')}
+        </Text>
+      </Pressable>
+    </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  scroll: {padding: 16, gap: 12},
+  card: {flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16},
+  badge: {width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center'},
+  flex: {flex: 1, minWidth: 0, gap: 2},
+  hint: {paddingHorizontal: 8},
+  button: {
+    height: 52,
+    borderRadius: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+});
 
 export default Location;

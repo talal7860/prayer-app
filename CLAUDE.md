@@ -19,6 +19,34 @@ location, lets the user pick calculation methods, and schedules a local notifica
 - Prayer-time math: `app/lib/PrayTimes.js` (vendored, excluded from lint).
 - Global types live in `app/types/main.d.ts` (ambient, no imports).
 
+## App structure (redesign)
+
+The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/TzzomF9PAhGP8cMVuSz2NK
+(epic #21).
+
+- `App.tsx`: loads Inter, then a root stack (tabs + `location`, `method`, `sound`) over
+  bottom tabs `today` / `week` / `settings`. `usePushNotifications()` is mounted once here.
+- `app/theme/tokens.ts`: light/dark palettes, per-period sky gradients, Inter font names.
+  Use these instead of hex values in screens.
+- `app/components/ui/`: `Text` (Inter, pick the weight with `weight`, not `fontWeight`),
+  `Icon` (the design's stroke SVGs), `Card`/`Row`/`SectionLabel`, `Segmented`, `Toggle`, `ChoiceList`.
+- `app/lib/prayerDay.ts`: pure helpers (period of day, next prayer, countdown, sun arc,
+  time format, Hijri date, distance). `app/lib/schedule.ts`: which notifications to
+  schedule. Both are unit-tested in `__tests__/`. Keep logic there, not in screens.
+- `app/hooks/usePrayerDay.ts`: yesterday/today/tomorrow times, ticking every second.
+- `useTravelCheck`: on foreground, if location permission is **already** granted and the
+  device is > 25 km from the saved location, Today shows the travel banner. It never prompts.
+- `useCityName` fills `settings.city` by reverse geocoding when it's missing.
+- Settings model (`Settings` in `main.d.ts`): `muted` (per-prayer bells; Sunrise muted by
+  default), `headsUp` (extra notification 10 min before), `timeFormat`, `city`.
+- Fajr and Isha always come from the calculation method's angles. The old
+  `fajrIshaCalculation: '90mins'` rule (Fajr = sunrise − 90 min, Isha = maghrib + 90 min,
+  patched into `PrayTimes.js`) was **removed on purpose**; a saved value is dropped on load.
+  Don't re-add a 90-minute option (the design's "Isha 18° / 90 min" control was dropped too).
+- `getPrayerTimes(date)` computes that date (it used to ignore `date`), and labels Friday's
+  Dhuhr "Jumu’ah".
+- Widgets / Live Activity (#20) are not built yet: they need native targets.
+
 ## Commands
 
 ```bash

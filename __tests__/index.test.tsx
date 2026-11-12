@@ -1,5 +1,6 @@
 import React from 'react';
-import {render, screen} from '@testing-library/react-native';
+import {fireEvent, render, screen, waitFor} from '@testing-library/react-native';
+import * as Notifications from 'expo-notifications';
 import App from '../App';
 
 jest.mock('@react-native-async-storage/async-storage', () =>
@@ -20,7 +21,23 @@ jest.mock('expo-notifications', () => ({
   SchedulableTriggerInputTypes: {DATE: 'date'},
 }));
 
-it('renders the home screen', async () => {
+it('renders Today and schedules reminders, with Sunrise muted by default', async () => {
   await render(<App />);
   expect(await screen.findAllByText(/fajr/i)).not.toHaveLength(0);
+  expect(screen.getByLabelText('Turn on Sunrise reminder')).toBeTruthy();
+  await waitFor(() =>
+    expect(Notifications.scheduleNotificationAsync).toHaveBeenCalled(),
+  );
+  const titles = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls.map(
+    ([request]) => request.content.title,
+  );
+  expect(titles.some((title: string) => title.includes('Sunrise'))).toBe(false);
+});
+
+it('switches to Week and Settings', async () => {
+  await render(<App />);
+  await fireEvent.press(await screen.findByRole('button', {name: /^Week/}));
+  expect(await screen.findByText('Next week')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', {name: /^Settings/}));
+  expect(await screen.findByText('Heads-up reminder')).toBeTruthy();
 });

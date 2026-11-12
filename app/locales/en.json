@@ -3,7 +3,10 @@
     "title": "Prayer Times"
   },
   "locations": {
-    "title": "Manage Location"
+    "title": "Location",
+    "useCurrent": "Use current location",
+    "coords": "Coordinates",
+    "hint": "Prayer times are calculated for this place."
   },
   "asr": {
     "title": "Asr Calculation Method"
@@ -12,18 +15,29 @@
     "title": "Settings",
     "location": "Location",
     "calculationMethod": "Calculation Method",
-    "fajrIshaCalculation": "Fajr Isha Calculation Method",
-    "asr": "Asr Calculation Method",
-    "sound": "Notification Sound"
+    "asr": "Asr",
+    "sound": "Notification Sound",
+    "locationSection": "Location",
+    "calculationSection": "Calculation",
+    "notificationsSection": "Notifications",
+    "displaySection": "Display",
+    "change": "Change",
+    "method": "Method",
+    "adhan": "Adhan sound",
+    "headsUp": "Heads-up reminder",
+    "headsUpHint": "10 minutes before each prayer",
+    "timeFormat": "Time format",
+    "unknownCity": "Current location"
   },
   "notification": {
-    "title": "It's {{label}} time now - {{time}}",
+    "title": "It's {{label}} time - {{time}}",
     "message": "",
     "action_ok": "Okay",
     "channel": {
       "name": "Prayer Notifications",
       "description": "Prayer Notifications"
-    }
+    },
+    "headsUp": "{{label}} in 10 minutes - {{time}}"
   },
   "prayer": {
     "fajr": "Fajr",
@@ -32,10 +46,54 @@
     "asr": "Asr",
     "maghrib": "Maghrib",
     "isha": "Isha",
-    "next": "{{label}} in {{time}}"
+    "next": "{{label}} in {{time}}",
+    "jumuah": "Jumu’ah"
   },
   "sounds": {
-    "mecca": "Mecca Azan",
-    "madina": "Madina Azan"
+    "mecca": "Makkah",
+    "default": "Default"
+  },
+  "today": {
+    "title": "Today",
+    "in": "{{label}} in",
+    "at": "at {{time}} · {{now}}",
+    "nowTime": "{{label}} time now",
+    "fajrEnded": "Fajr has ended",
+    "now": "Now",
+    "sunrise": "Sunrise {{time}}",
+    "sunset": "Sunset {{time}}",
+    "asrLabel": "{{method}} · {{asr}} Asr",
+    "bellOn": "Turn off {{label}} reminder",
+    "bellOff": "Turn on {{label}} reminder",
+    "travelTitle": "Looks like you’re in {{city}} now",
+    "travelBody": "Prayer times are still set for {{saved}}",
+    "keep": "Keep {{saved}}",
+    "update": "Update prayer times",
+    "settings": "Settings"
+  },
+  "week": {
+    "title": "Week",
+    "thisWeek": "This week",
+    "nextWeek": "Next week",
+    "day": "Day",
+    "fajr": "Fajr",
+    "rise": "Rise",
+    "dhuhr": "Dhuhr",
+    "asr": "Asr",
+    "magh": "Magh",
+    "isha": "Isha",
+    "today": "Today",
+    "daylight": "Daylight {{length}} today",
+    "same": "Same as yesterday",
+    "longer": "{{min}} min longer than yesterday",
+    "shorter": "{{min}} min shorter than yesterday",
+    "friday": "Friday is Jumu’ah",
+    "chooseWeek": "Choose week"
+  },
+  "methods": {
+    "title": "Calculation method"
+  },
+  "soundsScreen": {
+    "title": "Adhan sound"
   }
 }

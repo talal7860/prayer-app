@@ -11,7 +11,8 @@
       "buildNumber": "1",
       "supportsTablet": false,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Location Services required for fetching city and country"
+        "NSLocationWhenInUseUsageDescription": "Location Services required for fetching city and country",
+        "UIViewControllerBasedStatusBarAppearance": false
       }
     },
     "android": {
@@ -45,7 +46,8 @@
           "locationWhenInUsePermission": "Location Services required for fetching city and country"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-splash-screen"
     ],
     "extra": {
       "eas": {

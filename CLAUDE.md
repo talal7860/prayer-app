@@ -255,12 +255,15 @@ For the next SDK bump: `npx expo install expo@^<next> --fix`, then `npx expo-doc
   marketing version.
 - Signing credentials, the App Store Connect API key and the Play service account JSON live
   in EAS (`eas credentials`), not in the repo. The only GitHub secret is `EXPO_TOKEN`.
-- **Uploading by hand** (EAS Submit's free queue can take ~1 h): `scripts/upload-build.sh ios|android
-  [file]` uploads to TestFlight (`xcrun altool`) or Play internal testing (fastlane
-  `upload_to_play_store`). Without a file it downloads the latest finished EAS **cloud** build.
-  Settings come from env vars, read from `~/.config/adhan-app/env` (outside the repo, `chmod 600`):
-  `ASC_API_KEY_ID`, `ASC_API_ISSUER_ID`, `ASC_API_KEY_PATH` (the `.p8`), `PLAY_SERVICE_ACCOUNT_JSON`.
-  Android needs Homebrew's `fastlane` (an rvm Ruby's can be broken).
+- **Releasing from the Mac** (no EAS queues): `scripts/release.sh ios|android|all` builds the last
+  commit locally (`eas build --local`, EAS credentials, remote build numbers) into
+  `build/releases/`, then uploads it: iOS to TestFlight (`xcrun altool`), Android to Play internal
+  testing (fastlane `upload_to_play_store`). Settings come from env vars, read from
+  `~/.config/adhan-app/env` (outside the repo, `chmod 600`): `ASC_API_KEY_ID`,
+  `ASC_API_ISSUER_ID`, `ASC_API_KEY_PATH` (the `.p8`), `PLAY_SERVICE_ACCOUNT_JSON`. It checks them
+  before building. Needs Homebrew's `fastlane` (only that is put first on PATH: an rvm Ruby's
+  fastlane can be broken, and Homebrew's CocoaPods can be too), Xcode, and a JDK 17 for Android.
+  Only run local builds when asked; CI and "ship it" use EAS cloud builds.
 - The workflow uses `--no-wait`: a green Action means "builds queued". Build and submit
   results are on expo.dev.
 

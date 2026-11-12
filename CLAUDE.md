@@ -90,7 +90,7 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
 - Settings model (`Settings` in `main.d.ts`): `muted` (per-prayer bells; Sunrise has no bell,
   isn't in Today's list and is never notified: it's on the sun arc), `headsUp` (extra notification 10 min before), `timeFormat`, `city`, `highLats`
   (`NightMiddle` default / `AngleBased` / `OneSeventh`), `onboarded`, `adjustments`,
-  `travelAlerts`.
+  `travelAlerts`, `liveActivity`.
 - Far north in summer Isha can be after midnight (Calgary, June, Karachi: 01:38).
   adhan returns real instants, so that Isha is already on the next calendar day.
 - Times are always shown in the phone's timezone, even for a searched city elsewhere.
@@ -130,6 +130,11 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
     foreground) and from the background task. `syncLiveActivity` starts / updates / ends the
     Live Activity in the hour before a prayer, on foreground and going to background (iOS only
     lets the app start one while it's open).
+  - **Live Activity setting** (Settings → Notifications, iOS only): `settings.liveActivity`,
+    default on (old saved settings without it get the default). Off makes `activityFor` return
+    null, so `syncLiveActivity` never starts or updates one and ends a running one at once (the
+    settings change re-runs it). One switch covers both the lock screen and the Dynamic Island:
+    they're one ActivityKit activity, and iOS has no API to show it in only one of them.
   - Widget extension bundle id `com.conelabs.adhanapp.widget`, App Group
     `group.com.conelabs.adhanapp` (expo-widgets plugin options in `app.json`).
   - Jest mocks `expo-widgets` in `jest.setup.js`.

@@ -33,6 +33,8 @@
     "adhan": "صوت الأذان",
     "headsUp": "تذكير مسبق",
     "headsUpHint": "قبل كل صلاة بعشر دقائق",
+    "liveActivity": "النشاط المباشر",
+    "liveActivityHint": "شاشة القفل و Dynamic Island",
     "timeFormat": "صيغة الوقت",
     "unknownCity": "الموقع الحالي",
     "highLats": "خطوط العرض العليا",

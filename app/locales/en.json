@@ -167,7 +167,11 @@
     "notNow": "Not now"
   },
   "widget": {
-    "next": "Next prayer"
+    "next": "Next prayer",
+    "at": "at {{time}}",
+    "until": "until {{label}} · {{time}}",
+    "ring": "Prayer ring",
+    "ringHint": "Time left to the next prayer, as a ring."
   },
   "timetable": {
     "title": "Prayer times · {{month}}",

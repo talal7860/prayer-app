@@ -1,8 +1,9 @@
-import {HStack, Image, Spacer, Text, VStack} from '@expo/ui/swift-ui';
+import {Circle, HStack, Image, Spacer, Text, VStack} from '@expo/ui/swift-ui';
 import {
   activityBackgroundTint,
   font,
   foregroundStyle,
+  frame,
   monospacedDigit,
   opacity,
   padding,
@@ -14,7 +15,7 @@ import type {PrayerActivityProps} from './types';
 const PrayerActivity = (props: PrayerActivityProps) => {
   'widget';
   const at = new Date(props.at);
-  const accent = '#FFD27A';
+  const accent = '#FFE7A3';
   return {
     banner: (
       <HStack modifiers={[padding({all: 16}), activityBackgroundTint('#163A85'), foregroundStyle('#FFFFFF')]}>
@@ -34,7 +35,8 @@ const PrayerActivity = (props: PrayerActivityProps) => {
         </VStack>
       </HStack>
     ),
-    compactLeading: <Image systemName="moon.stars.fill" color={accent} />,
+    // The board's black pill: a gold dot and the countdown.
+    compactLeading: <Circle modifiers={[foregroundStyle(accent), frame({width: 8, height: 8})]} />,
     compactTrailing: (
       <Text date={at} dateStyle="timer" modifiers={[monospacedDigit(), foregroundStyle(accent)]} />
     ),

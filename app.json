@@ -92,12 +92,12 @@
             {
               "name": "NextPrayer",
               "displayName": "Next prayer",
-              "description": "The next prayer and a countdown.",
+              "description": "The next prayer with a live countdown, the sky and the day's times.",
               "ios": {
                 "supportedFamilies": [
                   "systemSmall",
                   "systemMedium",
-                  "accessoryCircular",
+                  "systemLarge",
                   "accessoryRectangular",
                   "accessoryInline"
                 ]
@@ -109,6 +109,18 @@
                 "targetCellHeight": 2,
                 "resizeMode": "both"
               }
+            },
+            {
+              "name": "PrayerRing",
+              "displayName": "Prayer ring",
+              "description": "Time left to the next prayer, as a ring.",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "accessoryCircular"
+                ]
+              },
+              "android": null
             }
           ]
         }

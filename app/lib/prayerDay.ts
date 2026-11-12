@@ -152,6 +152,10 @@ export const hijriLabel = (date: Date): string => {
   return I18n.t('hijri.date', {month: I18n.t(`hijri.m${h.month}`), day: h.day, year: h.year});
 };
 
+/** The Hijri day and month without the year: "Jumada II 1", "1 جمادى الآخرة". */
+export const hijriShort = (date: Date): string =>
+  hijriLabel(date).replace(/[\s,،]*1[45]\d\d.*$/, '');
+
 /** Great-circle distance in km. */
 export const distanceKm = (a: GeoLocation, b: GeoLocation) => {
   const R = 6371;

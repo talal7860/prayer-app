@@ -1,5 +1,6 @@
 import {Platform} from 'react-native';
 import NextPrayer from '../widgets/NextPrayer';
+import PrayerRing from '../widgets/PrayerRing';
 import PrayerActivity from '../widgets/PrayerActivity';
 import {activityFor, nextPrayerProps, widgetTimeline} from './widgetData';
 
@@ -7,7 +8,9 @@ import {activityFor, nextPrayerProps, widgetTimeline} from './widgetData';
 export const refreshWidgets = (settings: Settings, now: Date = new Date()) => {
   try {
     if (Platform.OS === 'ios') {
-      NextPrayer.updateTimeline(widgetTimeline(settings, now));
+      const timeline = widgetTimeline(settings, now);
+      NextPrayer.updateTimeline(timeline);
+      PrayerRing.updateTimeline(timeline);
     } else {
       NextPrayer.updateSnapshot(nextPrayerProps(settings, now));
     }

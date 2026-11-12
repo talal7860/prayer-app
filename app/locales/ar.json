@@ -69,6 +69,7 @@
     "title": "اليوم",
     "in": "{{label}} بعد",
     "at": "الساعة {{time}} · {{now}}",
+    "atTomorrow": "غدًا الساعة {{time}} · {{now}}",
     "nowTime": "وقت {{label}} الآن",
     "fajrEnded": "انتهى وقت الفجر",
     "now": "الآن",

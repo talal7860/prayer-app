@@ -6,6 +6,7 @@ import useAppSettings from '../../../hooks/useAppSettings';
 import usePalette from '../../../hooks/usePalette';
 import I18n from '../../../I18n';
 import {formatTime, PRAYER_KEYS} from '../../../lib/prayerDay';
+import useReadableWidth from '../../../hooks/useReadableWidth';
 
 const LIMIT = 30;
 
@@ -52,6 +53,7 @@ const Step = ({
 
 /** Per-prayer ± minutes, to match the local mosque's timetable. */
 const AdjustScreen = () => {
+  const column = useReadableWidth();
   const {settings, setSettings, getPrayerTimes} = useAppSettings();
   const {t} = usePalette();
   const today = getPrayerTimes();
@@ -62,7 +64,7 @@ const AdjustScreen = () => {
     });
 
   return (
-    <ScrollView contentContainerStyle={styles.scroll}>
+    <ScrollView contentContainerStyle={[styles.scroll, column]}>
       <Text size={13} color={t.muted} style={styles.hint}>
         {I18n.t('adjust.hint')}
       </Text>

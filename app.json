@@ -8,12 +8,18 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "bundleIdentifier": "com.conelabs.adhanapp",
-      "supportsTablet": false,
+      "supportsTablet": true,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Location Services required for fetching city and country",
         "UIViewControllerBasedStatusBarAppearance": false,
         "UIBackgroundModes": ["fetch", "processing"],
-        "INAlternativeAppNames": [{"INAlternativeAppName": "Adhan"}]
+        "INAlternativeAppNames": [{"INAlternativeAppName": "Adhan"}],
+        "UISupportedInterfaceOrientations~ipad": [
+          "UIInterfaceOrientationPortrait",
+          "UIInterfaceOrientationPortraitUpsideDown",
+          "UIInterfaceOrientationLandscapeLeft",
+          "UIInterfaceOrientationLandscapeRight"
+        ]
       },
       "appleTeamId": "4XYSPPP9LW",
       "entitlements": {

@@ -1,4 +1,7 @@
 import {
+  arcFraction,
+  daySlots,
+  semiArcPoint,
   daylightMinutes,
   distanceKm,
   formatCoords,
@@ -105,4 +108,38 @@ it('distanceKm: Calgary to Edmonton is about 280 km', () => {
 
 it('formatCoords', () => {
   expect(formatCoords({lat: 51.05011, lng: -114.08529})).toBe('51.05° N, 114.09° W');
+});
+
+describe('semicircle arc', () => {
+  it('runs from Fajr on the left to Isha on the right, through the top', () => {
+    expect(arcFraction(t.fajr, t)).toBe(0);
+    expect(arcFraction(t.isha, t)).toBe(1);
+    expect(arcFraction(at(11, 3), t)).toBe(0);
+    expect(arcFraction(at(11, 23), t)).toBe(1);
+    const left = semiArcPoint(0);
+    const top = semiArcPoint(0.5);
+    const right = semiArcPoint(1);
+    expect(left.x).toBeCloseTo(20);
+    expect(left.y).toBeCloseTo(290);
+    expect(top.x).toBeCloseTo(300);
+    expect(top.y).toBeCloseTo(20);
+    expect(right.x).toBeCloseTo(580);
+  });
+});
+
+describe('daySlots', () => {
+  const list = (Object.keys(t) as PrayerKey[]).map(key => ({key, label: key, time: t[key]}));
+  it('marks the next prayer and the ones gone by', () => {
+    const slots = daySlots(list, at(11, 13), {key: 'asr', time: t.asr});
+    expect(slots.filter(s => s.isNext).map(s => s.key)).toEqual(['asr']);
+    expect(slots.filter(s => s.past).map(s => s.key)).toEqual(['fajr', 'sunrise', 'dhuhr']);
+  });
+  it("shows tomorrow's Fajr after Isha", () => {
+    const slots = daySlots(list, at(11, 20), {key: 'fajr', time: n.fajr});
+    const fajr = slots.find(s => s.key === 'fajr');
+    expect(fajr?.isNext).toBe(true);
+    expect(fajr?.past).toBe(false);
+    expect(fajr?.time).toEqual(n.fajr);
+    expect(slots.filter(s => s.past)).toHaveLength(5);
+  });
 });

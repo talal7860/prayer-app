@@ -8,8 +8,10 @@ import useLocate from '../../../hooks/useLocate';
 import usePalette from '../../../hooks/usePalette';
 import I18n from '../../../I18n';
 import {formatCoords} from '../../../lib/prayerDay';
+import useReadableWidth from '../../../hooks/useReadableWidth';
 
 const Location = () => {
+  const column = useReadableWidth();
   const {settings, setSettings} = useAppSettings();
   const {t} = usePalette();
   const {locate, busy} = useLocate();
@@ -23,7 +25,7 @@ const Location = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scroll}>
+    <ScrollView contentContainerStyle={[styles.scroll, column]}>
       <Card style={styles.card}>
         <View style={[styles.badge, {backgroundColor: t.hi}]}>
           <Icon name="pin" size={20} color={t.accent} />

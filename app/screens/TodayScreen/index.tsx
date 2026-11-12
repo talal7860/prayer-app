@@ -1,29 +1,26 @@
-import React, {useLayoutEffect} from 'react';
-import {Pressable, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
+import React from 'react';
+import {
+  Pressable,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
-import {useNavigation} from '@react-navigation/native';
-import type {TabNavigation} from '../../navigation';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Svg, {Circle, Path} from 'react-native-svg';
 import Icon from '../../components/ui/Icon';
 import Text from '../../components/ui/Text';
-import useAppSettings from '../../hooks/useAppSettings';
-import usePalette from '../../hooks/usePalette';
-import usePrayerDay from '../../hooks/usePrayerDay';
-import useTravelCheck from '../../hooks/useTravelCheck';
-import useCityName from '../../hooks/useCityName';
 import I18n, {formatDate} from '../../I18n';
-import {
-  formatCoords,
-  formatCountdown,
-  formatTime,
-  hijriLabel,
-  sunPosition,
-} from '../../lib/prayerDay';
-import {dark, light, skies, skyLocations} from '../../theme/tokens';
+import {formatCountdown, hijriLabel, sunPosition} from '../../lib/prayerDay';
+import {todayLayout} from '../../lib/layout';
+import {skies, skyLocations} from '../../theme/tokens';
 import TravelBanner from './TravelBanner';
 import ExactAlarmPrompt from '../../components/ExactAlarmPrompt';
-import useExactAlarms from '../../hooks/useExactAlarms';
+import CoverToday from './CoverToday';
+import WideToday from './WideToday';
+import useToday, {type TodayModel} from './useToday';
 
 const WHITE_88 = 'rgba(255,255,255,0.88)';
 
@@ -64,35 +61,9 @@ const SunArc = ({
   </View>
 );
 
-const TodayScreen = () => {
-  const navigation = useNavigation<TabNavigation>();
+const PhoneToday = ({m}: {m: TodayModel}) => {
   const insets = useSafeAreaInsets();
-  const {settings, setSetting, calculationMethod} = useAppSettings();
-  const {isDark: systemDark} = usePalette();
-  const day = usePrayerDay();
-  const travel = useTravelCheck();
-  const exactAlarms = useExactAlarms();
-  useCityName();
-
-  const night = day.period === 'isha' || day.period === 'fajr';
-  const t = systemDark || night ? dark : light;
-  const fmt = (d: Date) => formatTime(d, settings.timeFormat);
-
-  // The design darkens the tab bar along with the sheet at night.
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      tabBarStyle: {backgroundColor: t.bg, borderTopColor: t.border},
-      tabBarActiveTintColor: t.accent,
-      tabBarInactiveTintColor: t.muted,
-    });
-  }, [navigation, t]);
-
-  const nextLabel =
-    day.list.find(p => p.key === day.next.key && p.time.getTime() === day.next.time.getTime())
-      ?.label ?? I18n.t(`prayer.${day.next.key}`);
-  // During Fajr the countdown is to sunrise, which is when Fajr's time ends.
-  const fajrEnding = day.period === 'fajr' && day.next.key === 'sunrise';
-  const fajrLabel = day.list.find(p => p.key === 'fajr')?.label ?? I18n.t('prayer.fajr');
+  const {navigation, day, travel, exactAlarms, t, fmt, fajrEnding, city, muted} = m;
   const ishaLabel = I18n.t('prayer.isha');
   const nowLine =
     day.period === 'morning'
@@ -100,10 +71,7 @@ const TodayScreen = () => {
       : I18n.t('today.nowTime', {
           label: day.current ? day.list.find(p => p.key === day.current)?.label : ishaLabel,
         });
-  const asrName = I18n.t(`asrNames.${settings.asr}`);
-  const city = settings.city ?? formatCoords(settings.location);
-  const {muted} = settings;
-  const toggleBell = (key: PrayerKey) => setSetting('muted')({...muted, [key]: !muted[key]});
+  const toggleBell = m.toggleBell;
 
   return (
     <View style={[styles.root, {backgroundColor: t.bg}]}>
@@ -137,9 +105,7 @@ const TodayScreen = () => {
 
           <View style={styles.next} accessible accessibilityLiveRegion="none">
             <Text weight="semibold" size={17} color="#FFFFFF">
-              {fajrEnding
-                ? I18n.t('today.endsIn', {label: fajrLabel})
-                : I18n.t('today.in', {label: nextLabel})}
+              {m.headline}
             </Text>
             <Text weight="light" size={64} color="#FFFFFF" style={styles.countdown}>
               {formatCountdown(day.next.time.getTime() - day.now.getTime())}
@@ -149,9 +115,7 @@ const TodayScreen = () => {
                 ? I18n.t('today.endsAt', {time: fmt(day.next.time)})
                 : I18n.t(
                     // After Isha the countdown is to tomorrow's Fajr, which isn't the Fajr in the list.
-                    day.next.time.toDateString() === day.now.toDateString()
-                      ? 'today.at'
-                      : 'today.atTomorrow',
+                    m.nextIsTomorrow ? 'today.atTomorrow' : 'today.at',
                     {time: fmt(day.next.time), now: nowLine},
                   )}
             </Text>
@@ -186,10 +150,7 @@ const TodayScreen = () => {
               {I18n.t('today.title').toUpperCase()}
             </Text>
             <Text size={13} color={t.muted} numberOfLines={1} style={styles.shrink}>
-              {I18n.t('today.asrLabel', {
-                method: calculationMethod().split(',').pop()?.trim(),
-                asr: asrName,
-              })}
+              {m.asrLabel}
             </Text>
           </View>
           {/* Sunrise is on the sun arc above, so the list has only the five prayers. */}
@@ -309,5 +270,19 @@ const styles = StyleSheet.create({
   time: {marginLeft: 'auto', fontVariant: ['tabular-nums']},
   bell: {width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center'},
 });
+
+/** Picks the board for the window: iPhone, the Duo's cover screen (and iPad Split View), or iPad. */
+const TodayScreen = () => {
+  const m = useToday();
+  const {width, height} = useWindowDimensions();
+  const layout = todayLayout(width);
+  if (layout === 'wide') {
+    return <WideToday m={m} width={width} height={height} />;
+  }
+  if (layout === 'cover') {
+    return <CoverToday m={m} width={width} />;
+  }
+  return <PhoneToday m={m} />;
+};
 
 export default TodayScreen;

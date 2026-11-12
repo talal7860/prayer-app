@@ -2,6 +2,8 @@
 export type Palette = {
   bg: string;
   surface: string;
+  /** Cards that sit on `surface` (the iPad prayer cards). */
+  raised: string;
   text: string;
   muted: string;
   border: string;
@@ -17,6 +19,7 @@ export type Palette = {
 export const light: Palette = {
   bg: '#FFFFFF',
   surface: '#F5F6F9',
+  raised: '#FFFFFF',
   text: '#14161C',
   muted: '#5A6070',
   border: '#E7E9EF',
@@ -32,6 +35,7 @@ export const light: Palette = {
 export const dark: Palette = {
   bg: '#0D1120',
   surface: '#080B16',
+  raised: '#141A2C',
   text: '#EEF1F8',
   muted: '#A4ABC2',
   border: '#222943',

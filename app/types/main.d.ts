@@ -52,25 +52,25 @@ type Adjustment = Record<string, number>;
 
 type PrayerTimesByDate = Record<string, PrayerTimeLabel[]>;
 
-type Sounds = Record<string, {name: string; path: string}> | undefined | null;
+type Sounds = Record<string, {name: string; path: string}>;
 type SettingScreenMap = Record<string, string>;
 type NotificationChannels = Record<string, {channelId: string; soundName: string}>;
 
 type ColorScheme = 'light' | 'dark' | 'system' | undefined | null;
 
-interface AppSettingsContextInterface {
+type AppSettingsContextInterface = {
   settings: Settings;
   setSettings: React.Dispatch<React.SetStateAction<Settings>>;
-  setSetting: (key: string) => (value: any) => void;
+  setSetting: (key: string) => (value: unknown) => void;
   getPrayerTimes: (date?: Date) => PrayerTimeLabel[];
   calculationMethod: () => string;
   today: number;
   /** The saved settings have been read. Until then `settings` are the defaults. */
   loaded: boolean;
-}
+};
 
-interface SettingsTitleInterface {
+type SettingsTitleInterface = {
   setting: string;
   selected?: string;
   setSetting?: (setting: string) => void;
-}
+};

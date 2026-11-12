@@ -2,6 +2,7 @@ import React, {useLayoutEffect} from 'react';
 import {Pressable, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
 import {useNavigation} from '@react-navigation/native';
+import type {TabNavigation} from '../../navigation';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Svg, {Circle, Path} from 'react-native-svg';
 import Icon from '../../components/ui/Icon';
@@ -62,7 +63,7 @@ const SunArc = ({
 );
 
 const TodayScreen = () => {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<TabNavigation>();
   const insets = useSafeAreaInsets();
   const {settings, setSetting, calculationMethod} = useAppSettings();
   const {isDark: systemDark} = usePalette();
@@ -89,16 +90,16 @@ const TodayScreen = () => {
   // During Fajr the countdown is to sunrise, which is when Fajr's time ends.
   const fajrEnding = day.period === 'fajr' && day.next.key === 'sunrise';
   const fajrLabel = day.list.find(p => p.key === 'fajr')?.label ?? I18n.t('prayer.fajr');
+  const ishaLabel = I18n.t('prayer.isha');
   const nowLine =
     day.period === 'morning'
       ? I18n.t('today.fajrEnded')
       : I18n.t('today.nowTime', {
-          label: day.current
-            ? day.list.find(p => p.key === day.current)?.label
-            : I18n.t('prayer.isha'),
+          label: day.current ? day.list.find(p => p.key === day.current)?.label : ishaLabel,
         });
+  const asrName = I18n.t(`asrNames.${settings.asr}`);
   const city = settings.city ?? formatCoords(settings.location);
-  const muted = settings.muted ?? {};
+  const {muted} = settings;
   const toggleBell = (key: PrayerKey) => setSetting('muted')({...muted, [key]: !muted[key]});
 
   return (
@@ -179,7 +180,7 @@ const TodayScreen = () => {
             <Text size={13} color={t.muted} numberOfLines={1} style={styles.shrink}>
               {I18n.t('today.asrLabel', {
                 method: calculationMethod().split(',').pop()?.trim(),
-                asr: I18n.t(`asrNames.${settings.asr}`),
+                asr: asrName,
               })}
             </Text>
           </View>

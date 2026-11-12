@@ -4,7 +4,11 @@ import type {NextPrayerProps, WidgetHandle} from './types';
 // Keep this file .tsx like the platform files: Metro tries every .ts candidate (incl. the
 // plain one) before any .tsx, so a NextPrayer.ts here would shadow NextPrayer.ios.tsx.
 const NextPrayer: WidgetHandle<NextPrayerProps> = {
-  updateTimeline: () => {},
-  updateSnapshot: () => {},
+  updateTimeline: () => {
+    // No widgets here.
+  },
+  updateSnapshot: () => {
+    // No widgets here.
+  },
 };
 export default NextPrayer;

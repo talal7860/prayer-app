@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import type {TabNavigation} from '../../navigation';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Card, Row, SectionLabel} from '../../components/ui/Card';
 import Icon from '../../components/ui/Icon';
@@ -26,7 +27,7 @@ import {backgroundLocationAllowed} from '../../travelTask';
 import {adjustmentSummary} from './Adjust';
 
 const SettingsScreen = () => {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<TabNavigation>();
   const insets = useSafeAreaInsets();
   const {t, isDark} = usePalette();
   const {settings, setSetting, calculationMethod} = useAppSettings();
@@ -89,8 +90,8 @@ const SettingsScreen = () => {
             subtitle={I18n.t('settings.travelAlertsHint')}
             last>
             <Toggle
-              value={!!settings.travelAlerts}
-              onChange={setTravelAlerts}
+              value={settings.travelAlerts}
+              onChange={on => void setTravelAlerts(on)}
               accessibilityLabel={I18n.t('settings.travelAlerts')}
             />
           </Row>
@@ -132,7 +133,7 @@ const SettingsScreen = () => {
         <Card>
           <Row
             title={I18n.t('settings.adhan')}
-            value={AppConstants.sounds?.[settings.sound]?.name}
+            value={AppConstants.soundName(settings.sound)}
             onPress={() => navigation.navigate('sound')}
           />
           <Row
@@ -140,7 +141,7 @@ const SettingsScreen = () => {
             subtitle={I18n.t('settings.headsUpHint')}
             last={Platform.OS !== 'ios'}>
             <Toggle
-              value={!!settings.headsUp}
+              value={settings.headsUp}
               onChange={setSetting('headsUp')}
               accessibilityLabel={I18n.t('settings.headsUp')}
             />
@@ -151,7 +152,7 @@ const SettingsScreen = () => {
               subtitle={I18n.t('settings.liveActivityHint')}
               last>
               <Toggle
-                value={!!settings.liveActivity}
+                value={settings.liveActivity}
                 onChange={setSetting('liveActivity')}
                 accessibilityLabel={I18n.t('settings.liveActivity')}
               />

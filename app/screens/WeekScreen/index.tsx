@@ -26,6 +26,7 @@ import {
   isFriday,
   toDayTimes,
 } from '../../lib/prayerDay';
+import {errorMessage} from '../../lib/errors';
 import {timetableHtml} from '../../lib/timetable';
 
 type Week = 'this' | 'next';
@@ -61,8 +62,8 @@ const WeekScreen = () => {
     try {
       const {uri} = await Print.printToFileAsync({html: timetableHtml(settings, new Date(today))});
       await Sharing.shareAsync(uri, {mimeType: 'application/pdf', UTI: 'com.adobe.pdf'});
-    } catch (error: any) {
-      Alert.alert(I18n.t('timetable.failed'), error?.message);
+    } catch (error: unknown) {
+      Alert.alert(I18n.t('timetable.failed'), errorMessage(error));
     } finally {
       setSharing(false);
     }
@@ -71,6 +72,7 @@ const WeekScreen = () => {
   const hm = (d: Date) => formatTime(d, settings.timeFormat, false);
   const city = settings.city ?? formatCoords(settings.location);
   const method = calculationMethod().split(',').pop()?.trim();
+  const asrName = I18n.t(`asrNames.${settings.asr}`);
   const length = I18n.t('week.length', {
     h: Math.floor(daylight.now / 60),
     m: String(Math.round(daylight.now % 60)).padStart(2, '0'),
@@ -96,7 +98,7 @@ const WeekScreen = () => {
             {I18n.t(week === 'this' ? 'week.thisWeek' : 'week.nextWeek')}
           </Text>
           <Text size={14} color={t.muted}>
-            {`${city} · ${method} · ${I18n.t('asrNames.label', {asr: I18n.t(`asrNames.${settings.asr}`)})}`}
+            {`${city} · ${method} · ${I18n.t('asrNames.label', {asr: asrName})}`}
           </Text>
         </View>
 

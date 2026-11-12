@@ -25,10 +25,11 @@ const describe = (place: ExpoLocation.LocationGeocodedAddress): Place => {
 /** City and country for a coordinate. Empty if the platform geocoder can't tell. */
 export const placeFor = async ({lat, lng}: GeoLocation): Promise<Place> => {
   try {
-    const [place] = await ExpoLocation.reverseGeocodeAsync({
+    const places = await ExpoLocation.reverseGeocodeAsync({
       latitude: lat,
       longitude: lng,
     });
+    const place = places.at(0);
     return place ? describe(place) : {};
   } catch {
     return {};
@@ -43,7 +44,7 @@ export const searchPlace = async (
   query: string,
 ): Promise<{location: GeoLocation; place: Place} | null> => {
   try {
-    const [hit] = await ExpoLocation.geocodeAsync(query.trim());
+    const hit = (await ExpoLocation.geocodeAsync(query.trim())).at(0);
     if (!hit) {
       return null;
     }

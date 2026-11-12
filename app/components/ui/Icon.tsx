@@ -64,6 +64,8 @@ const Icon = ({name, size = 20, color, strokeWidth = 1.8}: Props) => {
         </>
       ) : name === 'calendar' ? (
         <>
+          {/* react-native-svg types mark every x/y deprecated (the transform shorthand), but on Rect they're its position. */}
+          {/* eslint-disable-next-line @typescript-eslint/no-deprecated */}
           <Rect x={3.5} y={5} width={17} height={15} rx={3} {...common} />
           <Path d="M3.5 10h17M8 3v4M16 3v4" {...common} />
         </>

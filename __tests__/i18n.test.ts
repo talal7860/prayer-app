@@ -6,12 +6,12 @@ import {formatTime, hijriLabel} from '../app/lib/prayerDay';
 
 type Tree = {[key: string]: string | Tree};
 const flatten = (tree: Tree, prefix = ''): Record<string, string> =>
-  Object.entries(tree).reduce(
+  Object.entries(tree).reduce<Record<string, string>>(
     (acc, [k, v]) => ({
       ...acc,
       ...(typeof v === 'string' ? {[prefix + k]: v} : flatten(v, `${prefix}${k}.`)),
     }),
-    {} as Record<string, string>,
+    {},
   );
 const placeholders = (s: string) => (s.match(/{{\w+}}/g) ?? []).sort();
 
@@ -20,7 +20,7 @@ describe.each([
   ['ur', ur],
 ])('%s strings', (_, strings) => {
   const english = flatten(en);
-  const translated = flatten(strings as Tree);
+  const translated = flatten(strings);
 
   it('has every English key and nothing else', () => {
     expect(Object.keys(translated).sort()).toEqual(Object.keys(english).sort());

@@ -2,6 +2,7 @@ import {useCallback, useState} from 'react';
 import {Alert, Linking} from 'react-native';
 import * as ExpoLocation from 'expo-location';
 import I18n from '../I18n';
+import {errorMessage} from '../lib/errors';
 import {findPosition, placeFor, type Place} from '../lib/geocode';
 
 const openSettings = () => {
@@ -43,8 +44,8 @@ const useLocate = () => {
       const {coords} = await findPosition();
       const location = {lat: coords.latitude, lng: coords.longitude};
       return {location, place: await placeFor(location)};
-    } catch (error: any) {
-      Alert.alert(I18n.t('locations.failed'), error?.message);
+    } catch (error: unknown) {
+      Alert.alert(I18n.t('locations.failed'), errorMessage(error));
       return null;
     } finally {
       setBusy(false);

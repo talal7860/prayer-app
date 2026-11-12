@@ -10,7 +10,7 @@
     "doctor": "expo-doctor",
     "typecheck": "tsc --noEmit",
     "test": "jest",
-    "lint": "expo lint",
+    "lint": "expo lint . --max-warnings 0",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

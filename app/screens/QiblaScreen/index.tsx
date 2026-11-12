@@ -175,7 +175,9 @@ const QiblaScreen = () => {
   // A light tap when you turn onto the qibla, so you can feel it without watching the screen.
   useEffect(() => {
     if (facing) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {
+        // No haptics on this device.
+      });
     }
   }, [facing]);
 
@@ -188,6 +190,8 @@ const QiblaScreen = () => {
     Animated.timing(rotation, {
       toValue: target,
       duration: 160,
+      // RN's Easing functions are plain functions that never use `this`.
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       easing: Easing.out(Easing.quad),
       useNativeDriver: true,
     }).start();

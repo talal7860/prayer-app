@@ -54,12 +54,11 @@ const useTravelCheck = () => {
   }, [saved, dismissed, calculationMethod, asr, highLats]);
 
   useEffect(() => {
-    // check() only sets state after awaiting the OS, never synchronously.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    check();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- check() only sets state after awaiting the OS, never synchronously
+    void check();
     const sub = AppState.addEventListener('change', state => {
       if (state === 'active') {
-        check();
+        void check();
       }
     });
     return () => sub.remove();

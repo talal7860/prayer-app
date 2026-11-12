@@ -4,11 +4,15 @@ import {methodName, prayerTimesFor} from './prayerTimes';
 
 const COLUMNS: PrayerKey[] = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
 
-const escape = (s: string) =>
-  s.replace(
-    /[&<>"']/g,
-    c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[c]!,
-  );
+const ENTITIES: Record<string, string> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+};
+
+const escape = (s: string) => s.replace(/[&<>"']/g, c => ENTITIES[c]);
 
 /** Every day of `month`'s month, with that day's prayer times. */
 export const monthDays = (settings: Settings, month: Date) => {
@@ -25,10 +29,11 @@ export const timetableHtml = (settings: Settings, month: Date, locale = I18n.loc
   const rtl = /^(ar|ur|fa|he)/.test(locale);
   const days = monthDays(settings, month);
   const title = formatDate(month, {month: 'long', year: 'numeric'}, locale);
+  const asr = I18n.t(`asrNames.${settings.asr}`);
   const subtitle = [
     settings.city,
     methodName(settings.calculationMethod),
-    I18n.t('asrNames.label', {asr: I18n.t(`asrNames.${settings.asr}`)}),
+    I18n.t('asrNames.label', {asr}),
   ]
     .filter(Boolean)
     .join(' · ');
@@ -37,8 +42,9 @@ export const timetableHtml = (settings: Settings, month: Date, locale = I18n.loc
     .map(({date, times}) => {
       const fri = isFriday(date);
       const cells = COLUMNS.map(k => {
-        const time = times.find(p => p.key === k)!.time;
-        return `<td${k === 'dhuhr' && fri ? ' class="jumuah"' : ''}>${formatTime(time, settings.timeFormat)}</td>`;
+        // prayerTimesFor always returns every column's prayer.
+        const time = times.find(p => p.key === k)?.time;
+        return `<td${k === 'dhuhr' && fri ? ' class="jumuah"' : ''}>${time ? formatTime(time, settings.timeFormat) : ''}</td>`;
       }).join('');
       const day = formatDate(date, {weekday: 'short', day: 'numeric'}, locale);
       return `<tr${fri ? ' class="fri"' : ''}><th scope="row">${escape(day)}<small>${escape(hijriLabel(date))}</small></th>${cells}</tr>`;

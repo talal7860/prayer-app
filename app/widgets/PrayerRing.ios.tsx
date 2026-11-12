@@ -36,7 +36,7 @@ const PrayerRing = (p: NextPrayerProps, env: WidgetEnvironment) => {
       <Circle
         modifiers={[
           foregroundStyle('rgba(0,0,0,0)'),
-          strokeBorder({shape: 'circle', color: track, style: {lineWidth: line}}),
+          strokeBorder({shape: 'circle', content: track, style: {lineWidth: line}}),
         ]}
       />
       <Circle
@@ -46,7 +46,7 @@ const PrayerRing = (p: NextPrayerProps, env: WidgetEnvironment) => {
           foregroundStyle('rgba(0,0,0,0)'),
           strokeBorder({
             shape: 'circle',
-            color: fill,
+            content: fill,
             style: {
               lineWidth: line,
               lineCap: 'round',

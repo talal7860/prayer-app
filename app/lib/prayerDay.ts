@@ -132,7 +132,12 @@ export const hijriLabel = (date: Date): string => {
     // Fall through to the arithmetic calendar.
   }
   const h = tabularHijri(date);
-  return I18n.t('hijri.date', {month: I18n.t(`hijri.m${h.month}`), day: h.day, year: h.year});
+  const monthName = I18n.t(`hijri.m${h.month}`);
+  return I18n.t('hijri.date', {
+    month: monthName,
+    day: h.day,
+    year: h.year,
+  });
 };
 
 /** The Hijri day and month without the year: "Jumada II 1", "1 جمادى الآخرة". */

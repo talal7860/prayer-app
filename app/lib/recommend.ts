@@ -23,7 +23,7 @@ const HANAFI_COUNTRIES = ['PK', 'IN', 'BD', 'AF'];
 export const HIGH_LATITUDE = 48;
 
 export const recommendedMethod = (countryCode?: string): PrayerCalculationMethod =>
-  (countryCode && METHOD_BY_COUNTRY[countryCode.toUpperCase()]) || 'MWL';
+  (countryCode ? METHOD_BY_COUNTRY[countryCode.toUpperCase()] : undefined) ?? 'MWL';
 
 export const recommendedAsr = (countryCode?: string): AsrJuristics =>
   countryCode && HANAFI_COUNTRIES.includes(countryCode.toUpperCase()) ? 'Hanafi' : 'Standard';

@@ -24,18 +24,18 @@ export const defaultSettings: Settings = Object.freeze({
   onboarded: false,
 });
 
+/** What may be saved: any subset of the settings, plus keys from older versions. */
+type StoredSettings = Partial<Settings> & {fajrIshaCalculation?: string};
+
 /** Saved settings on top of `base`, with old keys dropped. */
 export const parseSettings = (
   stored: string | null,
   base: Settings = defaultSettings,
 ): Settings => {
   // `fajrIshaCalculation` (the old 90-minute rule) was removed; drop it if saved.
-  const {
-    fajrIshaCalculation: _removed,
-    ...parsed
-  }: Partial<Settings> & {
-    fajrIshaCalculation?: string;
-  } = stored ? JSON.parse(stored) : {};
+  const {fajrIshaCalculation: _removed, ...parsed} = stored
+    ? (JSON.parse(stored) as StoredSettings)
+    : {};
   const next: Settings = merge(base)(parsed);
   // Installed before the setup screen existed: they've already set things up.
   if (stored && parsed.onboarded === undefined) {

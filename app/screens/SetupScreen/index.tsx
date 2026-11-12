@@ -336,7 +336,7 @@ const SetupScreen = () => {
                   subtitle={I18n.t('setup.liveActivityHint')}
                   last>
                   <Toggle
-                    value={!!draft.liveActivity}
+                    value={draft.liveActivity}
                     onChange={liveActivity => setDraft(d => ({...d, liveActivity}))}
                     accessibilityLabel={I18n.t('settings.liveActivity')}
                   />

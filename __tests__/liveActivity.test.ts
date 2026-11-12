@@ -18,7 +18,10 @@ const dhuhr = prayerTimesFor(settings, new Date(2026, 2, 10, 12)).find(p => p.ke
 const soon = new Date(dhuhr.time.getTime() - 20 * 60 * 1000);
 
 const activity = PrayerActivity as unknown as {start: jest.Mock; getInstances: jest.Mock};
-const running = () => ({update: jest.fn(async () => {}), end: jest.fn(async () => {})});
+const running = () => ({
+  update: jest.fn(() => Promise.resolve()),
+  end: jest.fn(() => Promise.resolve()),
+});
 
 beforeEach(() => {
   jest.clearAllMocks();

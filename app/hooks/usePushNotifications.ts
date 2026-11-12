@@ -2,6 +2,7 @@ import {useCallback, useEffect, useState} from 'react';
 import {Alert, AppState, Platform} from 'react-native';
 import * as Notifications from 'expo-notifications';
 import I18n from '../I18n';
+import {errorMessage} from '../lib/errors';
 import AppConstants from '../AppConstants';
 import useAppSettings from './useAppSettings';
 import {rescheduleNotifications} from '../lib/notifications';
@@ -53,8 +54,8 @@ const usePushNotifications = () => {
             ios: {allowAlert: true, allowBadge: true, allowSound: true},
           });
       setRegistered(granted);
-    } catch (error: any) {
-      Alert.alert(error.message);
+    } catch (error: unknown) {
+      Alert.alert(errorMessage(error) ?? String(error));
     }
   }, []);
 
@@ -64,7 +65,7 @@ const usePushNotifications = () => {
       return;
     }
     refreshWidgets(settings);
-    syncLiveActivity(settings);
+    void syncLiveActivity(settings);
     syncWatch(settings);
   }, [ready, settings, today, foregrounded, backgrounded]);
 
@@ -72,7 +73,7 @@ const usePushNotifications = () => {
     if (!ready || !registered || !settings.sound) {
       return;
     }
-    rescheduleNotifications(settings).catch(error => console.warn(error));
+    rescheduleNotifications(settings).catch((error: unknown) => console.warn(error));
   }, [ready, registered, settings, today, foregrounded]);
 
   // Keep the travel geofence on the saved location (or stopped when the setting is off).
@@ -81,7 +82,7 @@ const usePushNotifications = () => {
     if (!ready) {
       return;
     }
-    syncTravelAlerts(settings).catch(error => console.warn(error));
+    syncTravelAlerts(settings).catch((error: unknown) => console.warn(error));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only these fields matter
   }, [ready, travelAlerts, location.lat, location.lng]);
 
@@ -104,12 +105,12 @@ const usePushNotifications = () => {
     const setup = async () => {
       if (Platform.OS === 'android') {
         // A failed channel must not stop the permission request below.
-        await createChannels().catch(error => console.warn(error));
+        await createChannels().catch((error: unknown) => console.warn(error));
       }
       await requestPermission();
-      await registerRescheduleTask().catch(error => console.warn(error));
+      await registerRescheduleTask().catch((error: unknown) => console.warn(error));
     };
-    setup();
+    void setup();
   }, [ready, requestPermission]);
 
   return {registered};

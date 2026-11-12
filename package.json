@@ -10,7 +10,9 @@
     "doctor": "expo-doctor",
     "typecheck": "tsc --noEmit",
     "test": "jest",
-    "lint": "expo lint"
+    "lint": "expo lint . --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@bacons/apple-targets": "^5.0.0",
@@ -52,10 +54,13 @@
     "@types/react": "~19.3.0",
     "eslint": "^9",
     "eslint-config-expo": "^58.0.4",
+    "eslint-config-prettier": "^10.1.8",
     "jest": "^30.5.2",
     "jest-expo": "^58.0.14",
+    "prettier": "^3.10.1",
     "test-renderer": "^1",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8"
   },
   "jest": {
     "preset": "jest-expo",

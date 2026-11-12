@@ -73,7 +73,7 @@ const useHeading = () => {
     setHeading(null);
     setAccuracy(null);
     setStatus('starting');
-    watch();
+    void watch();
   }, [watch]);
 
   /** Ask for location permission (or open Settings once the phone won't ask again). */
@@ -86,7 +86,7 @@ const useHeading = () => {
     setCanAskAgain(permission.canAskAgain);
     if (permission.granted) {
       setStatus('starting');
-      watch();
+      void watch();
     }
   }, [canAskAgain, watch]);
 
@@ -99,7 +99,7 @@ const useHeading = () => {
         }
         setCanAskAgain(permission.canAskAgain);
         if (permission.granted) {
-          watch();
+          void watch();
         } else {
           setStatus('denied');
         }

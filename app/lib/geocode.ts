@@ -14,7 +14,7 @@ const describe = (place: ExpoLocation.LocationGeocodedAddress): Place => {
   const region =
     place.region && place.region.length <= 3
       ? place.region
-      : place.isoCountryCode ?? place.region;
+      : (place.isoCountryCode ?? place.region);
   return {
     city: [city, region].filter(Boolean).join(', ') || undefined,
     countryCode: place.isoCountryCode ?? undefined,
@@ -25,10 +25,11 @@ const describe = (place: ExpoLocation.LocationGeocodedAddress): Place => {
 /** City and country for a coordinate. Empty if the platform geocoder can't tell. */
 export const placeFor = async ({lat, lng}: GeoLocation): Promise<Place> => {
   try {
-    const [place] = await ExpoLocation.reverseGeocodeAsync({
+    const places = await ExpoLocation.reverseGeocodeAsync({
       latitude: lat,
       longitude: lng,
     });
+    const place = places.at(0);
     return place ? describe(place) : {};
   } catch {
     return {};
@@ -36,15 +37,14 @@ export const placeFor = async ({lat, lng}: GeoLocation): Promise<Place> => {
 };
 
 /** "Calgary, AB" for a coordinate, or undefined if the platform geocoder can't tell. */
-export const cityName = async (location: GeoLocation) =>
-  (await placeFor(location)).city;
+export const cityName = async (location: GeoLocation) => (await placeFor(location)).city;
 
 /** The first match for a typed city name, or null. Uses the platform geocoder. */
 export const searchPlace = async (
   query: string,
 ): Promise<{location: GeoLocation; place: Place} | null> => {
   try {
-    const [hit] = await ExpoLocation.geocodeAsync(query.trim());
+    const hit = (await ExpoLocation.geocodeAsync(query.trim())).at(0);
     if (!hit) {
       return null;
     }

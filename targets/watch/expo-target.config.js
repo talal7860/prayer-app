@@ -9,6 +9,7 @@ module.exports = config => ({
   icon: '../../assets/images/icon.png',
   frameworks: ['SwiftUI', 'WatchConnectivity', 'WidgetKit'],
   entitlements: {
-    'com.apple.security.application-groups': config.ios.entitlements['com.apple.security.application-groups'],
+    'com.apple.security.application-groups':
+      config.ios.entitlements['com.apple.security.application-groups'],
   },
 });

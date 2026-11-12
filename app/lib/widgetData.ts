@@ -95,7 +95,8 @@ export const nextPrayerProps = (settings: Settings, at: Date): NextPrayerProps =
       .filter(p => LISTED.includes(p.key))
       .map(p => ({
         name: p.label,
-        label: p.key === 'dhuhr' && p.label !== I18n.t('prayer.dhuhr') ? p.label : I18n.t(SHORT[p.key]),
+        label:
+          p.key === 'dhuhr' && p.label !== I18n.t('prayer.dhuhr') ? p.label : I18n.t(SHORT[p.key]),
         time: fmt(p.time),
         hm: formatTime(p.time, settings.timeFormat, false),
         next: isNext(p),
@@ -132,7 +133,10 @@ export const widgetTimeline = (settings: Settings, now: Date = new Date()) => {
  * The Live Activity for the next prayer, if it's within the hour and the setting is on;
  * otherwise null (and `syncLiveActivity` ends any running one).
  */
-export const activityFor = (settings: Settings, now: Date = new Date()): PrayerActivityProps | null => {
+export const activityFor = (
+  settings: Settings,
+  now: Date = new Date(),
+): PrayerActivityProps | null => {
   if (!settings.liveActivity) {
     return null;
   }

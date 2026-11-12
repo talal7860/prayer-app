@@ -19,14 +19,10 @@ export const SectionLabel = ({children}: {children: string}) => {
   );
 };
 
-export const Card = ({
-  children,
-  style,
-}: PropsWithChildren<{style?: ViewStyle}>) => {
+export const Card = ({children, style}: PropsWithChildren<{style?: ViewStyle}>) => {
   const {t} = usePalette();
   return (
-    <View
-      style={[styles.card, {backgroundColor: t.bg, borderColor: t.border}, style]}>
+    <View style={[styles.card, {backgroundColor: t.bg, borderColor: t.border}, style]}>
       {children}
     </View>
   );

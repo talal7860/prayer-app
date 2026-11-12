@@ -28,7 +28,11 @@ it('skips muted prayers and past times', () => {
 });
 
 it('never schedules sunrise, even when its bell was on', () => {
-  const plan = planNotifications([day(11)], {muted: {}, headsUp: true, timeFormat: '24h'}, at(11, 0, 0));
+  const plan = planNotifications(
+    [day(11)],
+    {muted: {}, headsUp: true, timeFormat: '24h'},
+    at(11, 0, 0),
+  );
   expect(plan.some(p => p.prayer === 'sunrise')).toBe(false);
 });
 
@@ -50,7 +54,11 @@ it('adds a heads-up 10 minutes before each prayer', () => {
 
 it('stays under the iOS limit of 64 pending notifications for 5 days', () => {
   const days = [11, 12, 13, 14, 15].map(day);
-  const plan = planNotifications(days, {muted: {sunrise: true}, headsUp: true, timeFormat: '12h'}, at(11, 0));
+  const plan = planNotifications(
+    days,
+    {muted: {sunrise: true}, headsUp: true, timeFormat: '12h'},
+    at(11, 0),
+  );
   expect(plan.length).toBe(50);
 });
 
@@ -58,7 +66,11 @@ describe('fillSchedule', () => {
   const days = Array.from({length: 14}, (_, i) => day(11 + i));
 
   it('fills the iOS limit and ends with a reminder to open the app', () => {
-    const plan = fillSchedule(days, {muted: {sunrise: true}, headsUp: false, timeFormat: '12h'}, at(11, 0));
+    const plan = fillSchedule(
+      days,
+      {muted: {sunrise: true}, headsUp: false, timeFormat: '12h'},
+      at(11, 0),
+    );
     expect(plan).toHaveLength(MAX_PENDING);
     // 5 a day: 63 prayers reach Isha's day after 12 full days (12 * 5 = 60, then 3 more).
     const last = plan[MAX_PENDING - 2];
@@ -71,7 +83,11 @@ describe('fillSchedule', () => {
   });
 
   it('plans all 14 days when they fit', () => {
-    const plan = fillSchedule(days, {muted: {fajr: true, sunrise: true, dhuhr: true}, headsUp: false, timeFormat: '12h'}, at(11, 0));
+    const plan = fillSchedule(
+      days,
+      {muted: {fajr: true, sunrise: true, dhuhr: true}, headsUp: false, timeFormat: '12h'},
+      at(11, 0),
+    );
     expect(plan).toHaveLength(14 * 3 + 1);
   });
 

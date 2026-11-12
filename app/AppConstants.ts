@@ -22,10 +22,15 @@ const notificationChannels: NotificationChannels = {
   },
 };
 
+/** A sound's display name. A saved key may be a sound this version no longer has. */
+const soundName = (key: string): string | undefined =>
+  Object.hasOwn(sounds, key) ? sounds[key].name : undefined;
+
 const asrJuristics = ['Standard', 'Hanafi'];
 
 export default {
   notificationChannels,
   sounds,
+  soundName,
   asrJuristics,
 };

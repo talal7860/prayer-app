@@ -29,6 +29,8 @@ it('after Isha the next prayer is the next day’s Fajr', () => {
   const props = nextPrayerProps(settings, new Date(at('isha').getTime() + minutes(30)));
   expect(props.next).toBe('Fajr');
   expect(props.at).toBeGreaterThan(at('isha').getTime());
+  // The list moves on to the next day, so it shows the Fajr it counts down to.
+  expect(props.prayers.filter(p => p.next).map(p => p.name)).toEqual(['Fajr']);
 });
 
 it('the timeline has an entry now and at each prayer time, moving to the next prayer', () => {

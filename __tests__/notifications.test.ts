@@ -56,13 +56,15 @@ it('runs calls one at a time, so cancels never interleave', async () => {
 
 it('the background task reschedules from the saved settings', async () => {
   const AsyncStorage = require('@react-native-async-storage/async-storage');
-  const edmonton = {location: {lat: 53.5461, lng: -113.4938}, city: 'Edmonton, AB', muted: {sunrise: false}};
+  const edmonton = {location: {lat: 53.5461, lng: -113.4938}, city: 'Edmonton, AB', muted: {isha: true}};
   await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(edmonton));
   const TaskManager = require('expo-task-manager');
   require('../app/backgroundTask');
-  const [[name, task]] = TaskManager.defineTask.mock.calls;
-  expect(name).toBe('reschedule-prayer-notifications');
+  const [, task] = TaskManager.defineTask.mock.calls.find(
+    ([name]: [string]) => name === 'reschedule-prayer-notifications',
+  );
   await expect(task({})).resolves.toBe(1);
-  // Sunrise isn't muted in the saved settings, so it's scheduled.
-  expect(scheduled().some(r => r.content.title.includes('Sunrise'))).toBe(true);
+  // Isha is muted in the saved settings, so none is scheduled.
+  expect(scheduled().length).toBeGreaterThan(20);
+  expect(scheduled().some(r => r.content.title.includes('Isha'))).toBe(false);
 });

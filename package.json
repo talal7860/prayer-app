@@ -61,7 +61,14 @@
     "setupFiles": [
       "./jest.setup.js"
     ],
-    "globalSetup": "./jest.globalSetup.js"
+    "globalSetup": "./jest.globalSetup.js",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/\\.claude/"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/\\.claude/"
+    ]
   },
   "main": "index.js"
 }

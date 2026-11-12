@@ -1,12 +1,11 @@
-import {useCallback, useEffect, useMemo, useState} from 'react';
-import {range} from 'lodash/fp';
-import {Alert, Platform} from 'react-native';
+import {useCallback, useEffect, useState} from 'react';
+import {Alert, AppState, Platform} from 'react-native';
 import * as Notifications from 'expo-notifications';
 import I18n from '../I18n';
 import AppConstants from '../AppConstants';
 import useAppSettings from './useAppSettings';
-import {addDays} from '../lib/prayerDay';
-import {planNotifications} from '../lib/schedule';
+import {rescheduleNotifications} from '../lib/notifications';
+import {registerRescheduleTask} from '../backgroundTask';
 
 const createChannels = () =>
   Promise.all(
@@ -24,9 +23,17 @@ const createChannels = () =>
     ),
   );
 
+/**
+ * Keeps the scheduled prayer notifications in sync: on every settings change, at the start
+ * of each day, and each time the app comes back to the foreground. A background task
+ * (app/backgroundTask.ts) does the same while the app isn't opened.
+ */
 const usePushNotifications = () => {
   const [registered, setRegistered] = useState(false);
-  const {settings, getPrayerTimes, today} = useAppSettings();
+  const [foregrounded, setForegrounded] = useState(0);
+  const {settings, today} = useAppSettings();
+  // Ask for permission once the first-run setup is done, not over it.
+  const ready = settings.onboarded;
 
   const requestPermission = useCallback(async () => {
     try {
@@ -42,55 +49,36 @@ const usePushNotifications = () => {
     }
   }, []);
 
-  const plan = useMemo(() => {
-    const base = new Date(today);
-    const days = range(0, AppConstants.numberOfDaysToFetch).map(i =>
-      getPrayerTimes(addDays(base, i)),
-    );
-    return planNotifications(days, settings);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getPrayerTimes, today, settings.muted, settings.headsUp, settings.timeFormat]);
-
   useEffect(() => {
-    if (!registered || !settings.sound) {
+    if (!ready || !registered || !settings.sound) {
       return;
     }
-    const adhan = AppConstants.notificationChannels[settings.sound];
-    const plain = AppConstants.notificationChannels.default;
-    const schedule = async () => {
-      await Notifications.cancelAllScheduledNotificationsAsync();
-      await Promise.all(
-        plan.map(n => {
-          const channel = n.kind === 'adhan' ? adhan : plain;
-          return Notifications.scheduleNotificationAsync({
-            content: {
-              title: n.title,
-              body: '',
-              // iOS reads the sound from the content; Android from the channel.
-              sound: channel.soundName,
-            },
-            trigger: {
-              type: Notifications.SchedulableTriggerInputTypes.DATE,
-              date: n.date,
-              channelId: channel.channelId,
-            },
-          });
-        }),
-      );
-    };
-    schedule().catch(error => console.warn(error));
-  }, [registered, plan, settings.sound]);
+    rescheduleNotifications(settings).catch(error => console.warn(error));
+  }, [ready, registered, settings, today, foregrounded]);
 
   useEffect(() => {
+    const sub = AppState.addEventListener('change', state => {
+      if (state === 'active') {
+        setForegrounded(n => n + 1);
+      }
+    });
+    return () => sub.remove();
+  }, []);
+
+  useEffect(() => {
+    if (!ready) {
+      return;
+    }
     const setup = async () => {
       if (Platform.OS === 'android') {
         // A failed channel must not stop the permission request below.
         await createChannels().catch(error => console.warn(error));
       }
       await requestPermission();
+      await registerRescheduleTask().catch(error => console.warn(error));
     };
     setup();
-  }, [requestPermission]);
+  }, [ready, requestPermission]);
 
   return {registered};
 };

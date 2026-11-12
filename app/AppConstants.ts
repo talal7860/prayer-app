@@ -1,7 +1,5 @@
 import I18n from './I18n';
 
-const numberOfDaysToFetch = 5;
-
 const sounds: Sounds = {
   mecca: {
     name: I18n.t('sounds.mecca'),
@@ -28,7 +26,6 @@ const asrJuristics = ['Standard', 'Hanafi'];
 
 export default {
   notificationChannels,
-  numberOfDaysToFetch,
   sounds,
   asrJuristics,
 };

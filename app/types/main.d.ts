@@ -24,6 +24,9 @@ type AsrJuristics = 'Hanafi' | 'Standard';
 
 type TimeFormat = '12h' | '24h';
 
+/** How Fajr and Isha are set where twilight doesn't end (high latitudes in summer). */
+type HighLatRule = 'NightMiddle' | 'AngleBased' | 'OneSeventh';
+
 type Settings = {
   location: GeoLocation;
   /** Display name for `location`, e.g. "Calgary, AB". From reverse geocoding. */
@@ -36,6 +39,9 @@ type Settings = {
   /** Extra reminder 10 minutes before each prayer. */
   headsUp: boolean;
   timeFormat: TimeFormat;
+  highLats: HighLatRule;
+  /** The first-run setup was finished. Saved settings from before it existed count as done. */
+  onboarded: boolean;
   /** Location (rounded) the user chose to keep when the travel prompt showed. */
   travelDismissedAt?: GeoLocation;
 };
@@ -67,6 +73,8 @@ interface AppSettingsContextInterface {
   getPrayerTimes: (date?: Date) => PrayerTimeLabel[];
   calculationMethod: () => string;
   today: number;
+  /** The saved settings have been read. Until then `settings` are the defaults. */
+  loaded: boolean;
 }
 
 interface SettingsTitleInterface {

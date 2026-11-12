@@ -12,7 +12,8 @@ location, lets the user pick calculation methods, and schedules a local notifica
   `npx expo prebuild` and are git-ignored. Never hand-edit them. Change `app.json`
   (or add a config plugin) and re-run prebuild.
 - Navigation: React Navigation 7 (`native-stack` + `bottom-tabs`), see `App.tsx`.
-- Notifications: `expo-notifications` (`index.js` handler, `app/hooks/usePushNotifications.ts`).
+- Notifications: `expo-notifications` (`index.js` handler, `app/hooks/usePushNotifications.ts`,
+  `app/lib/notifications.ts`), kept topped up by `expo-background-task` (`app/backgroundTask.ts`).
 - Location: `expo-location` (`app/screens/SettingsScreen/Location/index.tsx`).
 - Storage: `@react-native-async-storage/async-storage` 2.x (Expo-pinned, not 3.x).
 - i18n: `i18n-js` v4 (`app/I18n.ts`, strings in `app/locales/en.json`).
@@ -24,8 +25,27 @@ location, lets the user pick calculation methods, and schedules a local notifica
 The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/TzzomF9PAhGP8cMVuSz2NK
 (epic #21).
 
-- `App.tsx`: loads Inter, then a root stack (tabs + `location`, `method`, `sound`) over
-  bottom tabs `today` / `week` / `settings`. `usePushNotifications()` is mounted once here.
+- `App.tsx`: loads Inter, waits for the saved settings (`loaded`), then a root stack over
+  bottom tabs `today` / `week` / `settings`, plus `location`, `method`, `highLats`, `sound`.
+  `usePushNotifications()` is mounted once here.
+- **First-run setup** (`app/screens/SetupScreen`): while `settings.onboarded` is false the
+  stack has only `setup`. It asks for location (GPS via `useLocate`, or a typed city through
+  `geocodeAsync`), method, Asr, and the high-latitude rule (only at |lat| ≥ 48°), then shows
+  today's times. Method and Asr are preselected from the country (`app/lib/recommend.ts`).
+  Nothing is saved until Start. Saved settings without `onboarded` (installs from before the
+  setup) count as done (`parseSettings`). The notification permission prompt waits for it.
+- **Notification scheduling**: `rescheduleNotifications(settings)` (`app/lib/notifications.ts`)
+  cancels everything and schedules `fillSchedule` from `app/lib/schedule.ts`: as many prayers
+  as fit under iOS's **64 pending notifications** (about 12 days, planned from 14), plus one
+  last "Open Prayer Times…" reminder just after them. It runs on settings changes, at day
+  change, on every foreground, and from the background task (`expo-background-task`, at most
+  every 12 h, reading settings from AsyncStorage via `loadSettings`). Calls are queued so they
+  never interleave. Before this, only 5 days were scheduled and only while the app was open,
+  so notifications stopped if it wasn't opened for 5 days.
+  Background tasks **don't run on the iOS simulator**; test on a device (or Android).
+- Pure, React-free modules (usable from the background task): `app/lib/prayerTimes.ts`
+  (`prayerTimesFor(settings, date)`, `methodName`), `app/lib/settingsStore.ts` (defaults,
+  `parseSettings`, `loadSettings`). The settings context wraps them.
 - `app/theme/tokens.ts`: light/dark palettes, per-period sky gradients, Inter font names.
   Use these instead of hex values in screens.
 - `app/components/ui/`: `Text` (Inter, pick the weight with `weight`, not `fontWeight`),
@@ -38,7 +58,11 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
   device is > 25 km from the saved location, Today shows the travel banner. It never prompts.
 - `useCityName` fills `settings.city` by reverse geocoding when it's missing.
 - Settings model (`Settings` in `main.d.ts`): `muted` (per-prayer bells; Sunrise muted by
-  default), `headsUp` (extra notification 10 min before), `timeFormat`, `city`.
+  default), `headsUp` (extra notification 10 min before), `timeFormat`, `city`, `highLats`
+  (`NightMiddle` default / `AngleBased` / `OneSeventh`), `onboarded`.
+- Far north in summer Isha can be after midnight (Calgary, June, Karachi: 01:38).
+  `prayerTimesFor` dates a Maghrib/Isha earlier than Dhuhr to the **next** day.
+- Times are always shown in the phone's timezone, even for a searched city elsewhere.
 - Fajr and Isha always come from the calculation method's angles. The old
   `fajrIshaCalculation: '90mins'` rule (Fajr = sunrise − 90 min, Isha = maghrib + 90 min,
   patched into `PrayTimes.js`) was **removed on purpose**; a saved value is dropped on load.
@@ -134,6 +158,10 @@ Tracking epic: https://github.com/talal7860/prayer-app/issues/11 (sub-issues #3�
   `.types` module); there is an inline disable for it.
 - **RNTL 14 `render` is async**: `await render(<App />)`. The App test mocks AsyncStorage,
   safe-area-context and expo-notifications (`__tests__/index.test.tsx`).
+- `setSetting(key)(undefined)` keeps the old value (lodash `merge` skips undefined). To clear a
+  field, use `setSettings(prev => ({...prev, key: undefined}))`.
+- Settings are saved only after they've been loaded (`loaded`), so a change back to a default
+  value is saved too.
 - Android notification channels are immutable once created on a device. To change a
   channel's sound or importance, give it a new `channelId` in `app/AppConstants.ts`.
 - iOS takes the sound from the notification content, Android from the channel; both are

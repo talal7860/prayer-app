@@ -12,6 +12,7 @@ import useAppSettings from '../../hooks/useAppSettings';
 import usePalette from '../../hooks/usePalette';
 import I18n from '../../I18n';
 import {formatCoords} from '../../lib/prayerDay';
+import {isHighLatitude} from '../../lib/recommend';
 
 const SettingsScreen = () => {
   const navigation = useNavigation<any>();
@@ -58,6 +59,13 @@ const SettingsScreen = () => {
             subtitle={calculationMethod()}
             onPress={() => navigation.navigate('method')}
           />
+          {isHighLatitude(settings.location) ? (
+            <Row
+              title={I18n.t('settings.highLats')}
+              subtitle={I18n.t(`highLats.${settings.highLats}`)}
+              onPress={() => navigation.navigate('highLats')}
+            />
+          ) : null}
           <Row title={I18n.t('settings.asr')} last>
             <Segmented
               accessibilityLabel={I18n.t('settings.asr')}

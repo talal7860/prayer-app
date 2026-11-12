@@ -28,6 +28,9 @@ import SettingsScreen from './app/screens/SettingsScreen';
 import LocationScreen from './app/screens/SettingsScreen/Location';
 import MethodScreen from './app/screens/SettingsScreen/Method';
 import SoundScreen from './app/screens/SettingsScreen/Sound';
+import HighLatsScreen from './app/screens/SettingsScreen/HighLats';
+import SetupScreen from './app/screens/SetupScreen';
+import useAppSettings from './app/hooks/useAppSettings';
 import {fonts} from './app/theme/tokens';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -77,6 +80,7 @@ const Tabs = () => {
 
 const Root = () => {
   const {t, isDark} = usePalette();
+  const {settings, loaded} = useAppSettings();
   // Keeps the scheduled prayer notifications in sync with the settings.
   usePushNotifications();
   const base = isDark ? DarkTheme : DefaultTheme;
@@ -91,6 +95,9 @@ const Root = () => {
       border: t.border,
     },
   };
+  if (!loaded) {
+    return null;
+  }
   return (
     <NavigationContainer theme={theme}>
       <Stack.Navigator
@@ -100,7 +107,12 @@ const Root = () => {
           headerShadowVisible: false,
           contentStyle: {backgroundColor: t.surface},
         }}>
-        <Stack.Screen name="tabs" component={Tabs} options={{headerShown: false}} />
+        {settings.onboarded ? (
+          <Stack.Screen name="tabs" component={Tabs} options={{headerShown: false, animation: 'fade'}} />
+        ) : (
+          // Until the first-run setup is done it's the only screen. Finishing it swaps in the tabs.
+          <Stack.Screen name="setup" component={SetupScreen} options={{headerShown: false, animation: 'fade'}} />
+        )}
         <Stack.Screen
           name="location"
           component={LocationScreen}
@@ -110,6 +122,11 @@ const Root = () => {
           name="method"
           component={MethodScreen}
           options={{title: I18n.t('methods.title')}}
+        />
+        <Stack.Screen
+          name="highLats"
+          component={HighLatsScreen}
+          options={{title: I18n.t('highLats.title')}}
         />
         <Stack.Screen
           name="sound"

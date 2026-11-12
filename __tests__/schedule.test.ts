@@ -1,4 +1,4 @@
-import {planNotifications} from '../app/lib/schedule';
+import {fillSchedule, MAX_PENDING, planNotifications} from '../app/lib/schedule';
 
 const at = (d: number, h: number, m = 0) => new Date(2026, 10, d, h, m);
 const day = (d: number): PrayerTimeLabel[] => [
@@ -47,4 +47,31 @@ it('stays under the iOS limit of 64 pending notifications for 5 days', () => {
   const days = [11, 12, 13, 14, 15].map(day);
   const plan = planNotifications(days, {muted: {sunrise: true}, headsUp: true, timeFormat: '12h'}, at(11, 0));
   expect(plan.length).toBe(50);
+});
+
+describe('fillSchedule', () => {
+  const days = Array.from({length: 14}, (_, i) => day(11 + i));
+
+  it('fills the iOS limit and ends with a reminder to open the app', () => {
+    const plan = fillSchedule(days, {muted: {sunrise: true}, headsUp: false, timeFormat: '12h'}, at(11, 0));
+    expect(plan).toHaveLength(MAX_PENDING);
+    // 5 a day: 63 prayers reach Isha's day after 12 full days (12 * 5 = 60, then 3 more).
+    const last = plan[MAX_PENDING - 2];
+    expect(`${last.date.getDate()} ${last.prayer}`).toBe('23 asr');
+    expect(plan[MAX_PENDING - 1]).toMatchObject({
+      kind: 'reminder',
+      date: new Date(last.date.getTime() + 60000),
+      title: 'Open Prayer Times to keep getting prayer notifications',
+    });
+  });
+
+  it('plans all 14 days when they fit', () => {
+    const plan = fillSchedule(days, {muted: {fajr: true, sunrise: true, dhuhr: true}, headsUp: false, timeFormat: '12h'}, at(11, 0));
+    expect(plan).toHaveLength(14 * 3 + 1);
+  });
+
+  it('schedules nothing when every prayer is muted', () => {
+    const muted = {fajr: true, sunrise: true, dhuhr: true, asr: true, maghrib: true, isha: true};
+    expect(fillSchedule(days, {muted, headsUp: false, timeFormat: '12h'}, at(11, 0))).toEqual([]);
+  });
 });

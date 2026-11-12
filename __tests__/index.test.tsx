@@ -75,7 +75,7 @@ describe('first run', () => {
     expect(await screen.findByText('Your prayer times today')).toBeTruthy();
     await fireEvent.press(screen.getByRole('button', {name: 'Start'}));
 
-    expect(await screen.findByLabelText('Turn on Sunrise reminder')).toBeTruthy();
+    expect(await screen.findByLabelText('Turn off Fajr reminder')).toBeTruthy();
     await waitFor(async () =>
       expect(JSON.parse((await AsyncStorage.getItem(SETTINGS_KEY))!)).toMatchObject({
         onboarded: true,
@@ -110,15 +110,17 @@ describe('first run', () => {
   it('skips the setup for people who used the app before it existed', async () => {
     await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify({calculationMethod: 'ISNA'}));
     await render(<App />);
-    expect(await screen.findByLabelText('Turn on Sunrise reminder')).toBeTruthy();
+    expect(await screen.findByLabelText('Turn off Fajr reminder')).toBeTruthy();
   });
 });
 
-it('renders Today and schedules reminders, with Sunrise muted by default', async () => {
+it('renders Today with the five prayers, and never schedules Sunrise', async () => {
   await savedSetup();
   await render(<App />);
   expect(await screen.findAllByText(/fajr/i)).not.toHaveLength(0);
-  expect(screen.getByLabelText('Turn on Sunrise reminder')).toBeTruthy();
+  expect(screen.getByLabelText('Turn off Fajr reminder')).toBeTruthy();
+  // Sunrise is on the sun arc, not in the list.
+  expect(screen.queryByLabelText(/Sunrise reminder/)).toBeNull();
   await waitFor(() =>
     expect(Notifications.scheduleNotificationAsync).toHaveBeenCalled(),
   );

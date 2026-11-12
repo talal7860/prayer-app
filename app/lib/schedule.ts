@@ -25,11 +25,12 @@ export const planNotifications = (
 ): PlannedNotification[] => {
   const plan: PlannedNotification[] = [];
   days.flat().forEach(p => {
-    if (muted[p.key]) {
+    // Sunrise isn't a prayer: it's shown on Today's sun arc, with no bell and no notification.
+    if (muted[p.key] || p.key === 'sunrise') {
       return;
     }
     const time = formatTime(p.time, timeFormat);
-    if (headsUp && p.key !== 'sunrise') {
+    if (headsUp) {
       const date = new Date(p.time.getTime() - HEADS_UP_MINUTES * 60000);
       plan.push({
         kind: 'headsUp',

@@ -27,7 +27,12 @@ it('skips muted prayers and past times', () => {
   expect(plan[0].title).toBe("It's Maghrib time - 4:54 PM");
 });
 
-it('adds a heads-up 10 minutes before each prayer, not before sunrise', () => {
+it('never schedules sunrise, even when its bell was on', () => {
+  const plan = planNotifications([day(11)], {muted: {}, headsUp: true, timeFormat: '24h'}, at(11, 0, 0));
+  expect(plan.some(p => p.prayer === 'sunrise')).toBe(false);
+});
+
+it('adds a heads-up 10 minutes before each prayer', () => {
   const plan = planNotifications(
     [day(11)],
     {muted: {}, headsUp: true, timeFormat: '24h'},

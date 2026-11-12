@@ -31,7 +31,8 @@ export const nextPrayerProps = (settings: Settings, at: Date): NextPrayerProps =
     next: label(info.next.key, info.next.time),
     time: formatTime(info.next.time, settings.timeFormat),
     at: info.next.time.getTime(),
-    prayers: today.map(p => ({
+    // After Isha the next prayer is tomorrow's Fajr: show tomorrow's times then.
+    prayers: (info.next.time > today[today.length - 1].time ? tomorrow : today).map(p => ({
       name: p.label,
       time: formatTime(p.time, settings.timeFormat),
       current: p.key === info.current,

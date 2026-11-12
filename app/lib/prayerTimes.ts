@@ -1,47 +1,83 @@
-import PrayerTimes from './PrayTimes';
+import {
+  CalculationMethod,
+  CalculationParameters,
+  Coordinates,
+  HighLatitudeRule,
+  Madhab,
+  PolarCircleResolution,
+  PrayerTimes,
+} from 'adhan';
 import I18n from '../I18n';
 import {PRAYER_KEYS} from './prayerDay';
 
-//@ts-ignore -- vendored JS class
-const PT = new PrayerTimes('Karachi');
+type Method = Settings['calculationMethod'];
+
+// The saved setting keeps the old PrayTimes keys, so existing installs carry over.
+const METHODS: Record<Method, {name: string; params: () => CalculationParameters}> = {
+  MWL: {name: 'Muslim World League', params: CalculationMethod.MuslimWorldLeague},
+  ISNA: {name: 'Islamic Society of North America (ISNA)', params: CalculationMethod.NorthAmerica},
+  Egypt: {name: 'Egyptian General Authority of Survey', params: CalculationMethod.Egyptian},
+  Makkah: {name: 'Umm Al-Qura University, Makkah', params: CalculationMethod.UmmAlQura},
+  Karachi: {name: 'University of Islamic Sciences, Karachi', params: CalculationMethod.Karachi},
+  Tehran: {name: 'Institute of Geophysics, University of Tehran', params: CalculationMethod.Tehran},
+  // adhan has no preset for Qum: Fajr 16°, Isha 14°, Maghrib 4° below the horizon.
+  Jafari: {
+    name: 'Shia Ithna-Ashari, Leva Institute, Qum',
+    params: () => {
+      const p = CalculationMethod.Other();
+      p.fajrAngle = 16;
+      p.ishaAngle = 14;
+      p.maghribAngle = 4;
+      return p;
+    },
+  },
+};
+
+export const METHOD_KEYS = Object.keys(METHODS) as Method[];
+
+const HIGH_LATS: Record<HighLatRule, (typeof HighLatitudeRule)[keyof typeof HighLatitudeRule]> = {
+  NightMiddle: HighLatitudeRule.MiddleOfTheNight,
+  AngleBased: HighLatitudeRule.TwilightAngle,
+  OneSeventh: HighLatitudeRule.SeventhOfTheNight,
+};
 
 /** The method's display name, e.g. "University of Islamic Sciences, Karachi". */
-export const methodName = (method: Settings['calculationMethod']): string =>
-  PT.getDefaults()[method].name;
+export const methodName = (method: Method): string => METHODS[method]?.name ?? method;
 
-/** That date's prayer times for these settings. No React, so the background task can use it. */
-export const prayerTimesFor = (
-  settings: Pick<Settings, 'calculationMethod' | 'asr' | 'location'> &
-    Partial<Pick<Settings, 'highLats' | 'adjustments'>>,
-  date: Date = new Date(),
-): PrayerTimeLabel[] => {
-  // Reset to the method's own parameters, then apply the user's choices.
-  PT.setMethod(settings.calculationMethod);
-  PT.adjust({asr: settings.asr, highLats: settings.highLats ?? 'NightMiddle'});
-  // Minutes to match the local mosque. tune() merges, so set every prayer each time.
-  PT.tune(Object.fromEntries(PRAYER_KEYS.map(k => [k, settings.adjustments?.[k] ?? 0])));
-  const times = PT.getTimes(
+type Calc = Pick<Settings, 'calculationMethod' | 'asr' | 'location'> &
+  Partial<Pick<Settings, 'highLats' | 'adjustments'>>;
+
+const paramsFor = (settings: Calc) => {
+  const params = (METHODS[settings.calculationMethod] ?? METHODS.MWL).params();
+  params.madhab = settings.asr === 'Hanafi' ? Madhab.Hanafi : Madhab.Shafi;
+  params.highLatitudeRule = HIGH_LATS[settings.highLats ?? 'NightMiddle'];
+  // Where the sun doesn't set or rise at all, use the nearest latitude where it does.
+  params.polarCircleResolution = PolarCircleResolution.AqrabBalad;
+  // Minutes to match the local mosque (on top of the method's own adjustments).
+  PRAYER_KEYS.forEach(key => {
+    params.adjustments[key] = settings.adjustments?.[key] ?? 0;
+  });
+  return params;
+};
+
+/**
+ * That date's prayer times for these settings (the `adhan` library). No React, so the
+ * background task can use it. Times are real instants: a far-north Isha after midnight is
+ * already on the next calendar day.
+ */
+export const prayerTimesFor = (settings: Calc, date: Date = new Date()): PrayerTimeLabel[] => {
+  const times = new PrayerTimes(
+    new Coordinates(settings.location.lat, settings.location.lng),
     date,
-    [settings.location.lat, settings.location.lng],
-    -date.getTimezoneOffset() / 60,
-    0,
-    '24h',
+    paramsFor(settings),
   );
-  const dhuhr = Number(times.dhuhr.split(':')[0]);
   return PRAYER_KEYS.map(prayer => {
-    const prayerDate = new Date(date);
-    const [hours, minutes] = times[prayer].split(':').map(Number);
-    prayerDate.setHours(hours, minutes, 0, 0);
-    // Far north in summer Isha can fall after midnight ("01:38"). It's still this
-    // evening's Isha, so it belongs to the next calendar day, not this morning.
-    if ((prayer === 'maghrib' || prayer === 'isha') && hours < dhuhr) {
-      prayerDate.setDate(prayerDate.getDate() + 1);
-    }
+    const time = times[prayer];
     const label =
-      prayer === 'dhuhr' && prayerDate.getDay() === 5
+      prayer === 'dhuhr' && time.getDay() === 5
         ? I18n.t('prayer.jumuah')
         : I18n.t(`prayer.${prayer}`);
-    return {key: prayer, label, time: prayerDate};
+    return {key: prayer, label, time};
   });
 };
 

@@ -38,7 +38,7 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
 (epic #21).
 
 - `App.tsx`: loads Inter, waits for the saved settings (`loaded`), then a root stack over
-  bottom tabs `today` / `week` / `settings`, plus `qibla`, `location`, `method`, `highLats`, `sound`.
+  bottom tabs `today` / `week` / `qibla` / `settings`, plus `location`, `method`, `highLats`, `sound`.
   `usePushNotifications()` is mounted once here.
 - **First-run setup** (`app/screens/SetupScreen`): while `settings.onboarded` is false the
   stack has only `setup`. It asks for location (GPS via `useLocate`, or a typed city through
@@ -76,8 +76,9 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
   - Android: **coarse location only** (`ACCESS_FINE_LOCATION` and `FOREGROUND_SERVICE_LOCATION`
     are in `blockedPermissions`; city-level is enough for prayer times). Geofencing needs fine
     location, so the background task (~every 12 h) runs `checkTravel` instead.
-- **Qibla finder** (#38): a stack screen opened from the compass button in Today's top bar (not a
-  4th tab: the redesign has three). `app/lib/qibla.ts` (pure, tested): adhan's `Qibla()` bearing from
+- **Qibla finder** (#38): the `qibla` bottom tab (it was a stack screen behind a compass button in
+  Today's top bar; moved to a tab on request). It's mounted only while its tab is focused
+  (`QiblaTab` in `App.tsx`), so the compass stops when you switch tabs. `app/lib/qibla.ts` (pure, tested): adhan's `Qibla()` bearing from
   true north for `settings.location`, distance to the Kaaba, offset/`unwrap` (the dial turns the short
   way across north), facing within ±5° (stops past ±8°). `useHeading` wraps
   `watchHeadingAsync` (`trueHeading`, else `magHeading` when it's −1); location permission only, it

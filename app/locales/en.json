@@ -238,5 +238,11 @@
     "e": "E",
     "s": "S",
     "w": "W"
+  },
+  "exactAlarm": {
+    "title": "On-time adhan",
+    "body": "Android can deliver the adhan late unless Adhan App may set exact alarms. Turn on “Alarms & reminders”.",
+    "allow": "Allow",
+    "settingsHint": "Off: the adhan can be late"
   }
 }

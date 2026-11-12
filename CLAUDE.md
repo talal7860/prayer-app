@@ -288,6 +288,14 @@ One-time setup (needs the account owner):
   channel id (the WAV one is `adhan-makkah`; the old `prayer-time-notifications-mecca` is deleted
   on launch).
 - Android permissions include `SCHEDULE_EXACT_ALARM` so prayer notifications fire on time.
+  **Android 14+ doesn't grant it to new installs**: without it Android may deliver the adhan
+  (and the widget's re-render alarm) tens of minutes late (`dumpsys alarm` shows `window=+38m`).
+  The local module `modules/exact-alarm` (Android only) checks `canScheduleExactAlarms()` and
+  opens the app's "Alarms & reminders" page. `useExactAlarms` re-checks on every foreground, and
+  `ExactAlarmPrompt` asks on Today, at the end of the setup and in Settings → Notifications
+  while it's off. Coming back from that page is a foreground, so `usePushNotifications`
+  reschedules everything, exact this time. (Not `USE_EXACT_ALARM`: Play allows that only for
+  alarm-clock and calendar apps.)
   Location is coarse only (see Travel alerts).
 
 ## Upgrade history (RN 0.65.1 → 0.88.1, Nov 2026)

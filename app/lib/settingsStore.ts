@@ -17,7 +17,8 @@ export const defaultSettings: Settings = Object.freeze({
   adjustments: {},
   travelAlerts: false,
   headsUp: false,
-  liveActivity: true,
+  // Opt-in: off until someone turns it on (setup or Settings → Notifications).
+  liveActivity: false,
   timeFormat: '12h',
   highLats: 'NightMiddle',
   onboarded: false,

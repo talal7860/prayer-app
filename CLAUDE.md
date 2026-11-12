@@ -65,10 +65,13 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
 - `useTravelCheck`: on foreground, if location permission is **already** granted and today's
   prayer times where the device is differ from the saved location's by **≥ 2 minutes**
   (`movedEnough` in `app/lib/travel.ts`), Today shows the travel banner. It never prompts.
-- **Travel alerts** (opt-in, Settings → Location): `app/travelTask.ts` keeps a 25 km geofence
-  (`expo-location` `startGeofencingAsync`) on the saved location. Needs "Always" location
-  (Android: `ACCESS_BACKGROUND_LOCATION`, via `isAndroidBackgroundLocationEnabled`). On exit,
-  if the times differ by ≥ 2 min, it posts "You're in {city}"; opening the app shows the banner.
+- **Travel alerts** (opt-in, Settings → Location), "Always" location. `checkTravel`
+  (`app/travelTask.ts`) posts "You're in {city}" when the times differ by ≥ 2 min, once per new
+  place (`@prayer_app:travelNotifiedAt`); opening the app shows the banner.
+  - iOS: a 25 km geofence (`startGeofencingAsync`) on the saved location wakes the app.
+  - Android: **coarse location only** (`ACCESS_FINE_LOCATION` and `FOREGROUND_SERVICE_LOCATION`
+    are in `blockedPermissions`; city-level is enough for prayer times). Geofencing needs fine
+    location, so the background task (~every 12 h) runs `checkTravel` instead.
 - **Adjust times** (Settings → Calculation): per-prayer ± minutes (`settings.adjustments`,
   ±30), applied with PrayTimes `tune()` in `prayerTimesFor`. `tune()` merges, so every call
   sets all six keys.
@@ -180,6 +183,7 @@ One-time setup (needs the account owner):
   channel id (the WAV one is `adhan-makkah`; the old `prayer-time-notifications-mecca` is deleted
   on launch).
 - Android permissions include `SCHEDULE_EXACT_ALARM` so prayer notifications fire on time.
+  Location is coarse only (see Travel alerts).
 
 ## Upgrade history (RN 0.65.1 → 0.88.1, Nov 2026)
 

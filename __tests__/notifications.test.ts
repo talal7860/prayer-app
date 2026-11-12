@@ -60,8 +60,9 @@ it('the background task reschedules from the saved settings', async () => {
   await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(edmonton));
   const TaskManager = require('expo-task-manager');
   require('../app/backgroundTask');
-  const [[name, task]] = TaskManager.defineTask.mock.calls;
-  expect(name).toBe('reschedule-prayer-notifications');
+  const [, task] = TaskManager.defineTask.mock.calls.find(
+    ([name]: [string]) => name === 'reschedule-prayer-notifications',
+  );
   await expect(task({})).resolves.toBe(1);
   // Isha is muted in the saved settings, so none is scheduled.
   expect(scheduled().length).toBeGreaterThan(20);

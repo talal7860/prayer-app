@@ -19,6 +19,7 @@ const paths = {
   check: 'M5 12.5l4.5 4.5L19 7.5',
   navigate: 'M3 11l18-8-8 18-2-8-8-2z',
   back: 'M15 6l-6 6 6 6',
+  compass: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M15.5 8.5l-2.2 4.8-4.8 2.2 2.2-4.8z',
 } as const;
 
 export type IconName =

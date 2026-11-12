@@ -41,14 +41,18 @@ const HIGH_LATS: Record<HighLatRule, (typeof HighLatitudeRule)[keyof typeof High
   OneSeventh: HighLatitudeRule.SeventhOfTheNight,
 };
 
+/** The method for a saved key. A value saved by another version may not be one of ours. */
+const methodFor = (method: Method) =>
+  Object.hasOwn(METHODS, method) ? METHODS[method] : undefined;
+
 /** The method's display name, e.g. "University of Islamic Sciences, Karachi". */
-export const methodName = (method: Method): string => METHODS[method]?.name ?? method;
+export const methodName = (method: Method): string => methodFor(method)?.name ?? method;
 
 type Calc = Pick<Settings, 'calculationMethod' | 'asr' | 'location'> &
   Partial<Pick<Settings, 'highLats' | 'adjustments'>>;
 
 const paramsFor = (settings: Calc) => {
-  const params = (METHODS[settings.calculationMethod] ?? METHODS.MWL).params();
+  const params = (methodFor(settings.calculationMethod) ?? METHODS.MWL).params();
   params.madhab = settings.asr === 'Hanafi' ? Madhab.Hanafi : Madhab.Shafi;
   params.highLatitudeRule = HIGH_LATS[settings.highLats ?? 'NightMiddle'];
   // Where the sun doesn't set or rise at all, use the nearest latitude where it does.

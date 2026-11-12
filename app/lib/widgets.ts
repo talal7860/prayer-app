@@ -30,7 +30,9 @@ export const syncLiveActivity = async (settings: Settings, now: Date = new Date(
   }
   try {
     const wanted = activityFor(settings, now);
-    const [current, ...extra] = PrayerActivity.getInstances();
+    const instances = PrayerActivity.getInstances();
+    const current = instances.at(0);
+    const extra = instances.slice(1);
     // One activity at a time. Update it in place rather than ending and restarting it.
     await Promise.all(extra.map(a => a.end('immediate')));
     if (!wanted) {

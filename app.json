@@ -12,16 +12,11 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Location Services required for fetching city and country",
         "UIViewControllerBasedStatusBarAppearance": false,
-        "UIBackgroundModes": [
-          "fetch",
-          "processing"
-        ]
+        "UIBackgroundModes": ["fetch", "processing"]
       },
       "appleTeamId": "APPLE_TEAM_ID_REDACTED",
       "entitlements": {
-        "com.apple.security.application-groups": [
-          "group.com.conelabs.adhanapp"
-        ],
+        "com.apple.security.application-groups": ["group.com.conelabs.adhanapp"],
         "com.apple.developer.usernotifications.time-sensitive": true
       },
       "config": {
@@ -52,9 +47,7 @@
       [
         "expo-notifications",
         {
-          "sounds": [
-            "./assets/sounds/makkah_azan.wav"
-          ],
+          "sounds": ["./assets/sounds/makkah_azan.wav"],
           "color": "#ffffff",
           "enableRemoteNotifications": false
         }
@@ -115,10 +108,7 @@
               "displayName": "Prayer ring",
               "description": "Time left to the next prayer, as a ring.",
               "ios": {
-                "supportedFamilies": [
-                  "systemSmall",
-                  "accessoryCircular"
-                ]
+                "supportedFamilies": ["systemSmall", "accessoryCircular"]
               },
               "android": null
             }

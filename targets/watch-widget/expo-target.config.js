@@ -8,6 +8,7 @@ module.exports = config => ({
   deploymentTarget: '10.0',
   frameworks: ['SwiftUI', 'WidgetKit'],
   entitlements: {
-    'com.apple.security.application-groups': config.ios.entitlements['com.apple.security.application-groups'],
+    'com.apple.security.application-groups':
+      config.ios.entitlements['com.apple.security.application-groups'],
   },
 });

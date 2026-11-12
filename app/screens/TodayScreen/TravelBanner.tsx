@@ -25,12 +25,18 @@ const TravelBanner = ({city, saved, onKeep, onUpdate}: Props) => {
         </View>
       </View>
       <View style={styles.actions}>
-        <Pressable accessibilityRole="button" onPress={onKeep} style={[styles.button, styles.ghost]}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onKeep}
+          style={[styles.button, styles.ghost]}>
           <Text weight="semibold" size={14} color={BLUE}>
             {I18n.t('today.keep', {saved: savedShort})}
           </Text>
         </Pressable>
-        <Pressable accessibilityRole="button" onPress={onUpdate} style={[styles.button, styles.primary]}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onUpdate}
+          style={[styles.button, styles.primary]}>
           <Text weight="semibold" size={14} color="#FFFFFF">
             {I18n.t('today.update')}
           </Text>

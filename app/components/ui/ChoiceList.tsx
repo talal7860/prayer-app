@@ -48,7 +48,14 @@ function ChoiceList<T extends string>({options, value, onChange}: Props<T>) {
 }
 
 const styles = StyleSheet.create({
-  row: {minHeight: 56, paddingHorizontal: 16, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 12},
+  row: {
+    minHeight: 56,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
   text: {flex: 1, minWidth: 0, gap: 2},
 });
 

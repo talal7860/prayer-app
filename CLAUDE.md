@@ -143,7 +143,10 @@ For the next SDK bump: `npx expo install expo@^<next> --fix`, then `npx expo-doc
 - EAS project: `@conelab-it-consultants-inc/prayer-app`. iOS builds two targets (app and the
   `ExpoWidgetsTarget` widget extension), each with its own provisioning profile. Non-interactive
   (CI) builds can't create credentials: create them once with an interactive `eas build -p ios`
-  or `eas credentials -p ios` (needs the Apple ID login).
+  or `eas credentials -p ios` (needs the Apple ID login). An App Store Connect API key is stored
+  on EAS, so non-interactive builds and submits need no Apple login, only
+  `EXPO_APPLE_TEAM_ID=APPLE_TEAM_ID_REDACTED EXPO_APPLE_TEAM_TYPE=COMPANY_OR_ORGANIZATION` (set in
+  `deploy.yml`; without them `--non-interactive` still prompts for the team).
 - Export compliance is declared in `app.json` (`ios.config.usesNonExemptEncryption: false`), so
   neither EAS nor TestFlight asks.
 - Android release builds run `lintVitalRelease`. Strings in `app/locales/native/*.json` must be

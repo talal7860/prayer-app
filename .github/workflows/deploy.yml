@@ -26,6 +26,9 @@ jobs:
         platform: [ios, android]
     env:
       EAS_BUILD_NO_EXPO_GO_WARNING: 'true'
+      # With the App Store Connect API key, non-interactive iOS builds still ask for the team.
+      EXPO_APPLE_TEAM_ID: APPLE_TEAM_ID_REDACTED
+      EXPO_APPLE_TEAM_TYPE: COMPANY_OR_ORGANIZATION
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

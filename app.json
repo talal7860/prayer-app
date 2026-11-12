@@ -126,7 +126,8 @@
         }
       ],
       "expo-sharing",
-      "expo-localization"
+      "expo-localization",
+      "@bacons/apple-targets"
     ],
     "extra": {
       "eas": {

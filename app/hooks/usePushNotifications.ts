@@ -8,6 +8,7 @@ import {rescheduleNotifications} from '../lib/notifications';
 import {registerRescheduleTask} from '../backgroundTask';
 import {syncTravelAlerts} from '../travelTask';
 import {refreshWidgets, syncLiveActivity} from '../lib/widgets';
+import {syncWatch} from '../lib/watch';
 
 // Channels from older versions. A channel's sound can't change, so the WAV adhan got a new one.
 const OLD_CHANNELS = ['prayer-time-notifications-mecca'];
@@ -64,6 +65,7 @@ const usePushNotifications = () => {
     }
     refreshWidgets(settings);
     syncLiveActivity(settings);
+    syncWatch(settings);
   }, [ready, settings, today, foregrounded, backgrounded]);
 
   useEffect(() => {

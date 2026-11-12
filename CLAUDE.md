@@ -90,6 +90,26 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
   `fajrIshaCalculation: '90mins'` rule (Fajr = sunrise − 90 min, Isha = maghrib + 90 min,
   patched into the old `PrayTimes.js`) was **removed on purpose**; a saved value is dropped on load.
   Don't re-add a 90-minute option (the design's "Isha 18° / 90 min" control was dropped too).
+- **Apple Watch app** (#35, the canvas's "Apple Watch" board), via `@bacons/apple-targets`
+  (`ios/` stays generated):
+  - `targets/watch/` (SwiftUI app `AdhanWatch`, `com.conelabs.adhanapp.watchkitapp`): countdown home
+    (arc Fajr → Isha filled to now, dots per prayer) and, on the next vertical page, today's list.
+  - `targets/watch-widget/` (`AdhanComplications`, `….watchkitapp.complications`): circular ring,
+    rectangular with a progress bar, inline, corner. Timeline: every prayer + every 15 min, 24 h.
+  - `targets/_shared/` is compiled into every target: `Adhan/` is **adhan-swift, vendored** (no
+    SPM support; same library as the phone's `adhan`, so times match) and `PrayerCore.swift`
+    (settings model, the same method mapping as `prayerTimes.ts`, `PrayerSnapshot`, colours).
+  - Settings reach the watch over WatchConnectivity: `syncWatch` (`app/lib/watch.ts`, on every
+    settings change) → local Expo module `modules/watch-sync` (`updateApplicationContext`) →
+    `PhoneLink` on the watch saves them in the App Group and reloads the complications. Labels
+    (prayer names, "until %@") are sent in the phone's language. Without settings the watch
+    asks you to open the phone app.
+  - Compile check without a watch simulator: `xcodebuild -workspace ios/AdhanApp.xcworkspace
+    -scheme AdhanWatch -destination 'generic/platform=watchOS Simulator' CODE_SIGNING_ALLOWED=NO build`.
+    Big SwiftUI closures can time out the Swift type checker ("failed to produce diagnostic"):
+    split them into small views/functions.
+  - EAS signs two more bundle ids; the first build after adding them needs an interactive
+    `eas build -p ios` (or `eas credentials`) to create their profiles.
 - **Monthly timetable** (Week → "Share the {month} timetable"): `app/lib/timetable.ts` builds an
   A4 HTML page (RTL-aware), `expo-print` makes the PDF, `expo-sharing` opens the share sheet.
 - `getPrayerTimes(date)` computes that date (it used to ignore `date`), and labels Friday's

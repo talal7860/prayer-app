@@ -15,6 +15,7 @@ jest.mock('react-native-safe-area-context', () =>
 
 jest.mock('expo-notifications', () => ({
   setNotificationChannelAsync: jest.fn(() => Promise.resolve(null)),
+  deleteNotificationChannelAsync: jest.fn(() => Promise.resolve()),
   getPermissionsAsync: jest.fn(() => Promise.resolve({granted: true})),
   requestPermissionsAsync: jest.fn(() => Promise.resolve({granted: true})),
   cancelAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve()),

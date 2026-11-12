@@ -1,5 +1,5 @@
 import React from 'react';
-import {Pressable, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
+import {Alert, Linking, Pressable, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Card, Row, SectionLabel} from '../../components/ui/Card';
@@ -13,12 +13,30 @@ import usePalette from '../../hooks/usePalette';
 import I18n from '../../I18n';
 import {formatCoords} from '../../lib/prayerDay';
 import {isHighLatitude} from '../../lib/recommend';
+import {backgroundLocationAllowed} from '../../travelTask';
+import {adjustmentSummary} from './Adjust';
 
 const SettingsScreen = () => {
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const {t, isDark} = usePalette();
   const {settings, setSetting, calculationMethod} = useAppSettings();
+
+  const setTravelAlerts = async (on: boolean) => {
+    if (!on) {
+      setSetting('travelAlerts')(false);
+      return;
+    }
+    const allowed = await backgroundLocationAllowed(true).catch(() => false);
+    if (allowed) {
+      setSetting('travelAlerts')(true);
+      return;
+    }
+    Alert.alert(I18n.t('travel.needsAlways'), I18n.t('travel.needsAlwaysBody'), [
+      {text: I18n.t('locations.goToSettings'), onPress: () => Linking.openSettings()},
+      {text: I18n.t('travel.notNow'), style: 'cancel'},
+    ]);
+  };
 
   return (
     <View style={[styles.root, {backgroundColor: t.surface}]}>
@@ -51,6 +69,15 @@ const SettingsScreen = () => {
             </Text>
           </Pressable>
         </Card>
+        <Card style={styles.below}>
+          <Row title={I18n.t('settings.travelAlerts')} subtitle={I18n.t('settings.travelAlertsHint')} last>
+            <Toggle
+              value={!!settings.travelAlerts}
+              onChange={setTravelAlerts}
+              accessibilityLabel={I18n.t('settings.travelAlerts')}
+            />
+          </Row>
+        </Card>
 
         <SectionLabel>{I18n.t('settings.calculationSection')}</SectionLabel>
         <Card>
@@ -66,6 +93,11 @@ const SettingsScreen = () => {
               onPress={() => navigation.navigate('highLats')}
             />
           ) : null}
+          <Row
+            title={I18n.t('settings.adjust')}
+            subtitle={adjustmentSummary(settings.adjustments)}
+            onPress={() => navigation.navigate('adjust')}
+          />
           <Row title={I18n.t('settings.asr')} last>
             <Segmented
               accessibilityLabel={I18n.t('settings.asr')}
@@ -122,6 +154,7 @@ const styles = StyleSheet.create({
   locationCard: {flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 16},
   badge: {width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center'},
   flex: {flex: 1, minWidth: 0, gap: 2},
+  below: {marginTop: 10},
   link: {minHeight: 44, justifyContent: 'center', paddingHorizontal: 4},
 });
 

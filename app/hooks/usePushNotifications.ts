@@ -6,9 +6,14 @@ import AppConstants from '../AppConstants';
 import useAppSettings from './useAppSettings';
 import {rescheduleNotifications} from '../lib/notifications';
 import {registerRescheduleTask} from '../backgroundTask';
+import {syncTravelAlerts} from '../travelTask';
 
-const createChannels = () =>
-  Promise.all(
+// Channels from older versions. A channel's sound can't change, so the WAV adhan got a new one.
+const OLD_CHANNELS = ['prayer-time-notifications-mecca'];
+
+const createChannels = async () => {
+  await Promise.all(OLD_CHANNELS.map(id => Notifications.deleteNotificationChannelAsync(id)));
+  await Promise.all(
     Object.values(AppConstants.notificationChannels).map(channel =>
       Notifications.setNotificationChannelAsync(channel.channelId, {
         name: I18n.t('notification.channel.name'),
@@ -22,6 +27,7 @@ const createChannels = () =>
       }),
     ),
   );
+};
 
 /**
  * Keeps the scheduled prayer notifications in sync: on every settings change, at the start
@@ -55,6 +61,16 @@ const usePushNotifications = () => {
     }
     rescheduleNotifications(settings).catch(error => console.warn(error));
   }, [ready, registered, settings, today, foregrounded]);
+
+  // Keep the travel geofence on the saved location (or stopped when the setting is off).
+  const {travelAlerts, location} = settings;
+  useEffect(() => {
+    if (!ready) {
+      return;
+    }
+    syncTravelAlerts(settings).catch(error => console.warn(error));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only these fields matter
+  }, [ready, travelAlerts, location.lat, location.lng]);
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', state => {

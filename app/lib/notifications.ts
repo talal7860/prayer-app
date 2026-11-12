@@ -31,6 +31,8 @@ const run = async (settings: Settings, now: Date) => {
           body: '',
           // iOS reads the sound from the content; Android from the channel.
           sound: channel.soundName,
+          // Lets the adhan through Focus modes (needs the time-sensitive entitlement).
+          interruptionLevel: n.kind === 'reminder' ? 'active' : 'timeSensitive',
         },
         trigger: {
           type: Notifications.SchedulableTriggerInputTypes.DATE,

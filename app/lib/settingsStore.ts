@@ -14,6 +14,8 @@ export const defaultSettings: Settings = Object.freeze({
   asr: 'Hanafi',
   sound: 'mecca',
   muted: {sunrise: true},
+  adjustments: {},
+  travelAlerts: false,
   headsUp: false,
   timeFormat: '12h',
   highLats: 'NightMiddle',

@@ -2,24 +2,24 @@ import {useCallback, useEffect, useState} from 'react';
 import {AppState} from 'react-native';
 import * as ExpoLocation from 'expo-location';
 import {cityName} from '../lib/geocode';
-import {distanceKm} from '../lib/prayerDay';
+import {movedEnough} from '../lib/travel';
 import useAppSettings from './useAppSettings';
 
-const TRAVEL_KM = 25;
 const round = ({lat, lng}: GeoLocation) => ({
   lat: Math.round(lat * 100) / 100,
   lng: Math.round(lng * 100) / 100,
 });
 
 /**
- * When the app comes to the foreground far from the saved location, offer to switch.
- * Only runs if location permission was already granted: it never prompts.
+ * When the app comes to the foreground somewhere whose prayer times differ from the saved
+ * location's by 2 minutes or more, offer to switch. Only runs if location permission was
+ * already granted: it never prompts.
  */
 const useTravelCheck = () => {
-  const {settings, setSetting} = useAppSettings();
+  const {settings, setSetting, setSettings} = useAppSettings();
   const [prompt, setPrompt] = useState<{city: string; location: GeoLocation} | null>(null);
-  const saved = settings.location;
-  const dismissed = settings.travelDismissedAt;
+  const {location: saved, travelDismissedAt: dismissed, calculationMethod, asr, highLats} =
+    settings;
 
   const check = useCallback(async () => {
     try {
@@ -32,8 +32,9 @@ const useTravelCheck = () => {
         return;
       }
       const here = {lat: pos.coords.latitude, lng: pos.coords.longitude};
-      const farFromSaved = distanceKm(here, saved) > TRAVEL_KM;
-      const alreadyKept = dismissed && distanceKm(here, dismissed) <= TRAVEL_KM;
+      const calc = {calculationMethod, asr, highLats};
+      const farFromSaved = movedEnough(calc, saved, here);
+      const alreadyKept = dismissed && !movedEnough(calc, dismissed, here);
       if (!farFromSaved || alreadyKept) {
         setPrompt(null);
         return;
@@ -45,7 +46,7 @@ const useTravelCheck = () => {
     } catch {
       // No location right now; try again next time the app opens.
     }
-  }, [saved, dismissed]);
+  }, [saved, dismissed, calculationMethod, asr, highLats]);
 
   useEffect(() => {
     // check() only sets state after awaiting the OS, never synchronously.
@@ -68,11 +69,11 @@ const useTravelCheck = () => {
 
   const update = useCallback(() => {
     if (prompt) {
-      setSetting('location')(prompt.location);
-      setSetting('city')(prompt.city);
+      const {location, city} = prompt;
+      setSettings(prev => ({...prev, location, city}));
     }
     setPrompt(null);
-  }, [prompt, setSetting]);
+  }, [prompt, setSettings]);
 
   return {prompt, keep, update};
 };

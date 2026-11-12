@@ -30,7 +30,7 @@ it('schedules well beyond 5 days, up to the iOS limit', async () => {
   const dates = scheduled().map(r => r.trigger.date as Date);
   const lastDay = Math.max(...dates.map(d => d.getTime()));
   expect((lastDay - now.getTime()) / 86400000).toBeGreaterThan(10);
-  expect(scheduled()[0].trigger.channelId).toBe('prayer-time-notifications-mecca');
+  expect(scheduled()[0].trigger.channelId).toBe('adhan-makkah');
   expect(scheduled()[MAX_PENDING - 1].trigger.channelId).toBe('prayer-time-notifications');
 });
 

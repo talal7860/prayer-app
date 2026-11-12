@@ -36,6 +36,10 @@ type Settings = {
   sound: string;
   /** Prayers whose reminder bell is off. */
   muted: Partial<Record<PrayerKey, boolean>>;
+  /** Minutes added to each calculated time (negative = earlier), to match the local mosque. */
+  adjustments: Partial<Record<PrayerKey, number>>;
+  /** Opt-in: watch for travel in the background and notify ("Always" location permission). */
+  travelAlerts: boolean;
   /** Extra reminder 10 minutes before each prayer. */
   headsUp: boolean;
   timeFormat: TimeFormat;

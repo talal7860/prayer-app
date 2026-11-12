@@ -12,12 +12,14 @@ export const methodName = (method: Settings['calculationMethod']): string =>
 /** That date's prayer times for these settings. No React, so the background task can use it. */
 export const prayerTimesFor = (
   settings: Pick<Settings, 'calculationMethod' | 'asr' | 'location'> &
-    Partial<Pick<Settings, 'highLats'>>,
+    Partial<Pick<Settings, 'highLats' | 'adjustments'>>,
   date: Date = new Date(),
 ): PrayerTimeLabel[] => {
   // Reset to the method's own parameters, then apply the user's choices.
   PT.setMethod(settings.calculationMethod);
   PT.adjust({asr: settings.asr, highLats: settings.highLats ?? 'NightMiddle'});
+  // Minutes to match the local mosque. tune() merges, so set every prayer each time.
+  PT.tune(Object.fromEntries(PRAYER_KEYS.map(k => [k, settings.adjustments?.[k] ?? 0])));
   const times = PT.getTimes(
     date,
     [settings.location.lat, settings.location.lng],
@@ -42,3 +44,13 @@ export const prayerTimesFor = (
     return {key: prayer, label, time: prayerDate};
   });
 };
+
+/** The largest gap, in whole minutes, between the same prayer in two days' times. */
+export const minutesApart = (a: PrayerTimeLabel[], b: PrayerTimeLabel[]): number =>
+  Math.max(
+    0,
+    ...a.map(p => {
+      const other = b.find(q => q.key === p.key);
+      return other ? Math.round(Math.abs(p.time.getTime() - other.time.getTime()) / 60000) : 0;
+    }),
+  );

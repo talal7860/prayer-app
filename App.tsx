@@ -29,6 +29,7 @@ import LocationScreen from './app/screens/SettingsScreen/Location';
 import MethodScreen from './app/screens/SettingsScreen/Method';
 import SoundScreen from './app/screens/SettingsScreen/Sound';
 import HighLatsScreen from './app/screens/SettingsScreen/HighLats';
+import AdjustScreen from './app/screens/SettingsScreen/Adjust';
 import SetupScreen from './app/screens/SetupScreen';
 import useAppSettings from './app/hooks/useAppSettings';
 import {fonts} from './app/theme/tokens';
@@ -134,6 +135,11 @@ const Root = () => {
           name="highLats"
           component={HighLatsScreen}
           options={{title: I18n.t('highLats.title')}}
+        />
+        <Stack.Screen
+          name="adjust"
+          component={AdjustScreen}
+          options={{title: I18n.t('adjust.title')}}
         />
         <Stack.Screen
           name="sound"

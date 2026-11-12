@@ -1,13 +1,13 @@
 {
   "home": {
-    "title": "Prayer Times"
+    "title": "Adhan App"
   },
   "locations": {
     "title": "Location",
     "useCurrent": "Use current location",
     "coords": "Coordinates",
     "hint": "Prayer times are calculated for this place.",
-    "servicesOff": "Turn on Location Services to let Prayer Times find your location.",
+    "servicesOff": "Turn on Location Services to let Adhan App find your location.",
     "goToSettings": "Go to Settings",
     "dontUse": "Don't Use Location",
     "denied": "Location permission denied",
@@ -35,7 +35,10 @@
     "headsUpHint": "10 minutes before each prayer",
     "timeFormat": "Time format",
     "unknownCity": "Current location",
-    "highLats": "High latitudes"
+    "highLats": "High latitudes",
+    "adjust": "Adjust times",
+    "travelAlerts": "Travel alerts",
+    "travelAlertsHint": "Notify me when I'm in another city"
   },
   "notification": {
     "title": "It's {{label}} time - {{time}}",
@@ -46,7 +49,7 @@
       "description": "Prayer Notifications"
     },
     "headsUp": "{{label}} in 10 minutes - {{time}}",
-    "reminder": "Open Prayer Times to keep getting prayer notifications"
+    "reminder": "Open Adhan App to keep getting prayer notifications"
   },
   "prayer": {
     "fajr": "Fajr",
@@ -141,5 +144,24 @@
     "reviewTitle": "Your prayer times today",
     "reviewHint": "Check these against your mosque's timetable. You can change any of this later in Settings.",
     "notifyHint": "Next, allow notifications to get the adhan at each prayer time."
+  },
+  "adjust": {
+    "title": "Adjust times",
+    "hint": "Add or remove minutes to match your local mosque. Notifications and widgets use the adjusted times.",
+    "none": "None",
+    "earlier": "1 minute earlier",
+    "later": "1 minute later",
+    "minutes": {
+      "one": "{{count}} minute",
+      "other": "{{count}} minutes"
+    }
+  },
+  "travel": {
+    "title": "You're in {{city}}",
+    "titleNoCity": "You're somewhere new",
+    "body": "Tap to update prayer times.",
+    "needsAlways": "Allow location \"Always\"",
+    "needsAlwaysBody": "Travel alerts check your location in the background. Allow it in Settings: Location → Always.",
+    "notNow": "Not now"
   }
 }

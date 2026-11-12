@@ -96,7 +96,9 @@ it('gives every notification a fixed id, and removes pending ones that are not i
     {identifier: 'some-old-random-id'},
   ]);
   await rescheduleNotifications(defaultSettings, now);
-  const cancelled = (Notifications.cancelScheduledNotificationAsync as jest.Mock).mock.calls.map(([id]) => id);
+  const cancelled = (Notifications.cancelScheduledNotificationAsync as jest.Mock).mock.calls.map(
+    ([id]) => id,
+  );
   expect(cancelled).toEqual(['prayer:adhan:dhuhr:1', 'some-old-random-id']);
 });
 

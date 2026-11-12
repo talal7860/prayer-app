@@ -84,7 +84,7 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
   `watchHeadingAsync` (`trueHeading`, else `magHeading` when it's −1); location permission only, it
   never prompts unless "Allow location" is tapped. `accuracy` ≤ 1 shows a calibrate hint; no reading in
   4 s (simulator) shows "No compass". The dial is Views + rotate transforms, and it's geographic, so it
-  doesn't mirror in RTL. No haptic: `expo-haptics` isn't installed.
+  doesn't mirror in RTL. A light `expo-haptics` tap when it turns to facing (once each time).
 - **Adjust times** (Settings → Calculation): per-prayer ± minutes (`settings.adjustments`,
   ±30), adhan's `params.adjustments` in `prayerTimesFor` (on top of the method's own).
 - `useCityName` fills `settings.city` by reverse geocoding when it's missing.

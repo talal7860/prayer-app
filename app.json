@@ -108,12 +108,20 @@
             }
           ]
         }
-      ]
+      ],
+      "expo-sharing",
+      "expo-localization"
     ],
     "extra": {
       "eas": {
         "projectId": "8deab7ae-9106-4150-b064-87578c79a68e"
-      }
+      },
+      "supportsRTL": true
+    },
+    "locales": {
+      "en": "./app/locales/native/en.json",
+      "ar": "./app/locales/native/ar.json",
+      "ur": "./app/locales/native/ur.json"
     }
   }
 }

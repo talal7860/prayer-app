@@ -1,5 +1,6 @@
 // Pure helpers for the Today and Week screens. No React, no I/O, so they're easy to test.
 import type {Period} from '../theme/tokens';
+import I18n, {latinDigits} from '../I18n';
 
 export const PRAYER_KEYS: PrayerKey[] = [
   'fajr',
@@ -29,7 +30,7 @@ export const formatTime = (
     return `${pad(h)}:${m}`;
   }
   const h12 = h % 12 === 0 ? 12 : h % 12;
-  return withPeriod ? `${h12}:${m} ${h >= 12 ? 'PM' : 'AM'}` : `${h12}:${m}`;
+  return withPeriod ? `${h12}:${m} ${I18n.t(h >= 12 ? 'time.pm' : 'time.am')}` : `${h12}:${m}`;
 };
 
 /** "1:02:03" with hours, "02:03" without. */
@@ -107,20 +108,6 @@ export const addDays = (date: Date, days: number) => {
   return d;
 };
 
-const MONTHS = [
-  'Muharram',
-  'Safar',
-  'Rabiʻ I',
-  'Rabiʻ II',
-  'Jumada I',
-  'Jumada II',
-  'Rajab',
-  'Shaʻban',
-  'Ramadan',
-  'Shawwal',
-  'Dhuʻl-Qiʻdah',
-  'Dhuʻl-Hijjah',
-];
 
 /** Tabular (arithmetic) Islamic calendar. Can differ from Umm al-Qura by a day. */
 export const tabularHijri = (date: Date) => {
@@ -148,19 +135,21 @@ export const tabularHijri = (date: Date) => {
 /** "Jumada II 1, 1448 AH". Umm al-Qura through Intl when available. */
 export const hijriLabel = (date: Date): string => {
   try {
-    const label = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', {
+    // A single -u-ca tag: Hermes ignores the `calendar` option and combined extensions.
+    const label = latinDigits(new Intl.DateTimeFormat(`${I18n.locale}-u-ca-islamic-umalqura`, {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
-    }).format(date);
-    if (/AH|\d{4}/.test(label) && !label.includes(`${date.getFullYear()}`)) {
+    }).format(date));
+    // Engines without the Islamic calendar silently give the Gregorian date.
+    if (/14\d\d|15\d\d/.test(label) && !label.includes(`${date.getFullYear()}`)) {
       return label;
     }
   } catch {
     // Fall through to the arithmetic calendar.
   }
   const h = tabularHijri(date);
-  return `${MONTHS[h.month - 1]} ${h.day}, ${h.year} AH`;
+  return I18n.t('hijri.date', {month: I18n.t(`hijri.m${h.month}`), day: h.day, year: h.year});
 };
 
 /** Great-circle distance in km. */

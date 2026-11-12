@@ -12,7 +12,7 @@ import {prayerTimesFor} from '../app/lib/prayerTimes';
 import {defaultSettings, parseSettings} from '../app/lib/settingsStore';
 import {syncLiveActivity} from '../app/lib/widgets';
 
-const settings: Settings = {...defaultSettings, city: 'Calgary, AB'};
+const settings: Settings = {...defaultSettings, city: 'Calgary, AB', liveActivity: true};
 const off: Settings = {...settings, liveActivity: false};
 const dhuhr = prayerTimesFor(settings, new Date(2026, 2, 10, 12)).find(p => p.key === 'dhuhr')!;
 const soon = new Date(dhuhr.time.getTime() - 20 * 60 * 1000);
@@ -25,10 +25,10 @@ beforeEach(() => {
   Platform.OS = 'ios';
 });
 
-it('is on by default, also for settings saved before it existed', () => {
-  expect(defaultSettings.liveActivity).toBe(true);
-  expect(parseSettings(JSON.stringify({headsUp: true})).liveActivity).toBe(true);
-  expect(parseSettings(JSON.stringify({liveActivity: false})).liveActivity).toBe(false);
+it('is off by default, also for settings saved before it existed', () => {
+  expect(defaultSettings.liveActivity).toBe(false);
+  expect(parseSettings(JSON.stringify({headsUp: true})).liveActivity).toBe(false);
+  expect(parseSettings(JSON.stringify({liveActivity: true})).liveActivity).toBe(true);
 });
 
 it('has no activity when the setting is off', () => {

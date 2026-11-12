@@ -134,7 +134,7 @@ const SettingsScreen = () => {
               subtitle={I18n.t('settings.liveActivityHint')}
               last>
               <Toggle
-                value={settings.liveActivity !== false}
+                value={!!settings.liveActivity}
                 onChange={setSetting('liveActivity')}
                 accessibilityLabel={I18n.t('settings.liveActivity')}
               />

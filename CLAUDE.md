@@ -166,7 +166,8 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
     Live Activity in the hour before a prayer, on foreground and going to background (iOS only
     lets the app start one while it's open).
   - **Live Activity setting** (Settings → Notifications, iOS only): `settings.liveActivity`,
-    default on (old saved settings without it get the default). Off makes `activityFor` return
+    **opt-in, default off** (old saved settings without it get the default). The setup's last
+    step asks for it too (a switch, off, iOS only). Off makes `activityFor` return
     null, so `syncLiveActivity` never starts or updates one and ends a running one at once (the
     settings change re-runs it). One switch covers both the lock screen and the Dynamic Island:
     they're one ActivityKit activity, and iOS has no API to show it in only one of them.

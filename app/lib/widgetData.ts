@@ -128,7 +128,7 @@ export const widgetTimeline = (settings: Settings, now: Date = new Date()) => {
  * otherwise null (and `syncLiveActivity` ends any running one).
  */
 export const activityFor = (settings: Settings, now: Date = new Date()): PrayerActivityProps | null => {
-  if (settings.liveActivity === false) {
+  if (!settings.liveActivity) {
     return null;
   }
   const props = nextPrayerProps(settings, now);

@@ -75,6 +75,10 @@ describe('first run', () => {
     // 33.7° N is not a high latitude, so the next step is the review.
     await fireEvent.press(screen.getByRole('button', {name: 'Continue'}));
     expect(await screen.findByText('Your prayer times today')).toBeTruthy();
+    // The Live Activity is opt-in: off until turned on here.
+    const liveActivity = screen.getByRole('switch', {name: 'Live Activity'});
+    expect(liveActivity).not.toBeChecked();
+    await fireEvent.press(liveActivity);
     await fireEvent.press(screen.getByRole('button', {name: 'Start'}));
 
     expect(await screen.findByLabelText('Turn off Fajr reminder')).toBeTruthy();
@@ -85,6 +89,7 @@ describe('first run', () => {
         location: {lat: 33.6844, lng: 73.0479},
         calculationMethod: 'Karachi',
         asr: 'Standard',
+        liveActivity: true,
       }),
     );
     expect(Notifications.requestPermissionsAsync).not.toHaveBeenCalled(); // already granted in the mock

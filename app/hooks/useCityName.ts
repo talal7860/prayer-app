@@ -12,7 +12,7 @@ const useCityName = () => {
       return;
     }
     let cancelled = false;
-    cityName({lat, lng}).then(city => {
+    void cityName({lat, lng}).then(city => {
       if (city && !cancelled) {
         setSetting('city')(city);
       }
@@ -20,7 +20,7 @@ const useCityName = () => {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setSetting is new every render; only the location matters
   }, [lat, lng, missing]);
 };
 

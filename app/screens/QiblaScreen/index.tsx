@@ -119,7 +119,11 @@ const Dial = ({size, rotation, bearing, facing, t}: DialProps) => {
             <View
               style={[
                 styles.needle,
-                {height: size / 2 - NEEDLE_FROM, marginTop: NEEDLE_FROM, backgroundColor: facing ? t.accent : t.text},
+                {
+                  height: size / 2 - NEEDLE_FROM,
+                  marginTop: NEEDLE_FROM,
+                  backgroundColor: facing ? t.accent : t.text,
+                },
               ]}
             />
           </Spoke>
@@ -129,7 +133,9 @@ const Dial = ({size, rotation, bearing, facing, t}: DialProps) => {
             </View>
           </Spoke>
         </Animated.View>
-        <View style={[styles.hub, {backgroundColor: facing ? t.accent : t.text, borderColor: t.bg}]} />
+        <View
+          style={[styles.hub, {backgroundColor: facing ? t.accent : t.text, borderColor: t.bg}]}
+        />
       </View>
     </View>
   );
@@ -169,7 +175,9 @@ const QiblaScreen = () => {
   // A light tap when you turn onto the qibla, so you can feel it without watching the screen.
   useEffect(() => {
     if (facing) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {
+        // No haptics on this device.
+      });
     }
   }, [facing]);
 
@@ -182,6 +190,8 @@ const QiblaScreen = () => {
     Animated.timing(rotation, {
       toValue: target,
       duration: 160,
+      // RN's Easing functions are plain functions that never use `this`.
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       easing: Easing.out(Easing.quad),
       useNativeDriver: true,
     }).start();
@@ -208,9 +218,7 @@ const QiblaScreen = () => {
   }
 
   return (
-    <ScrollView
-      style={{backgroundColor: t.surface}}
-      contentContainerStyle={styles.scroll}>
+    <ScrollView style={{backgroundColor: t.surface}} contentContainerStyle={styles.scroll}>
       <View style={styles.head} accessible accessibilityLiveRegion="polite">
         {facing ? <Icon name="check" size={26} color={t.accent} strokeWidth={2.4} /> : null}
         <Text weight="semibold" size={22} color={headColor} style={styles.center}>
@@ -229,11 +237,16 @@ const QiblaScreen = () => {
       {status === 'denied' ? (
         <Card>
           <View style={styles.noteBody}>
-            <Text size={14} color={t.muted}>{I18n.t('qibla.deniedBody')}</Text>
+            <Text size={14} color={t.muted}>
+              {I18n.t('qibla.deniedBody')}
+            </Text>
             <Pressable
               accessibilityRole="button"
               onPress={allow}
-              style={({pressed}) => [styles.button, {backgroundColor: t.accent, opacity: pressed ? 0.85 : 1}]}>
+              style={({pressed}) => [
+                styles.button,
+                {backgroundColor: t.accent, opacity: pressed ? 0.85 : 1},
+              ]}>
               <Text weight="semibold" size={15} color={t.onAccent}>
                 {I18n.t(canAskAgain ? 'qibla.allow' : 'locations.goToSettings')}
               </Text>
@@ -251,15 +264,22 @@ const QiblaScreen = () => {
       {calibrating || (live && needsCalibration(accuracy)) ? (
         <Card>
           <View style={styles.noteBody}>
-            <Text weight="semibold" size={15} color={t.text}>{I18n.t('qibla.calibrateTitle')}</Text>
-            <Text size={14} color={t.muted}>{I18n.t('qibla.calibrateBody')}</Text>
+            <Text weight="semibold" size={15} color={t.text}>
+              {I18n.t('qibla.calibrateTitle')}
+            </Text>
+            <Text size={14} color={t.muted}>
+              {I18n.t('qibla.calibrateBody')}
+            </Text>
           </View>
         </Card>
       ) : null}
 
       <Card>
         <Row title={I18n.t('qibla.direction')} value={I18n.t('qibla.bearing', {deg})} />
-        <Row title={I18n.t('qibla.distance')} value={I18n.t('qibla.km', {km: formatKm(distance)})} />
+        <Row
+          title={I18n.t('qibla.distance')}
+          value={I18n.t('qibla.km', {km: formatKm(distance)})}
+        />
         <Row title={I18n.t('qibla.from')} value={city} last />
       </Card>
       {live ? (
@@ -271,7 +291,11 @@ const QiblaScreen = () => {
         <Pressable
           accessibilityRole="button"
           onPress={startCalibrating}
-          style={({pressed}) => [styles.button, styles.outline, {borderColor: t.border, opacity: pressed ? 0.7 : 1}]}>
+          style={({pressed}) => [
+            styles.button,
+            styles.outline,
+            {borderColor: t.border, opacity: pressed ? 0.7 : 1},
+          ]}>
           <Text weight="semibold" size={15} color={t.accent}>
             {I18n.t('qibla.recalibrate')}
           </Text>

@@ -35,13 +35,16 @@ import SetupScreen from './app/screens/SetupScreen';
 import QiblaScreen from './app/screens/QiblaScreen';
 import useAppSettings from './app/hooks/useAppSettings';
 import {fonts} from './app/theme/tokens';
+import type {RootStackParamList, TabParamList} from './app/navigation';
 
-SplashScreen.preventAutoHideAsync().catch(() => {});
+SplashScreen.preventAutoHideAsync().catch(() => {
+  // Already hidden (e.g. a fast refresh): nothing to keep up.
+});
 
-const Tab = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator<TabParamList>();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
-const tabIcons: Record<string, IconName> = {
+const tabIcons: Record<keyof TabParamList, IconName> = {
   today: 'clock',
   qibla: 'compass',
   week: 'calendar',
@@ -67,11 +70,7 @@ const Tabs = () => {
           <Icon name={tabIcons[route.name]} size={22} color={color} strokeWidth={2} />
         ),
       })}>
-      <Tab.Screen
-        name="today"
-        component={TodayScreen}
-        options={{title: I18n.t('today.title')}}
-      />
+      <Tab.Screen name="today" component={TodayScreen} options={{title: I18n.t('today.title')}} />
       <Tab.Screen
         name="qibla"
         component={QiblaTab}
@@ -82,11 +81,7 @@ const Tabs = () => {
           headerTitleStyle: {fontFamily: fonts.semibold},
         }}
       />
-      <Tab.Screen
-        name="week"
-        component={WeekScreen}
-        options={{title: I18n.t('week.title')}}
-      />
+      <Tab.Screen name="week" component={WeekScreen} options={{title: I18n.t('week.title')}} />
       <Tab.Screen
         name="settings"
         component={SettingsScreen}
@@ -116,7 +111,9 @@ const Root = () => {
   // Keep the native splash up until the first real screen can draw, so there's no blank frame.
   useEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync().catch(() => {});
+      SplashScreen.hideAsync().catch(() => {
+        // Already hidden.
+      });
     }
   }, [loaded]);
 
@@ -133,10 +130,18 @@ const Root = () => {
           contentStyle: {backgroundColor: t.surface},
         }}>
         {settings.onboarded ? (
-          <Stack.Screen name="tabs" component={Tabs} options={{headerShown: false, animation: 'fade'}} />
+          <Stack.Screen
+            name="tabs"
+            component={Tabs}
+            options={{headerShown: false, animation: 'fade'}}
+          />
         ) : (
           // Until the first-run setup is done it's the only screen. Finishing it swaps in the tabs.
-          <Stack.Screen name="setup" component={SetupScreen} options={{headerShown: false, animation: 'fade'}} />
+          <Stack.Screen
+            name="setup"
+            component={SetupScreen}
+            options={{headerShown: false, animation: 'fade'}}
+          />
         )}
         <Stack.Screen
           name="location"

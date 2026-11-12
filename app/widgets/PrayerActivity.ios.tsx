@@ -18,7 +18,12 @@ const PrayerActivity = (props: PrayerActivityProps) => {
   const accent = '#FFE7A3';
   return {
     banner: (
-      <HStack modifiers={[padding({all: 16}), activityBackgroundTint('#163A85'), foregroundStyle('#FFFFFF')]}>
+      <HStack
+        modifiers={[
+          padding({all: 16}),
+          activityBackgroundTint('#163A85'),
+          foregroundStyle('#FFFFFF'),
+        ]}>
         <VStack alignment="leading" spacing={2}>
           <Text modifiers={[font({size: 13, weight: 'medium'}), opacity(0.8)]}>{props.city}</Text>
           <Text modifiers={[font({size: 22, weight: 'bold'})]}>{props.next}</Text>
@@ -26,11 +31,17 @@ const PrayerActivity = (props: PrayerActivityProps) => {
         </VStack>
         <Spacer />
         <VStack alignment="trailing" spacing={2}>
-          <Text modifiers={[font({size: 13, weight: 'medium'}), opacity(0.8)]}>{props.inLabel}</Text>
+          <Text modifiers={[font({size: 13, weight: 'medium'}), opacity(0.8)]}>
+            {props.inLabel}
+          </Text>
           <Text
             date={at}
             dateStyle="timer"
-            modifiers={[font({size: 30, weight: 'bold'}), monospacedDigit(), foregroundStyle(accent)]}
+            modifiers={[
+              font({size: 30, weight: 'bold'}),
+              monospacedDigit(),
+              foregroundStyle(accent),
+            ]}
           />
         </VStack>
       </HStack>

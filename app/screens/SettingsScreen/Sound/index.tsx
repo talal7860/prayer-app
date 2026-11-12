@@ -9,7 +9,7 @@ const SoundScreen = () => {
   return (
     <ScrollView contentContainerStyle={styles.scroll}>
       <ChoiceList
-        options={Object.entries(AppConstants.sounds ?? {}).map(([key, s]) => ({
+        options={Object.entries(AppConstants.sounds).map(([key, s]) => ({
           value: key,
           label: s.name,
         }))}

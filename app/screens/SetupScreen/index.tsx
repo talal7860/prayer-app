@@ -16,6 +16,8 @@ import ChoiceList from '../../components/ui/ChoiceList';
 import Icon from '../../components/ui/Icon';
 import Text from '../../components/ui/Text';
 import Toggle from '../../components/ui/Toggle';
+import ExactAlarmPrompt from '../../components/ExactAlarmPrompt';
+import useExactAlarms from '../../hooks/useExactAlarms';
 import useAppSettings from '../../hooks/useAppSettings';
 import useLocate from '../../hooks/useLocate';
 import usePalette from '../../hooks/usePalette';
@@ -44,6 +46,7 @@ const SetupScreen = () => {
   const insets = useSafeAreaInsets();
   const {settings, setSettings} = useAppSettings();
   const {locate, busy} = useLocate();
+  const exactAlarms = useExactAlarms();
   const [draft, setDraft] = useState<Draft>({
     calculationMethod: settings.calculationMethod,
     asr: settings.asr,
@@ -78,7 +81,9 @@ const SetupScreen = () => {
       ...d,
       location,
       city: found.city,
-      calculationMethod: touched.method ? d.calculationMethod : recommendedMethod(found.countryCode),
+      calculationMethod: touched.method
+        ? d.calculationMethod
+        : recommendedMethod(found.countryCode),
       asr: touched.asr ? d.asr : recommendedAsr(found.countryCode),
     }));
   };
@@ -126,10 +131,7 @@ const SetupScreen = () => {
   const suggestedAsr = place.countryCode ? recommendedAsr(place.countryCode) : null;
 
   const preview = useMemo(
-    () =>
-      draft.location
-        ? prayerTimesFor({...draft, location: draft.location}, new Date())
-        : [],
+    () => (draft.location ? prayerTimesFor({...draft, location: draft.location}, new Date()) : []),
     [draft],
   );
 
@@ -147,7 +149,9 @@ const SetupScreen = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <View style={[styles.top, {paddingTop: insets.top + 12}]}>
-        <View style={styles.progress} accessibilityLabel={I18n.t('setup.step', {n: index + 1, total: steps.length})}>
+        <View
+          style={styles.progress}
+          accessibilityLabel={I18n.t('setup.step', {n: index + 1, total: steps.length})}>
           {steps.map((s, i) => (
             <View
               key={s}
@@ -167,15 +171,18 @@ const SetupScreen = () => {
         ) : null}
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         {step === 'location' ? (
           <Text weight="medium" size={15} color={t.accent} style={styles.welcome}>
             {I18n.t('setup.welcome')}
           </Text>
         ) : null}
-        <Text weight="bold" size={28} color={t.text} accessibilityRole="header" style={styles.title}>
+        <Text
+          weight="bold"
+          size={28}
+          color={t.text}
+          accessibilityRole="header"
+          style={styles.title}>
           {header[0]}
         </Text>
         <Text size={15} color={t.muted} style={styles.hint}>
@@ -206,12 +213,20 @@ const SetupScreen = () => {
               onPress={locateMe}
               style={({pressed}) => [
                 styles.button,
-                {backgroundColor: draft.location ? t.hi : t.accent, opacity: pressed || busy ? 0.8 : 1},
+                {
+                  backgroundColor: draft.location ? t.hi : t.accent,
+                  opacity: pressed || busy ? 0.8 : 1,
+                },
               ]}>
               {busy ? (
                 <ActivityIndicator color={draft.location ? t.accent : t.onAccent} />
               ) : (
-                <Icon name="navigate" size={18} color={draft.location ? t.accent : t.onAccent} strokeWidth={2} />
+                <Icon
+                  name="navigate"
+                  size={18}
+                  color={draft.location ? t.accent : t.onAccent}
+                  strokeWidth={2}
+                />
               )}
               <Text weight="semibold" size={15} color={draft.location ? t.accent : t.onAccent}>
                 {I18n.t('setup.useCurrent')}
@@ -324,13 +339,14 @@ const SetupScreen = () => {
                   subtitle={I18n.t('setup.liveActivityHint')}
                   last>
                   <Toggle
-                    value={!!draft.liveActivity}
+                    value={draft.liveActivity}
                     onChange={liveActivity => setDraft(d => ({...d, liveActivity}))}
                     accessibilityLabel={I18n.t('settings.liveActivity')}
                   />
                 </Row>
               </Card>
             ) : null}
+            {exactAlarms.needed ? <ExactAlarmPrompt onAllow={exactAlarms.allow} /> : null}
             <Text size={13} color={t.muted} style={styles.hint}>
               {I18n.t('setup.notifyHint')}
             </Text>

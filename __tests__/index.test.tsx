@@ -9,8 +9,9 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
-jest.mock('react-native-safe-area-context', () =>
-  require('react-native-safe-area-context/jest/mock').default,
+jest.mock(
+  'react-native-safe-area-context',
+  () => require('react-native-safe-area-context/jest/mock').default,
 );
 
 jest.mock('expo-notifications', () => ({
@@ -35,18 +36,24 @@ jest.mock('expo-background-task', () => ({
 }));
 
 jest.mock('expo-location', () => ({
-  getForegroundPermissionsAsync: jest.fn(() => Promise.resolve({granted: false, canAskAgain: true})),
+  getForegroundPermissionsAsync: jest.fn(() =>
+    Promise.resolve({granted: false, canAskAgain: true}),
+  ),
   watchHeadingAsync: jest.fn(() => Promise.resolve({remove: jest.fn()})),
   geocodeAsync: jest.fn(() => Promise.resolve([{latitude: 33.6844, longitude: 73.0479}])),
   reverseGeocodeAsync: jest.fn(() =>
     Promise.resolve([
-      {city: 'Islamabad', region: 'Islamabad Capital Territory', isoCountryCode: 'PK', country: 'Pakistan'},
+      {
+        city: 'Islamabad',
+        region: 'Islamabad Capital Territory',
+        isoCountryCode: 'PK',
+        country: 'Pakistan',
+      },
     ]),
   ),
 }));
 
-const savedSetup = () =>
-  AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify({onboarded: true}));
+const savedSetup = () => AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify({onboarded: true}));
 
 beforeEach(async () => {
   await AsyncStorage.clear();
@@ -128,9 +135,7 @@ it('renders Today with the five prayers, and never schedules Sunrise', async () 
   expect(screen.getByLabelText('Turn off Fajr reminder')).toBeTruthy();
   // Sunrise is on the sun arc, not in the list.
   expect(screen.queryByLabelText(/Sunrise reminder/)).toBeNull();
-  await waitFor(() =>
-    expect(Notifications.scheduleNotificationAsync).toHaveBeenCalled(),
-  );
+  await waitFor(() => expect(Notifications.scheduleNotificationAsync).toHaveBeenCalled());
   const titles = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls.map(
     ([request]) => request.content.title,
   );

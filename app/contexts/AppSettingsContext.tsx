@@ -1,26 +1,19 @@
-import React, {
-  useCallback,
-  useEffect,
-  useState,
-  createContext,
-  FC,
-  PropsWithChildren,
-} from 'react';
+import React, {useCallback, useEffect, useState, createContext, FC, PropsWithChildren} from 'react';
 import {useAsyncStorage} from '@react-native-async-storage/async-storage';
 import {merge} from 'lodash/fp';
 import MyDate from '../lib/MyDate';
 import {methodName, prayerTimesFor} from '../lib/prayerTimes';
-import {
-  SETTINGS_KEY,
-  defaultSettings,
-  parseSettings,
-} from '../lib/settingsStore';
+import {SETTINGS_KEY, defaultSettings, parseSettings} from '../lib/settingsStore';
 
 const AppSettingsContext = createContext<AppSettingsContextInterface>({
   settings: defaultSettings,
-  setSettings: () => {},
-  setSetting: () => () => {},
-  getPrayerTimes: (_date?: Date | undefined) => [],
+  setSettings: () => {
+    // No provider: nothing to update.
+  },
+  setSetting: () => () => {
+    // No provider: nothing to update.
+  },
+  getPrayerTimes: (_date?: Date) => [],
   calculationMethod: () => '',
   today: new MyDate().beginningOfDay().getTime(),
   loaded: false,
@@ -34,7 +27,7 @@ const AppSettingsProvider: FC<PropsWithChildren> = ({children}) => {
   const {getItem, setItem} = useAsyncStorage(SETTINGS_KEY);
   useEffect(() => {
     if (loaded) {
-      setItem(JSON.stringify(settings));
+      void setItem(JSON.stringify(settings));
     }
   }, [setItem, settings, loaded]);
 
@@ -51,19 +44,19 @@ const AppSettingsProvider: FC<PropsWithChildren> = ({children}) => {
       setSettings((prev: Settings) => parseSettings(stored, prev));
       setLoaded(true);
     }
-    process();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    void process();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- read the saved settings once, on mount
   }, []);
 
   const calculationMethod = () => methodName(settings.calculationMethod);
 
-  const setSetting = (key: string) => (value: any) =>
+  const setSetting = (key: string) => (value: unknown) =>
     setSettings((prev: Settings) => merge(prev)({[key]: value}));
 
   const settingsKey = JSON.stringify(settings);
   const getPrayerTimes = useCallback(
     (date: Date = new Date()): PrayerTimeLabel[] => prayerTimesFor(settings, date),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- recompute when the settings' contents change, not their identity
     [settingsKey],
   );
   return (

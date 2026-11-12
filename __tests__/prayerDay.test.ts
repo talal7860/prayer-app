@@ -78,10 +78,7 @@ describe('sunPosition', () => {
   it('is null at night and on the arc during the day', () => {
     expect(sunPosition(at(11, 3), t)).toBeNull();
     expect(sunPosition(t.sunrise, t)).toEqual({x: 16, y: 78});
-    const noonish = sunPosition(
-      new Date((t.sunrise.getTime() + t.maghrib.getTime()) / 2),
-      t,
-    );
+    const noonish = sunPosition(new Date((t.sunrise.getTime() + t.maghrib.getTime()) / 2), t);
     expect(noonish?.x).toBeCloseTo(171);
     expect(noonish?.y).toBeCloseTo(24);
   });
@@ -101,16 +98,11 @@ it('tabularHijri matches a known date', () => {
 });
 
 it('distanceKm: Calgary to Edmonton is about 280 km', () => {
-  const km = distanceKm(
-    {lat: 51.0501, lng: -114.0853},
-    {lat: 53.5461, lng: -113.4938},
-  );
+  const km = distanceKm({lat: 51.0501, lng: -114.0853}, {lat: 53.5461, lng: -113.4938});
   expect(km).toBeGreaterThan(270);
   expect(km).toBeLessThan(290);
 });
 
 it('formatCoords', () => {
-  expect(formatCoords({lat: 51.05011, lng: -114.08529})).toBe(
-    '51.05° N, 114.09° W',
-  );
+  expect(formatCoords({lat: 51.05011, lng: -114.08529})).toBe('51.05° N, 114.09° W');
 });

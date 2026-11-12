@@ -8,14 +8,14 @@ const useDarkMode = () => {
   const systemScheme = useColorScheme();
   const [schemeSetting, setSchemeSetting] = useState<ColorScheme>('system');
   useEffect(() => {
-    getItem().then(data => {
+    void getItem().then(data => {
       if (!isNull(data)) {
-        setSchemeSetting(<ColorScheme>data);
+        setSchemeSetting(data as ColorScheme);
       }
     });
   }, [getItem]);
   useEffect(() => {
-    setItem(<string>schemeSetting);
+    void setItem(schemeSetting as string);
   }, [schemeSetting, setItem]);
   const scheme = useMemo(() => {
     if (schemeSetting === 'system' || !systemScheme) {

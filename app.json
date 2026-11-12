@@ -77,7 +77,38 @@
           }
         }
       ],
-      "expo-background-task"
+      "expo-background-task",
+      [
+        "expo-widgets",
+        {
+          "bundleIdentifier": "com.conelabs.adhanapp.widget",
+          "groupIdentifier": "group.com.conelabs.adhanapp",
+          "enableAndroid": true,
+          "widgets": [
+            {
+              "name": "NextPrayer",
+              "displayName": "Next prayer",
+              "description": "The next prayer and a countdown.",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "systemMedium",
+                  "accessoryCircular",
+                  "accessoryRectangular",
+                  "accessoryInline"
+                ]
+              },
+              "android": {
+                "minWidth": 250,
+                "minHeight": 110,
+                "targetCellWidth": 4,
+                "targetCellHeight": 2,
+                "resizeMode": "both"
+              }
+            }
+          ]
+        }
+      ]
     ],
     "extra": {
       "eas": {

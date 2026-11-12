@@ -1,4 +1,4 @@
-# Prayer App
+# Adhan App (prayer-app)
 
 React Native prayer-times app (TypeScript). Shows daily prayer times from the device
 location, lets the user pick calculation methods, and schedules a local notification
@@ -37,7 +37,7 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
 - **Notification scheduling**: `rescheduleNotifications(settings)` (`app/lib/notifications.ts`)
   cancels everything and schedules `fillSchedule` from `app/lib/schedule.ts`: as many prayers
   as fit under iOS's **64 pending notifications** (about 12 days, planned from 14), plus one
-  last "Open Prayer Times…" reminder just after them. It runs on settings changes, at day
+  last "Open Adhan App…" reminder just after them. It runs on settings changes, at day
   change, on every foreground, and from the background task (`expo-background-task`, at most
   every 12 h, reading settings from AsyncStorage via `loadSettings`). Calls are queued so they
   never interleave. Before this, only 5 days were scheduled and only while the app was open,
@@ -54,12 +54,21 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
   time format, Hijri date, distance). `app/lib/schedule.ts`: which notifications to
   schedule. Both are unit-tested in `__tests__/`. Keep logic there, not in screens.
 - `app/hooks/usePrayerDay.ts`: yesterday/today/tomorrow times, ticking every second.
-- `useTravelCheck`: on foreground, if location permission is **already** granted and the
-  device is > 25 km from the saved location, Today shows the travel banner. It never prompts.
+- `useTravelCheck`: on foreground, if location permission is **already** granted and today's
+  prayer times where the device is differ from the saved location's by **≥ 2 minutes**
+  (`movedEnough` in `app/lib/travel.ts`), Today shows the travel banner. It never prompts.
+- **Travel alerts** (opt-in, Settings → Location): `app/travelTask.ts` keeps a 25 km geofence
+  (`expo-location` `startGeofencingAsync`) on the saved location. Needs "Always" location
+  (Android: `ACCESS_BACKGROUND_LOCATION`, via `isAndroidBackgroundLocationEnabled`). On exit,
+  if the times differ by ≥ 2 min, it posts "You're in {city}"; opening the app shows the banner.
+- **Adjust times** (Settings → Calculation): per-prayer ± minutes (`settings.adjustments`,
+  ±30), applied with PrayTimes `tune()` in `prayerTimesFor`. `tune()` merges, so every call
+  sets all six keys.
 - `useCityName` fills `settings.city` by reverse geocoding when it's missing.
 - Settings model (`Settings` in `main.d.ts`): `muted` (per-prayer bells; Sunrise muted by
   default), `headsUp` (extra notification 10 min before), `timeFormat`, `city`, `highLats`
-  (`NightMiddle` default / `AngleBased` / `OneSeventh`), `onboarded`.
+  (`NightMiddle` default / `AngleBased` / `OneSeventh`), `onboarded`, `adjustments`,
+  `travelAlerts`.
 - Far north in summer Isha can be after midnight (Calgary, June, Karachi: 01:38).
   `prayerTimesFor` dates a Maghrib/Isha earlier than Dhuhr to the **next** day.
 - Times are always shown in the phone's timezone, even for a searched city elsewhere.
@@ -69,7 +78,24 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
   Don't re-add a 90-minute option (the design's "Isha 18° / 90 min" control was dropped too).
 - `getPrayerTimes(date)` computes that date (it used to ignore `date`), and labels Friday's
   Dhuhr "Jumu’ah".
-- Widgets / Live Activity (#20) are not built yet: they need native targets.
+- **Widgets and Live Activity** (`expo-widgets` + `@expo/ui`, #20):
+  - `app/widgets/NextPrayer.ios.tsx` (SwiftUI: small, medium, lock screen circular /
+    rectangular / inline) and `NextPrayer.android.tsx` (Jetpack Compose). `PrayerActivity.ios.tsx`
+    is the Live Activity / Dynamic Island countdown. The plain `.ts` files are no-op stand-ins
+    for Jest and other platforms; Metro picks the platform file.
+  - A layout function has the `'widget'` directive and runs in the widget's **own JS runtime**:
+    no hooks, no app imports, no module-level values. Only `@expo/ui` components/modifiers
+    (globals there). Pass everything already formatted through props (`app/widgets/types.ts`).
+  - Data: `app/lib/widgetData.ts` (pure, tested). iOS gets a timeline: an entry now and one at
+    every prayer time for 2 days, so it advances by itself, with a live `dateStyle="timer"`
+    countdown. Android widgets can't tick or take a timeline: it's a snapshot.
+  - `refreshWidgets` runs with the notification reschedule (settings change, day change,
+    foreground) and from the background task. `syncLiveActivity` starts / updates / ends the
+    Live Activity in the hour before a prayer, on foreground and going to background (iOS only
+    lets the app start one while it's open).
+  - Widget extension bundle id `com.conelabs.adhanapp.widget`, App Group
+    `group.com.conelabs.adhanapp` (expo-widgets plugin options in `app.json`).
+  - Jest mocks `expo-widgets` in `jest.setup.js`.
 
 ## Commands
 
@@ -119,8 +145,14 @@ One-time setup (needs the account owner):
 
 ## Native config (in `app.json`)
 
-- Display name "Prayer Times". iOS bundle id `org.personal.talal7860.PrayerTimes`,
-  Android package `com.talal7860.prayertimes`. Do not change them: they are the store ids.
+- Display name "Adhan App" (store fallback "Adhan App: Prayer Times"). iOS bundle id and
+  Android package `com.conelabs.adhanapp`, Apple team `4XYSPPP9LW` (`ios.appleTeamId`), from
+  #23. Renamed from `org.personal.talal7860.PrayerTimes` / `com.talal7860.prayertimes` before
+  any store release. Don't change them again once the app is in the stores.
+- iOS entitlements: App Group `group.com.conelabs.adhanapp`, Time Sensitive notifications
+  (adhan and heads-up use `interruptionLevel: 'timeSensitive'` to get through Focus). **No push
+  entitlement**: `expo-notifications` has `enableRemoteNotifications: false` (local only).
+  Background modes: fetch + processing.
 - Icons and splash use the **"Arch"** concept from the design canvas's "App icon concepts"
   artboard (white pointed arch + warm sun on a `#2E63C9 → #163A85` gradient):
   - `assets/images/icon.png`: 1024², full-bleed, no rounded corners (iOS masks it).
@@ -130,8 +162,13 @@ One-time setup (needs the account owner):
     on `#2453B3`, `#0D1120` in dark mode.
   - The PNGs were rendered from the design's SVG with `@resvg/resvg-js` (not a project dependency).
     To change them, edit the SVG and re-render all five at 1024², then `npx expo prebuild --clean`.
-- Azan sound `assets/sounds/makkah_azan.mp3` is bundled by the `expo-notifications`
-  plugin `sounds` option. Code refers to it by file name (`AppConstants.sounds.mecca.path`).
+- Azan sound `assets/sounds/makkah_azan.wav` (29 s, 16-bit mono 22 kHz) is bundled by the
+  `expo-notifications` plugin `sounds` option. Code refers to it by file name
+  (`AppConstants.sounds.mecca.path`). **iOS notification sounds must be ≤ 30 s and
+  WAV/AIFF/CAF**; the old MP3 silently fell back to the default sound. Made with
+  `afconvert -f WAVE -d LEI16@22050 -c 1 in.mp3 out.wav`. Changing it on Android needs a new
+  channel id (the WAV one is `adhan-makkah`; the old `prayer-time-notifications-mecca` is deleted
+  on launch).
 - Android permissions include `SCHEDULE_EXACT_ALARM` so prayer notifications fire on time.
 
 ## Upgrade history (RN 0.65.1 → 0.88.1, Nov 2026)

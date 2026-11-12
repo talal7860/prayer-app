@@ -7,6 +7,7 @@ import useAppSettings from './useAppSettings';
 import {rescheduleNotifications} from '../lib/notifications';
 import {registerRescheduleTask} from '../backgroundTask';
 import {syncTravelAlerts} from '../travelTask';
+import {refreshWidgets, syncLiveActivity} from '../lib/widgets';
 
 // Channels from older versions. A channel's sound can't change, so the WAV adhan got a new one.
 const OLD_CHANNELS = ['prayer-time-notifications-mecca'];
@@ -37,6 +38,7 @@ const createChannels = async () => {
 const usePushNotifications = () => {
   const [registered, setRegistered] = useState(false);
   const [foregrounded, setForegrounded] = useState(0);
+  const [backgrounded, setBackgrounded] = useState(0);
   const {settings, today} = useAppSettings();
   // Ask for permission once the first-run setup is done, not over it.
   const ready = settings.onboarded;
@@ -54,6 +56,15 @@ const usePushNotifications = () => {
       Alert.alert(error.message);
     }
   }, []);
+
+  // Widgets and the Live Activity don't need notification permission.
+  useEffect(() => {
+    if (!ready) {
+      return;
+    }
+    refreshWidgets(settings);
+    syncLiveActivity(settings);
+  }, [ready, settings, today, foregrounded, backgrounded]);
 
   useEffect(() => {
     if (!ready || !registered || !settings.sound) {
@@ -76,6 +87,9 @@ const usePushNotifications = () => {
     const sub = AppState.addEventListener('change', state => {
       if (state === 'active') {
         setForegrounded(n => n + 1);
+      } else if (state === 'background') {
+        // The last chance to start the Live Activity before the app is suspended.
+        setBackgrounded(n => n + 1);
       }
     });
     return () => sub.remove();

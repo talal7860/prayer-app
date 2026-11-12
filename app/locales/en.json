@@ -163,5 +163,8 @@
     "needsAlways": "Allow location \"Always\"",
     "needsAlwaysBody": "Travel alerts check your location in the background. Allow it in Settings: Location → Always.",
     "notNow": "Not now"
+  },
+  "widget": {
+    "next": "Next prayer"
   }
 }

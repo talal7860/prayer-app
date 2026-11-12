@@ -1146,6 +1146,13 @@
   resolved "https://registry.yarnpkg.com/@expo/sudo-prompt/-/sudo-prompt-9.3.2.tgz#0fd2813402a42988e49145cab220e25bea74b308"
   integrity sha512-HHQigo3rQWKMDzYDLkubN5WQOYXJJE2eNqIQC2axC2iO3mHdwnIR7FgZVvHWtBwAdzBgAP0ECp8KqS8TiMKvgw==
 
+"@expo/ui@~58.0.28":
+  version "58.0.28"
+  resolved "https://registry.yarnpkg.com/@expo/ui/-/ui-58.0.28.tgz#2439a7bf85321d3b2cede9230cd68c4776ca2c66"
+  integrity sha512-WEe4lOdislcL16H4wAGJRQ3JtzTj4cIFwX+5ZBaTt7QbpxnVwi5acaic9PcEJHjU6pV4ySr6yzH7oywOo7HvrQ==
+  dependencies:
+    sf-symbols-typescript "^2.1.0"
+
 "@expo/vector-icons@^15.0.2":
   version "15.1.1"
   resolved "https://registry.yarnpkg.com/@expo/vector-icons/-/vector-icons-15.1.1.tgz#4b1d2c60493c0b0536972f0a5babd5f5c85b48f4"
@@ -4001,6 +4008,14 @@ expo-task-manager@~58.0.14:
   integrity sha512-a8GFlS0pcL7P7FFY9nukmeQz9gBpRFftXDEdA08NkWZDjVn2VNjdJw2nSbElEnLQCLYzKMkITJLbnixXqVoQdQ==
   dependencies:
     unimodules-app-loader "~58.0.2"
+
+expo-widgets@~58.0.28:
+  version "58.0.28"
+  resolved "https://registry.yarnpkg.com/expo-widgets/-/expo-widgets-58.0.28.tgz#ec2d60be439de13e2d8b1de1731e98d919c3a1f3"
+  integrity sha512-XLeFBpuviZplRE8DUvsWF+ajRiqvYsiE8BeqYcpYfqRCIesPaqjGmEdn1Vy0Bnzuj7LksU2s4e75pkatJR58HQ==
+  dependencies:
+    "@expo/plist" "^0.10.2"
+    "@expo/ui" "~58.0.28"
 
 expo@~58.0.24:
   version "58.0.24"

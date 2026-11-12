@@ -2,6 +2,7 @@ import * as BackgroundTask from 'expo-background-task';
 import * as TaskManager from 'expo-task-manager';
 import {rescheduleNotifications} from './lib/notifications';
 import {loadSettings} from './lib/settingsStore';
+import {refreshWidgets} from './lib/widgets';
 
 export const RESCHEDULE_TASK = 'reschedule-prayer-notifications';
 
@@ -10,7 +11,9 @@ export const RESCHEDULE_TASK = 'reschedule-prayer-notifications';
 // when the app isn't opened.
 TaskManager.defineTask(RESCHEDULE_TASK, async () => {
   try {
-    await rescheduleNotifications(await loadSettings());
+    const settings = await loadSettings();
+    refreshWidgets(settings);
+    await rescheduleNotifications(settings);
     return BackgroundTask.BackgroundTaskResult.Success;
   } catch (error) {
     console.warn(error);

@@ -11,10 +11,11 @@ import {
   View,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {Card} from '../../components/ui/Card';
+import {Card, Row} from '../../components/ui/Card';
 import ChoiceList from '../../components/ui/ChoiceList';
 import Icon from '../../components/ui/Icon';
 import Text from '../../components/ui/Text';
+import Toggle from '../../components/ui/Toggle';
 import useAppSettings from '../../hooks/useAppSettings';
 import useLocate from '../../hooks/useLocate';
 import usePalette from '../../hooks/usePalette';
@@ -28,7 +29,7 @@ import {highLatOptions} from '../SettingsScreen/HighLats';
 
 type Step = 'location' | 'method' | 'asr' | 'highLats' | 'review';
 
-type Draft = Pick<Settings, 'calculationMethod' | 'asr' | 'highLats'> & {
+type Draft = Pick<Settings, 'calculationMethod' | 'asr' | 'highLats' | 'liveActivity'> & {
   location?: GeoLocation;
   city?: string;
 };
@@ -47,6 +48,7 @@ const SetupScreen = () => {
     calculationMethod: settings.calculationMethod,
     asr: settings.asr,
     highLats: settings.highLats,
+    liveActivity: settings.liveActivity,
   });
   const [place, setPlace] = useState<Place>({});
   const [touched, setTouched] = useState({method: false, asr: false});
@@ -108,6 +110,7 @@ const SetupScreen = () => {
       calculationMethod: draft.calculationMethod,
       asr: draft.asr,
       highLats: draft.highLats,
+      liveActivity: draft.liveActivity,
       location: draft.location ?? prev.location,
       city: draft.city,
       onboarded: true,
@@ -313,6 +316,21 @@ const SetupScreen = () => {
                 .filter(Boolean)
                 .join(' · ')}
             </Text>
+            {Platform.OS === 'ios' ? (
+              // Opt-in: the countdown on the lock screen and in the Dynamic Island.
+              <Card>
+                <Row
+                  title={I18n.t('settings.liveActivity')}
+                  subtitle={I18n.t('setup.liveActivityHint')}
+                  last>
+                  <Toggle
+                    value={!!draft.liveActivity}
+                    onChange={liveActivity => setDraft(d => ({...d, liveActivity}))}
+                    accessibilityLabel={I18n.t('settings.liveActivity')}
+                  />
+                </Row>
+              </Card>
+            ) : null}
             <Text size={13} color={t.muted} style={styles.hint}>
               {I18n.t('setup.notifyHint')}
             </Text>

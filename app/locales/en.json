@@ -147,7 +147,8 @@
     "asrHanafiDetail": "Shadow twice the object. Later Asr",
     "reviewTitle": "Your prayer times today",
     "reviewHint": "Check these against your mosque's timetable. You can change any of this later in Settings.",
-    "notifyHint": "Next, allow notifications to get the adhan at each prayer time."
+    "notifyHint": "Next, allow notifications to get the adhan at each prayer time.",
+    "liveActivityHint": "A countdown on the lock screen and in the Dynamic Island in the hour before each prayer. You can change it later in Settings."
   },
   "adjust": {
     "title": "Adjust times",

@@ -7,6 +7,7 @@ import {prayerTimesFor} from '../app/lib/prayerTimes';
 import {defaultSettings} from '../app/lib/settingsStore';
 
 const settings: Settings = {...defaultSettings, city: 'Calgary, AB', timeFormat: '24h'};
+const on: Settings = {...settings, liveActivity: true};
 
 // Times are shown in the machine's time zone, so take the moments from the computed times
 // instead of hard-coding clock hours (CI runs in UTC, Calgary is UTC-7).
@@ -47,10 +48,10 @@ it('the timeline has an entry now and at each prayer time, moving to the next pr
   expect(Math.max(...gaps)).toBeLessThanOrEqual(30 * 60 * 1000);
 });
 
-it('the Live Activity only shows in the hour before a prayer', () => {
+it('the Live Activity, when on, only shows in the hour before a prayer', () => {
   const dhuhr = at('dhuhr').getTime();
-  expect(activityFor(settings, new Date(dhuhr - minutes(120)))).toBeNull();
-  const soon = activityFor(settings, new Date(dhuhr - minutes(20)));
+  expect(activityFor(on, new Date(dhuhr - minutes(120)))).toBeNull();
+  const soon = activityFor(on, new Date(dhuhr - minutes(20)));
   expect(soon?.next).toBe('Dhuhr');
   expect(soon?.inLabel).toBe('Dhuhr in');
 });

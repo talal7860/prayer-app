@@ -95,6 +95,13 @@ const Root = () => {
       border: t.border,
     },
   };
+  // Keep the native splash up until the first real screen can draw, so there's no blank frame.
+  useEffect(() => {
+    if (loaded) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [loaded]);
+
   if (!loaded) {
     return null;
   }
@@ -147,12 +154,6 @@ const App = () => {
     Inter_700Bold,
   });
   const ready = loaded || !!error;
-
-  useEffect(() => {
-    if (ready) {
-      SplashScreen.hideAsync().catch(() => {});
-    }
-  }, [ready]);
 
   if (!ready) {
     return null;

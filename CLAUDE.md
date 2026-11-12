@@ -121,8 +121,15 @@ One-time setup (needs the account owner):
 
 - Display name "Prayer Times". iOS bundle id `org.personal.talal7860.PrayerTimes`,
   Android package `com.talal7860.prayertimes`. Do not change them: they are the store ids.
-- Icons: `assets/images/icon.png` (1024²), Android adaptive foreground
-  `assets/images/adaptive-icon.png` on `#5c7474`.
+- Icons and splash use the **"Arch"** concept from the design canvas's "App icon concepts"
+  artboard (white pointed arch + warm sun on a `#2E63C9 → #163A85` gradient):
+  - `assets/images/icon.png`: 1024², full-bleed, no rounded corners (iOS masks it).
+  - Android adaptive: `adaptive-icon.png` (foreground, mark scaled to the 72/108 dp safe area),
+    `adaptive-icon-background.png` (gradient), `adaptive-icon-monochrome.png` (Android 13 themed icons).
+  - Splash (`expo-splash-screen` plugin): `splash-icon.png` (mark only, transparent), 120 pt wide
+    on `#2453B3`, `#0D1120` in dark mode.
+  - The PNGs were rendered from the design's SVG with `@resvg/resvg-js` (not a project dependency).
+    To change them, edit the SVG and re-render all five at 1024², then `npx expo prebuild --clean`.
 - Azan sound `assets/sounds/makkah_azan.mp3` is bundled by the `expo-notifications`
   plugin `sounds` option. Code refers to it by file name (`AppConstants.sounds.mecca.path`).
 - Android permissions include `SCHEDULE_EXACT_ALARM` so prayer notifications fire on time.

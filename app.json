@@ -20,7 +20,9 @@
       "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#5c7474"
+        "backgroundImage": "./assets/images/adaptive-icon-background.png",
+        "monochromeImage": "./assets/images/adaptive-icon-monochrome.png",
+        "backgroundColor": "#2453B3"
       },
       "permissions": [
         "android.permission.VIBRATE",
@@ -47,7 +49,19 @@
         }
       ],
       "expo-font",
-      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 120,
+          "resizeMode": "contain",
+          "backgroundColor": "#2453B3",
+          "dark": {
+            "image": "./assets/images/splash-icon.png",
+            "backgroundColor": "#0D1120"
+          }
+        }
+      ],
       "expo-background-task"
     ],
     "extra": {

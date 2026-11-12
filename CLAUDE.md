@@ -1,4 +1,4 @@
-# Adhan App (prayer-app)
+# Adhan Times (prayer-app)
 
 React Native prayer-times app (TypeScript). Shows daily prayer times from the device
 location, lets the user pick calculation methods, and schedules a local notification
@@ -282,7 +282,10 @@ One-time setup (needs the account owner):
 
 ## Native config (in `app.json`)
 
-- Display name "Adhan App" (store fallback "Adhan App: Prayer Times"). iOS bundle id and
+- Display name **"Adhan Times"** (Arabic «أوقات الأذان», Urdu «اذان ٹائمز»), renamed from "Adhan App"
+  (Nov 2026). It's `app.json` → `name` plus `app/locales/native/*.json` (`CFBundleDisplayName`,
+  `app_name`), and the in-app strings. The store listing names are set separately in Play Console
+  and App Store Connect. iOS bundle id and
   Android package `com.conelabs.adhanapp`, Apple team `4XYSPPP9LW` (`ios.appleTeamId`), from
   #23. Renamed from `org.personal.talal7860.PrayerTimes` / `com.talal7860.prayertimes` before
   any store release. Don't change them again once the app is in the stores.

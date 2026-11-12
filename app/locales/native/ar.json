@@ -1,10 +1,10 @@
 {
   "ios": {
-    "CFBundleDisplayName": "تطبيق الأذان",
+    "CFBundleDisplayName": "أوقات الأذان",
     "NSLocationWhenInUseUsageDescription": "يُستخدم موقعك لحساب أوقات الصلاة في مكانك.",
     "NSLocationAlwaysAndWhenInUseUsageDescription": "تستخدم تنبيهات السفر موقعك في الخلفية لتنبيهك عندما تتغير أوقات الصلاة لأنك في مدينة أخرى."
   },
   "android": {
-    "app_name": "تطبيق الأذان"
+    "app_name": "أوقات الأذان"
   }
 }

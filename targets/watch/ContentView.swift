@@ -20,7 +20,7 @@ struct ContentView: View {
         Image(systemName: "iphone")
           .font(.title2)
           .foregroundStyle(Palette.accent)
-        Text("Open Adhan App on your iPhone to set your location.")
+        Text("Open Adhan Times on your iPhone to set your location.")
           .font(.footnote)
           .multilineTextAlignment(.center)
           .foregroundStyle(Palette.soft)

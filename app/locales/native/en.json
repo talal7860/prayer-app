@@ -1,10 +1,10 @@
 {
   "ios": {
-    "CFBundleDisplayName": "Adhan App",
+    "CFBundleDisplayName": "Adhan Times",
     "NSLocationWhenInUseUsageDescription": "Your location is used to calculate prayer times for where you are.",
     "NSLocationAlwaysAndWhenInUseUsageDescription": "Travel alerts use your location in the background to tell you when prayer times change because you are in another city."
   },
   "android": {
-    "app_name": "Adhan App"
+    "app_name": "Adhan Times"
   }
 }

@@ -124,7 +124,11 @@ const TodayScreen = () => {
               {formatCountdown(day.next.time.getTime() - day.now.getTime())}
             </Text>
             <Text size={14} color={WHITE_88}>
-              {I18n.t('today.at', {time: fmt(day.next.time), now: nowLine})}
+              {I18n.t(
+                // After Isha the countdown is to tomorrow's Fajr, which isn't the Fajr in the list.
+                day.next.time.toDateString() === day.now.toDateString() ? 'today.at' : 'today.atTomorrow',
+                {time: fmt(day.next.time), now: nowLine},
+              )}
             </Text>
           </View>
 

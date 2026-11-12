@@ -69,6 +69,7 @@
     "title": "Today",
     "in": "{{label}} in",
     "at": "at {{time}} · {{now}}",
+    "atTomorrow": "at {{time}} tomorrow · {{now}}",
     "nowTime": "{{label}} time now",
     "fajrEnded": "Fajr has ended",
     "now": "Now",

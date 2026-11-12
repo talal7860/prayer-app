@@ -65,3 +65,11 @@ android/app/google-services.json
 ios/
 android/
 expo-env.d.ts
+
+# EAS local credentials (certificate passwords, keys). Never commit.
+credentials.json
+*.p12
+*.p8
+*.mobileprovision
+*.jks
+*.keystore

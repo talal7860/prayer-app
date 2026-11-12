@@ -1,32 +1,47 @@
 {
   "expo": {
-    "name": "Prayer Times",
+    "name": "Adhan App",
     "slug": "prayer-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "bundleIdentifier": "org.personal.talal7860.PrayerTimes",
+      "bundleIdentifier": "com.conelabs.adhanapp",
       "buildNumber": "1",
       "supportsTablet": false,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Location Services required for fetching city and country"
+        "NSLocationWhenInUseUsageDescription": "Location Services required for fetching city and country",
+        "UIViewControllerBasedStatusBarAppearance": false,
+        "UIBackgroundModes": [
+          "fetch",
+          "processing"
+        ]
+      },
+      "appleTeamId": "APPLE_TEAM_ID_REDACTED",
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.com.conelabs.adhanapp"
+        ],
+        "com.apple.developer.usernotifications.time-sensitive": true
       }
     },
     "android": {
-      "package": "com.talal7860.prayertimes",
+      "package": "com.conelabs.adhanapp",
       "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#5c7474"
+        "backgroundImage": "./assets/images/adaptive-icon-background.png",
+        "monochromeImage": "./assets/images/adaptive-icon-monochrome.png",
+        "backgroundColor": "#2453B3"
       },
       "permissions": [
         "android.permission.VIBRATE",
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.SCHEDULE_EXACT_ALARM"
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        "android.permission.POST_NOTIFICATIONS"
       ]
     },
     "plugins": [
@@ -34,18 +49,66 @@
         "expo-notifications",
         {
           "sounds": [
-            "./assets/sounds/makkah_azan.mp3"
+            "./assets/sounds/makkah_azan.wav"
           ],
-          "color": "#ffffff"
+          "color": "#ffffff",
+          "enableRemoteNotifications": false
         }
       ],
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Location Services required for fetching city and country"
+          "locationWhenInUsePermission": "Location Services required for fetching city and country",
+          "locationAlwaysAndWhenInUsePermission": "Travel alerts use your location in the background to tell you when prayer times change because you are in another city.",
+          "isAndroidBackgroundLocationEnabled": true
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 120,
+          "resizeMode": "contain",
+          "backgroundColor": "#2453B3",
+          "dark": {
+            "image": "./assets/images/splash-icon.png",
+            "backgroundColor": "#0D1120"
+          }
+        }
+      ],
+      "expo-background-task",
+      [
+        "expo-widgets",
+        {
+          "bundleIdentifier": "com.conelabs.adhanapp.widget",
+          "groupIdentifier": "group.com.conelabs.adhanapp",
+          "enableAndroid": true,
+          "widgets": [
+            {
+              "name": "NextPrayer",
+              "displayName": "Next prayer",
+              "description": "The next prayer and a countdown.",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "systemMedium",
+                  "accessoryCircular",
+                  "accessoryRectangular",
+                  "accessoryInline"
+                ]
+              },
+              "android": {
+                "minWidth": 250,
+                "minHeight": 110,
+                "targetCellWidth": 4,
+                "targetCellHeight": 2,
+                "resizeMode": "both"
+              }
+            }
+          ]
+        }
+      ]
     ],
     "extra": {
       "eas": {

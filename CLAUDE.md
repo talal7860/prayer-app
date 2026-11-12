@@ -1,4 +1,4 @@
-# Prayer App
+# Adhan App (prayer-app)
 
 React Native prayer-times app (TypeScript). Shows daily prayer times from the device
 location, lets the user pick calculation methods, and schedules a local notification
@@ -12,12 +12,90 @@ location, lets the user pick calculation methods, and schedules a local notifica
   `npx expo prebuild` and are git-ignored. Never hand-edit them. Change `app.json`
   (or add a config plugin) and re-run prebuild.
 - Navigation: React Navigation 7 (`native-stack` + `bottom-tabs`), see `App.tsx`.
-- Notifications: `expo-notifications` (`index.js` handler, `app/hooks/usePushNotifications.ts`).
+- Notifications: `expo-notifications` (`index.js` handler, `app/hooks/usePushNotifications.ts`,
+  `app/lib/notifications.ts`), kept topped up by `expo-background-task` (`app/backgroundTask.ts`).
 - Location: `expo-location` (`app/screens/SettingsScreen/Location/index.tsx`).
 - Storage: `@react-native-async-storage/async-storage` 2.x (Expo-pinned, not 3.x).
 - i18n: `i18n-js` v4 (`app/I18n.ts`, strings in `app/locales/en.json`).
 - Prayer-time math: `app/lib/PrayTimes.js` (vendored, excluded from lint).
 - Global types live in `app/types/main.d.ts` (ambient, no imports).
+
+## App structure (redesign)
+
+The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/TzzomF9PAhGP8cMVuSz2NK
+(epic #21).
+
+- `App.tsx`: loads Inter, waits for the saved settings (`loaded`), then a root stack over
+  bottom tabs `today` / `week` / `settings`, plus `location`, `method`, `highLats`, `sound`.
+  `usePushNotifications()` is mounted once here.
+- **First-run setup** (`app/screens/SetupScreen`): while `settings.onboarded` is false the
+  stack has only `setup`. It asks for location (GPS via `useLocate`, or a typed city through
+  `geocodeAsync`), method, Asr, and the high-latitude rule (only at |lat| ≥ 48°), then shows
+  today's times. Method and Asr are preselected from the country (`app/lib/recommend.ts`).
+  Nothing is saved until Start. Saved settings without `onboarded` (installs from before the
+  setup) count as done (`parseSettings`). The notification permission prompt waits for it.
+- **Notification scheduling**: `rescheduleNotifications(settings)` (`app/lib/notifications.ts`)
+  cancels everything and schedules `fillSchedule` from `app/lib/schedule.ts`: as many prayers
+  as fit under iOS's **64 pending notifications** (about 12 days, planned from 14), plus one
+  last "Open Adhan App…" reminder just after them. It runs on settings changes, at day
+  change, on every foreground, and from the background task (`expo-background-task`, at most
+  every 12 h, reading settings from AsyncStorage via `loadSettings`). Calls are queued so they
+  never interleave. Before this, only 5 days were scheduled and only while the app was open,
+  so notifications stopped if it wasn't opened for 5 days.
+  Background tasks **don't run on the iOS simulator**; test on a device (or Android).
+- Pure, React-free modules (usable from the background task): `app/lib/prayerTimes.ts`
+  (`prayerTimesFor(settings, date)`, `methodName`), `app/lib/settingsStore.ts` (defaults,
+  `parseSettings`, `loadSettings`). The settings context wraps them.
+- `app/theme/tokens.ts`: light/dark palettes, per-period sky gradients, Inter font names.
+  Use these instead of hex values in screens.
+- `app/components/ui/`: `Text` (Inter, pick the weight with `weight`, not `fontWeight`),
+  `Icon` (the design's stroke SVGs), `Card`/`Row`/`SectionLabel`, `Segmented`, `Toggle`, `ChoiceList`.
+- `app/lib/prayerDay.ts`: pure helpers (period of day, next prayer, countdown, sun arc,
+  time format, Hijri date, distance). `app/lib/schedule.ts`: which notifications to
+  schedule. Both are unit-tested in `__tests__/`. Keep logic there, not in screens.
+- `app/hooks/usePrayerDay.ts`: yesterday/today/tomorrow times, ticking every second.
+- `useTravelCheck`: on foreground, if location permission is **already** granted and today's
+  prayer times where the device is differ from the saved location's by **≥ 2 minutes**
+  (`movedEnough` in `app/lib/travel.ts`), Today shows the travel banner. It never prompts.
+- **Travel alerts** (opt-in, Settings → Location): `app/travelTask.ts` keeps a 25 km geofence
+  (`expo-location` `startGeofencingAsync`) on the saved location. Needs "Always" location
+  (Android: `ACCESS_BACKGROUND_LOCATION`, via `isAndroidBackgroundLocationEnabled`). On exit,
+  if the times differ by ≥ 2 min, it posts "You're in {city}"; opening the app shows the banner.
+- **Adjust times** (Settings → Calculation): per-prayer ± minutes (`settings.adjustments`,
+  ±30), applied with PrayTimes `tune()` in `prayerTimesFor`. `tune()` merges, so every call
+  sets all six keys.
+- `useCityName` fills `settings.city` by reverse geocoding when it's missing.
+- Settings model (`Settings` in `main.d.ts`): `muted` (per-prayer bells; Sunrise muted by
+  default), `headsUp` (extra notification 10 min before), `timeFormat`, `city`, `highLats`
+  (`NightMiddle` default / `AngleBased` / `OneSeventh`), `onboarded`, `adjustments`,
+  `travelAlerts`.
+- Far north in summer Isha can be after midnight (Calgary, June, Karachi: 01:38).
+  `prayerTimesFor` dates a Maghrib/Isha earlier than Dhuhr to the **next** day.
+- Times are always shown in the phone's timezone, even for a searched city elsewhere.
+- Fajr and Isha always come from the calculation method's angles. The old
+  `fajrIshaCalculation: '90mins'` rule (Fajr = sunrise − 90 min, Isha = maghrib + 90 min,
+  patched into `PrayTimes.js`) was **removed on purpose**; a saved value is dropped on load.
+  Don't re-add a 90-minute option (the design's "Isha 18° / 90 min" control was dropped too).
+- `getPrayerTimes(date)` computes that date (it used to ignore `date`), and labels Friday's
+  Dhuhr "Jumu’ah".
+- **Widgets and Live Activity** (`expo-widgets` + `@expo/ui`, #20):
+  - `app/widgets/NextPrayer.ios.tsx` (SwiftUI: small, medium, lock screen circular /
+    rectangular / inline) and `NextPrayer.android.tsx` (Jetpack Compose). `PrayerActivity.ios.tsx`
+    is the Live Activity / Dynamic Island countdown. The plain `.ts` files are no-op stand-ins
+    for Jest and other platforms; Metro picks the platform file.
+  - A layout function has the `'widget'` directive and runs in the widget's **own JS runtime**:
+    no hooks, no app imports, no module-level values. Only `@expo/ui` components/modifiers
+    (globals there). Pass everything already formatted through props (`app/widgets/types.ts`).
+  - Data: `app/lib/widgetData.ts` (pure, tested). iOS gets a timeline: an entry now and one at
+    every prayer time for 2 days, so it advances by itself, with a live `dateStyle="timer"`
+    countdown. Android widgets can't tick or take a timeline: it's a snapshot.
+  - `refreshWidgets` runs with the notification reschedule (settings change, day change,
+    foreground) and from the background task. `syncLiveActivity` starts / updates / ends the
+    Live Activity in the hour before a prayer, on foreground and going to background (iOS only
+    lets the app start one while it's open).
+  - Widget extension bundle id `com.conelabs.adhanapp.widget`, App Group
+    `group.com.conelabs.adhanapp` (expo-widgets plugin options in `app.json`).
+  - Jest mocks `expo-widgets` in `jest.setup.js`.
 
 ## Commands
 
@@ -39,7 +117,10 @@ For the next SDK bump: `npx expo install expo@^<next> --fix`, then `npx expo-doc
 ## CI / CD
 
 - `.github/workflows/ci.yml`: on every PR, runs typecheck, lint, tests and `expo-doctor`.
-- `.github/workflows/deploy.yml`: on push to `master` (or a manual run), re-runs CI, then
+- `.github/workflows/deploy.yml`: **automatic deploys are currently disabled** (the `push`
+  trigger is commented out). It only runs manually (Actions → Deploy → Run workflow). Once the
+  one-time setup below is done, uncomment the trigger to deploy on every push to `master`.
+  It re-runs CI, then
   `eas build --platform all --profile production --auto-submit` on EAS. iOS goes to
   **TestFlight**, Android to the Play **internal testing** track. Releases run one at a time.
 - `eas.json`: `appVersionSource: remote` + `autoIncrement`, so EAS owns the iOS build number
@@ -64,12 +145,30 @@ One-time setup (needs the account owner):
 
 ## Native config (in `app.json`)
 
-- Display name "Prayer Times". iOS bundle id `org.personal.talal7860.PrayerTimes`,
-  Android package `com.talal7860.prayertimes`. Do not change them: they are the store ids.
-- Icons: `assets/images/icon.png` (1024²), Android adaptive foreground
-  `assets/images/adaptive-icon.png` on `#5c7474`.
-- Azan sound `assets/sounds/makkah_azan.mp3` is bundled by the `expo-notifications`
-  plugin `sounds` option. Code refers to it by file name (`AppConstants.sounds.mecca.path`).
+- Display name "Adhan App" (store fallback "Adhan App: Prayer Times"). iOS bundle id and
+  Android package `com.conelabs.adhanapp`, Apple team `APPLE_TEAM_ID_REDACTED` (`ios.appleTeamId`), from
+  #23. Renamed from `org.personal.talal7860.PrayerTimes` / `com.talal7860.prayertimes` before
+  any store release. Don't change them again once the app is in the stores.
+- iOS entitlements: App Group `group.com.conelabs.adhanapp`, Time Sensitive notifications
+  (adhan and heads-up use `interruptionLevel: 'timeSensitive'` to get through Focus). **No push
+  entitlement**: `expo-notifications` has `enableRemoteNotifications: false` (local only).
+  Background modes: fetch + processing.
+- Icons and splash use the **"Arch"** concept from the design canvas's "App icon concepts"
+  artboard (white pointed arch + warm sun on a `#2E63C9 → #163A85` gradient):
+  - `assets/images/icon.png`: 1024², full-bleed, no rounded corners (iOS masks it).
+  - Android adaptive: `adaptive-icon.png` (foreground, mark scaled to the 72/108 dp safe area),
+    `adaptive-icon-background.png` (gradient), `adaptive-icon-monochrome.png` (Android 13 themed icons).
+  - Splash (`expo-splash-screen` plugin): `splash-icon.png` (mark only, transparent), 120 pt wide
+    on `#2453B3`, `#0D1120` in dark mode.
+  - The PNGs were rendered from the design's SVG with `@resvg/resvg-js` (not a project dependency).
+    To change them, edit the SVG and re-render all five at 1024², then `npx expo prebuild --clean`.
+- Azan sound `assets/sounds/makkah_azan.wav` (29 s, 16-bit mono 22 kHz) is bundled by the
+  `expo-notifications` plugin `sounds` option. Code refers to it by file name
+  (`AppConstants.sounds.mecca.path`). **iOS notification sounds must be ≤ 30 s and
+  WAV/AIFF/CAF**; the old MP3 silently fell back to the default sound. Made with
+  `afconvert -f WAVE -d LEI16@22050 -c 1 in.mp3 out.wav`. Changing it on Android needs a new
+  channel id (the WAV one is `adhan-makkah`; the old `prayer-time-notifications-mecca` is deleted
+  on launch).
 - Android permissions include `SCHEDULE_EXACT_ALARM` so prayer notifications fire on time.
 
 ## Upgrade history (RN 0.65.1 → 0.88.1, Nov 2026)
@@ -103,10 +202,19 @@ Tracking epic: https://github.com/talal7860/prayer-app/issues/11 (sub-issues #3�
   `.types` module); there is an inline disable for it.
 - **RNTL 14 `render` is async**: `await render(<App />)`. The App test mocks AsyncStorage,
   safe-area-context and expo-notifications (`__tests__/index.test.tsx`).
+- `setSetting(key)(undefined)` keeps the old value (lodash `merge` skips undefined). To clear a
+  field, use `setSettings(prev => ({...prev, key: undefined}))`.
+- Settings are saved only after they've been loaded (`loaded`), so a change back to a default
+  value is saved too.
 - Android notification channels are immutable once created on a device. To change a
   channel's sound or importance, give it a new `channelId` in `app/AppConstants.ts`.
 - iOS takes the sound from the notification content, Android from the channel; both are
   set in `scheduleNotifications`.
+- For an Android channel with the system default sound, **leave `sound` out**. `sound: 'default'`
+  makes expo-notifications look for a bundled file named "default". That throws, and it used to
+  stop the permission request, so no notifications were scheduled at all.
+- Expo SDK 58 doesn't forward `console.log` from the app to the Metro terminal (`console.error`
+  still shows). If edits don't show up in the app, restart Metro with `npx expo start --clear`.
 - The old "Okay" notification action (`notification.action_ok`) was dropped in the
   migration; re-adding it needs `Notifications.setNotificationCategoryAsync`.
 - Custom notification sounds don't work in Expo Go. Use a dev build (`npx expo run:*`).

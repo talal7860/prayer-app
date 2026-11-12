@@ -1,6 +1,9 @@
 import React from 'react';
-import {render, screen} from '@testing-library/react-native';
+import {fireEvent, render, screen, waitFor} from '@testing-library/react-native';
+import * as Notifications from 'expo-notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import App from '../App';
+import {SETTINGS_KEY} from '../app/lib/settingsStore';
 
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
@@ -12,6 +15,7 @@ jest.mock('react-native-safe-area-context', () =>
 
 jest.mock('expo-notifications', () => ({
   setNotificationChannelAsync: jest.fn(() => Promise.resolve(null)),
+  deleteNotificationChannelAsync: jest.fn(() => Promise.resolve()),
   getPermissionsAsync: jest.fn(() => Promise.resolve({granted: true})),
   requestPermissionsAsync: jest.fn(() => Promise.resolve({granted: true})),
   cancelAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve()),
@@ -20,7 +24,119 @@ jest.mock('expo-notifications', () => ({
   SchedulableTriggerInputTypes: {DATE: 'date'},
 }));
 
-it('renders the home screen', async () => {
+jest.mock('expo-task-manager', () => ({
+  defineTask: jest.fn(),
+  isTaskRegisteredAsync: jest.fn(() => Promise.resolve(false)),
+}));
+
+jest.mock('expo-background-task', () => ({
+  registerTaskAsync: jest.fn(() => Promise.resolve()),
+  BackgroundTaskResult: {Success: 1, Failed: 2},
+}));
+
+jest.mock('expo-location', () => ({
+  geocodeAsync: jest.fn(() => Promise.resolve([{latitude: 33.6844, longitude: 73.0479}])),
+  reverseGeocodeAsync: jest.fn(() =>
+    Promise.resolve([
+      {city: 'Islamabad', region: 'Islamabad Capital Territory', isoCountryCode: 'PK', country: 'Pakistan'},
+    ]),
+  ),
+}));
+
+const savedSetup = () =>
+  AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify({onboarded: true}));
+
+beforeEach(async () => {
+  await AsyncStorage.clear();
+  jest.clearAllMocks();
+});
+
+describe('first run', () => {
+  it('shows the setup, preselects what is common there, and saves on Start', async () => {
+    await render(<App />);
+    expect(await screen.findByText('Where are you?')).toBeTruthy();
+    // No location yet: can't continue, and no permission prompt over the setup.
+    expect(screen.getByRole('button', {name: 'Continue'})).toBeDisabled();
+    expect(Notifications.requestPermissionsAsync).not.toHaveBeenCalled();
+
+    await fireEvent.changeText(screen.getByLabelText('Or type a city'), 'Islamabad');
+    await fireEvent.press(screen.getByRole('button', {name: 'Search'}));
+    expect(await screen.findByText('Islamabad, PK')).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', {name: 'Continue'}));
+
+    expect(await screen.findByText('Common in Pakistan')).toBeTruthy();
+    expect(screen.getByRole('radio', {name: /Karachi/})).toBeSelected();
+    await fireEvent.press(screen.getByRole('button', {name: 'Continue'}));
+
+    expect(screen.getByRole('radio', {name: /^Hanafi/})).toBeSelected();
+    await fireEvent.press(screen.getByRole('radio', {name: /^Standard/}));
+    // 33.7° N is not a high latitude, so the next step is the review.
+    await fireEvent.press(screen.getByRole('button', {name: 'Continue'}));
+    expect(await screen.findByText('Your prayer times today')).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', {name: 'Start'}));
+
+    expect(await screen.findByLabelText('Turn on Sunrise reminder')).toBeTruthy();
+    await waitFor(async () =>
+      expect(JSON.parse((await AsyncStorage.getItem(SETTINGS_KEY))!)).toMatchObject({
+        onboarded: true,
+        city: 'Islamabad, PK',
+        location: {lat: 33.6844, lng: 73.0479},
+        calculationMethod: 'Karachi',
+        asr: 'Standard',
+      }),
+    );
+    expect(Notifications.requestPermissionsAsync).not.toHaveBeenCalled(); // already granted in the mock
+    expect(Notifications.getPermissionsAsync).toHaveBeenCalled();
+  });
+
+  it('asks about high latitudes far north', async () => {
+    const ExpoLocation = require('expo-location');
+    ExpoLocation.geocodeAsync.mockResolvedValueOnce([{latitude: 51.05, longitude: -114.08}]);
+    ExpoLocation.reverseGeocodeAsync.mockResolvedValueOnce([
+      {city: 'Calgary', region: 'AB', isoCountryCode: 'CA', country: 'Canada'},
+    ]);
+    await render(<App />);
+    await fireEvent.changeText(await screen.findByLabelText('Or type a city'), 'Calgary');
+    await fireEvent.press(screen.getByRole('button', {name: 'Search'}));
+    await screen.findByText('Calgary, AB');
+    await fireEvent.press(screen.getByRole('button', {name: 'Continue'}));
+    expect(screen.getByRole('radio', {name: /ISNA/})).toBeSelected();
+    await fireEvent.press(screen.getByRole('button', {name: 'Continue'}));
+    await fireEvent.press(screen.getByRole('button', {name: 'Continue'}));
+    expect(await screen.findByText('High latitudes')).toBeTruthy();
+    expect(screen.getByRole('radio', {name: /Middle of the night/})).toBeSelected();
+  });
+
+  it('skips the setup for people who used the app before it existed', async () => {
+    await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify({calculationMethod: 'ISNA'}));
+    await render(<App />);
+    expect(await screen.findByLabelText('Turn on Sunrise reminder')).toBeTruthy();
+  });
+});
+
+it('renders Today and schedules reminders, with Sunrise muted by default', async () => {
+  await savedSetup();
   await render(<App />);
   expect(await screen.findAllByText(/fajr/i)).not.toHaveLength(0);
+  expect(screen.getByLabelText('Turn on Sunrise reminder')).toBeTruthy();
+  await waitFor(() =>
+    expect(Notifications.scheduleNotificationAsync).toHaveBeenCalled(),
+  );
+  const titles = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls.map(
+    ([request]) => request.content.title,
+  );
+  expect(titles.some((title: string) => title.includes('Sunrise'))).toBe(false);
+  expect(require('expo-background-task').registerTaskAsync).toHaveBeenCalledWith(
+    'reschedule-prayer-notifications',
+    {minimumInterval: 720},
+  );
+});
+
+it('switches to Week and Settings', async () => {
+  await savedSetup();
+  await render(<App />);
+  await fireEvent.press(await screen.findByRole('button', {name: /^Week/}));
+  expect(await screen.findByText('Next week')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', {name: /^Settings/}));
+  expect(await screen.findByText('Heads-up reminder')).toBeTruthy();
 });

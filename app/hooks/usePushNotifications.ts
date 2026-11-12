@@ -1,27 +1,47 @@
 import {useCallback, useEffect, useState} from 'react';
-import {Alert, Platform} from 'react-native';
+import {Alert, AppState, Platform} from 'react-native';
 import * as Notifications from 'expo-notifications';
 import I18n from '../I18n';
 import AppConstants from '../AppConstants';
 import useAppSettings from './useAppSettings';
+import {rescheduleNotifications} from '../lib/notifications';
+import {registerRescheduleTask} from '../backgroundTask';
+import {syncTravelAlerts} from '../travelTask';
+import {refreshWidgets, syncLiveActivity} from '../lib/widgets';
 
-const createChannels = () =>
-  Promise.all(
+// Channels from older versions. A channel's sound can't change, so the WAV adhan got a new one.
+const OLD_CHANNELS = ['prayer-time-notifications-mecca'];
+
+const createChannels = async () => {
+  await Promise.all(OLD_CHANNELS.map(id => Notifications.deleteNotificationChannelAsync(id)));
+  await Promise.all(
     Object.values(AppConstants.notificationChannels).map(channel =>
       Notifications.setNotificationChannelAsync(channel.channelId, {
         name: I18n.t('notification.channel.name'),
         description: I18n.t('notification.channel.description'),
         // eslint-disable-next-line import/namespace -- re-exported via `export *` from a .types module
         importance: Notifications.AndroidImportance.HIGH,
-        sound: channel.soundName === 'default' ? 'default' : channel.soundName,
+        // Leaving `sound` out gives the system default. Passing 'default' makes
+        // expo-notifications look for a bundled file called "default".
+        ...(channel.soundName === 'default' ? {} : {sound: channel.soundName}),
         enableVibrate: true,
       }),
     ),
   );
+};
 
+/**
+ * Keeps the scheduled prayer notifications in sync: on every settings change, at the start
+ * of each day, and each time the app comes back to the foreground. A background task
+ * (app/backgroundTask.ts) does the same while the app isn't opened.
+ */
 const usePushNotifications = () => {
   const [registered, setRegistered] = useState(false);
-  const {settings} = useAppSettings();
+  const [foregrounded, setForegrounded] = useState(0);
+  const [backgrounded, setBackgrounded] = useState(0);
+  const {settings, today} = useAppSettings();
+  // Ask for permission once the first-run setup is done, not over it.
+  const ready = settings.onboarded;
 
   const requestPermission = useCallback(async () => {
     try {
@@ -37,59 +57,60 @@ const usePushNotifications = () => {
     }
   }, []);
 
-  const scheduleNotifications = useCallback(
-    async (prayerTimes: PrayerTimesByDate) => {
-      if (!settings.sound) {
-        return;
-      }
-      const channel = AppConstants.notificationChannels[settings.sound];
-      await Notifications.cancelAllScheduledNotificationsAsync();
-      const now = new Date();
-      const requests: Promise<string>[] = [];
-      for (const key in prayerTimes) {
-        prayerTimes[key].forEach(time => {
-          if (time.time < now) {
-            return;
-          }
-          requests.push(
-            Notifications.scheduleNotificationAsync({
-              content: {
-                title: I18n.t('notification.title', {
-                  label: time.label,
-                  time: AppConstants.timeFormat(time.time),
-                }),
-                body: '',
-                // iOS reads the sound from the content; Android from the channel.
-                sound: channel.soundName,
-              },
-              trigger: {
-                type: Notifications.SchedulableTriggerInputTypes.DATE,
-                date: time.time,
-                channelId: channel.channelId,
-              },
-            }),
-          );
-        });
-      }
-      await Promise.all(requests);
-    },
-    [settings],
-  );
+  // Widgets and the Live Activity don't need notification permission.
+  useEffect(() => {
+    if (!ready) {
+      return;
+    }
+    refreshWidgets(settings);
+    syncLiveActivity(settings);
+  }, [ready, settings, today, foregrounded, backgrounded]);
 
   useEffect(() => {
+    if (!ready || !registered || !settings.sound) {
+      return;
+    }
+    rescheduleNotifications(settings).catch(error => console.warn(error));
+  }, [ready, registered, settings, today, foregrounded]);
+
+  // Keep the travel geofence on the saved location (or stopped when the setting is off).
+  const {travelAlerts, location} = settings;
+  useEffect(() => {
+    if (!ready) {
+      return;
+    }
+    syncTravelAlerts(settings).catch(error => console.warn(error));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only these fields matter
+  }, [ready, travelAlerts, location.lat, location.lng]);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', state => {
+      if (state === 'active') {
+        setForegrounded(n => n + 1);
+      } else if (state === 'background') {
+        // The last chance to start the Live Activity before the app is suspended.
+        setBackgrounded(n => n + 1);
+      }
+    });
+    return () => sub.remove();
+  }, []);
+
+  useEffect(() => {
+    if (!ready) {
+      return;
+    }
     const setup = async () => {
       if (Platform.OS === 'android') {
-        await createChannels();
+        // A failed channel must not stop the permission request below.
+        await createChannels().catch(error => console.warn(error));
       }
       await requestPermission();
+      await registerRescheduleTask().catch(error => console.warn(error));
     };
     setup();
-  }, [requestPermission]);
+  }, [ready, requestPermission]);
 
-  return {
-    registered,
-    scheduleNotifications,
-  };
+  return {registered};
 };
 
 export default usePushNotifications;

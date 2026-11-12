@@ -1,13 +1,13 @@
 {
   "home": {
-    "title": "Adhan App"
+    "title": "Adhan Times"
   },
   "locations": {
     "title": "Location",
     "useCurrent": "Use current location",
     "coords": "Coordinates",
     "hint": "Prayer times are calculated for this place.",
-    "servicesOff": "Turn on Location Services to let Adhan App find your location.",
+    "servicesOff": "Turn on Location Services to let Adhan Times find your location.",
     "goToSettings": "Go to Settings",
     "dontUse": "Don't Use Location",
     "denied": "Location permission denied",
@@ -51,7 +51,7 @@
       "description": "Prayer Notifications"
     },
     "headsUp": "{{label}} in 10 minutes - {{time}}",
-    "reminder": "Open Adhan App to keep getting prayer notifications"
+    "reminder": "Open Adhan Times to keep getting prayer notifications"
   },
   "prayer": {
     "fajr": "Fajr",
@@ -241,7 +241,7 @@
   },
   "exactAlarm": {
     "title": "On-time adhan",
-    "body": "Android can deliver the adhan late unless Adhan App may set exact alarms. Turn on “Alarms & reminders”.",
+    "body": "Android can deliver the adhan late unless Adhan Times may set exact alarms. Turn on “Alarms & reminders”.",
     "allow": "Allow",
     "settingsHint": "Off: the adhan can be late"
   }

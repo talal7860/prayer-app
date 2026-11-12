@@ -33,6 +33,8 @@
     "adhan": "Adhan sound",
     "headsUp": "Heads-up reminder",
     "headsUpHint": "10 minutes before each prayer",
+    "liveActivity": "Live Activity",
+    "liveActivityHint": "Lock screen and Dynamic Island",
     "timeFormat": "Time format",
     "unknownCity": "Current location",
     "highLats": "High latitudes",

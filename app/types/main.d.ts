@@ -42,6 +42,8 @@ type Settings = {
   travelAlerts: boolean;
   /** Extra reminder 10 minutes before each prayer. */
   headsUp: boolean;
+  /** iOS: the Live Activity countdown (lock screen and Dynamic Island) before each prayer. */
+  liveActivity: boolean;
   timeFormat: TimeFormat;
   highLats: HighLatRule;
   /** The first-run setup was finished. Saved settings from before it existed count as done. */

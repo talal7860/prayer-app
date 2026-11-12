@@ -123,8 +123,14 @@ export const widgetTimeline = (settings: Settings, now: Date = new Date()) => {
   return [now, ...dates].map(date => ({date, props: nextPrayerProps(settings, date)}));
 };
 
-/** The Live Activity for the next prayer, if it's within the hour; otherwise null. */
+/**
+ * The Live Activity for the next prayer, if it's within the hour and the setting is on;
+ * otherwise null (and `syncLiveActivity` ends any running one).
+ */
 export const activityFor = (settings: Settings, now: Date = new Date()): PrayerActivityProps | null => {
+  if (settings.liveActivity === false) {
+    return null;
+  }
   const props = nextPrayerProps(settings, now);
   if (props.at - now.getTime() > ACTIVITY_LEAD_MS) {
     return null;

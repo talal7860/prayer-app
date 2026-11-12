@@ -1,5 +1,5 @@
 import React from 'react';
-import {Alert, Linking, Pressable, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
+import {Alert, Linking, Platform, Pressable, ScrollView, StatusBar, StyleSheet, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Card, Row, SectionLabel} from '../../components/ui/Card';
@@ -118,13 +118,28 @@ const SettingsScreen = () => {
             value={AppConstants.sounds?.[settings.sound]?.name}
             onPress={() => navigation.navigate('sound')}
           />
-          <Row title={I18n.t('settings.headsUp')} subtitle={I18n.t('settings.headsUpHint')} last>
+          <Row
+            title={I18n.t('settings.headsUp')}
+            subtitle={I18n.t('settings.headsUpHint')}
+            last={Platform.OS !== 'ios'}>
             <Toggle
               value={!!settings.headsUp}
               onChange={setSetting('headsUp')}
               accessibilityLabel={I18n.t('settings.headsUp')}
             />
           </Row>
+          {Platform.OS === 'ios' && (
+            <Row
+              title={I18n.t('settings.liveActivity')}
+              subtitle={I18n.t('settings.liveActivityHint')}
+              last>
+              <Toggle
+                value={settings.liveActivity !== false}
+                onChange={setSetting('liveActivity')}
+                accessibilityLabel={I18n.t('settings.liveActivity')}
+              />
+            </Row>
+          )}
         </Card>
 
         <SectionLabel>{I18n.t('settings.displaySection')}</SectionLabel>

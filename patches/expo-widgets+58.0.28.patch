@@ -1,3 +1,14 @@
+diff --git a/node_modules/expo-widgets/android/proguard-rules.pro b/node_modules/expo-widgets/android/proguard-rules.pro
+index 222bdfd..748f879 100644
+--- a/node_modules/expo-widgets/android/proguard-rules.pro
++++ b/node_modules/expo-widgets/android/proguard-rules.pro
+@@ -1,2 +1,6 @@
+ # WorkManager creates its Room database by reflection during app startup.
+ -keep class * extends androidx.room.RoomDatabase { <init>(); }
++
++# ChronometerView (our patch) creates Glance's EmittableAndroidRemoteViews by reflection
++# (it's Kotlin-internal); keep its name and setRemoteViews/setModifier in release builds.
++-keep class androidx.glance.appwidget.EmittableAndroidRemoteViews { *; }
 diff --git a/node_modules/expo-widgets/android/src/main/AndroidManifest.xml b/node_modules/expo-widgets/android/src/main/AndroidManifest.xml
 index 2fa6c08..51f14b2 100644
 --- a/node_modules/expo-widgets/android/src/main/AndroidManifest.xml

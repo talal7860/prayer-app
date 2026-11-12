@@ -16,6 +16,8 @@ import ChoiceList from '../../components/ui/ChoiceList';
 import Icon from '../../components/ui/Icon';
 import Text from '../../components/ui/Text';
 import Toggle from '../../components/ui/Toggle';
+import ExactAlarmPrompt from '../../components/ExactAlarmPrompt';
+import useExactAlarms from '../../hooks/useExactAlarms';
 import useAppSettings from '../../hooks/useAppSettings';
 import useLocate from '../../hooks/useLocate';
 import usePalette from '../../hooks/usePalette';
@@ -44,6 +46,7 @@ const SetupScreen = () => {
   const insets = useSafeAreaInsets();
   const {settings, setSettings} = useAppSettings();
   const {locate, busy} = useLocate();
+  const exactAlarms = useExactAlarms();
   const [draft, setDraft] = useState<Draft>({
     calculationMethod: settings.calculationMethod,
     asr: settings.asr,
@@ -343,6 +346,7 @@ const SetupScreen = () => {
                 </Row>
               </Card>
             ) : null}
+            {exactAlarms.needed ? <ExactAlarmPrompt onAllow={exactAlarms.allow} /> : null}
             <Text size={13} color={t.muted} style={styles.hint}>
               {I18n.t('setup.notifyHint')}
             </Text>

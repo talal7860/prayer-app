@@ -12,6 +12,7 @@ import {
   DefaultTheme,
   NavigationContainer,
   type Theme,
+  useIsFocused,
 } from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -43,8 +44,13 @@ const Stack = createNativeStackNavigator();
 const tabIcons: Record<string, IconName> = {
   today: 'clock',
   week: 'calendar',
+  qibla: 'compass',
   settings: 'sliders',
 };
+
+// Tab screens stay mounted, so the compass would keep running on the other tabs.
+// Mounting the Qibla screen only while its tab is open stops the heading watch on the way out.
+const QiblaTab = () => (useIsFocused() ? <QiblaScreen /> : null);
 
 const Tabs = () => {
   const {t} = usePalette();
@@ -70,6 +76,16 @@ const Tabs = () => {
         name="week"
         component={WeekScreen}
         options={{title: I18n.t('week.title')}}
+      />
+      <Tab.Screen
+        name="qibla"
+        component={QiblaTab}
+        options={{
+          title: I18n.t('qibla.title'),
+          headerShown: true,
+          headerShadowVisible: false,
+          headerTitleStyle: {fontFamily: fonts.semibold},
+        }}
       />
       <Tab.Screen
         name="settings"
@@ -122,11 +138,6 @@ const Root = () => {
           // Until the first-run setup is done it's the only screen. Finishing it swaps in the tabs.
           <Stack.Screen name="setup" component={SetupScreen} options={{headerShown: false, animation: 'fade'}} />
         )}
-        <Stack.Screen
-          name="qibla"
-          component={QiblaScreen}
-          options={{title: I18n.t('qibla.title')}}
-        />
         <Stack.Screen
           name="location"
           component={LocationScreen}

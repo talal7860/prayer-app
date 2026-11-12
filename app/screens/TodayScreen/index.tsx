@@ -100,14 +100,6 @@ const TodayScreen = () => {
                 {city}
               </Text>
             </Pressable>
-            <View style={styles.topActions}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('qibla.open')}
-                onPress={() => navigation.navigate('qibla')}
-                style={styles.iconButton}>
-                <Icon name="compass" size={21} color="#FFFFFF" strokeWidth={2} />
-              </Pressable>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={I18n.t('today.settings')}
@@ -115,7 +107,6 @@ const TodayScreen = () => {
               style={styles.iconButton}>
               <Icon name="sliders" size={20} color="#FFFFFF" strokeWidth={2} />
             </Pressable>
-            </View>
           </View>
 
           <View style={styles.dates}>
@@ -221,7 +212,6 @@ const styles = StyleSheet.create({
   scroll: {flexGrow: 1},
   sky: {minHeight: 410, paddingHorizontal: 24},
   topBar: {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12},
-  topActions: {flexDirection: 'row', gap: 10},
   cityPill: {
     flexDirection: 'row',
     alignItems: 'center',

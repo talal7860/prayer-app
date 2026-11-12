@@ -35,6 +35,8 @@ jest.mock('expo-background-task', () => ({
 }));
 
 jest.mock('expo-location', () => ({
+  getForegroundPermissionsAsync: jest.fn(() => Promise.resolve({granted: false, canAskAgain: true})),
+  watchHeadingAsync: jest.fn(() => Promise.resolve({remove: jest.fn()})),
   geocodeAsync: jest.fn(() => Promise.resolve([{latitude: 33.6844, longitude: 73.0479}])),
   reverseGeocodeAsync: jest.fn(() =>
     Promise.resolve([
@@ -141,4 +143,22 @@ it('switches to Week and Settings', async () => {
   expect(await screen.findByText('Next week')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', {name: /^Settings/}));
   expect(await screen.findByText('Heads-up reminder')).toBeTruthy();
+});
+
+it('has a Qibla tab whose compass runs only while it is open', async () => {
+  const ExpoLocation = require('expo-location');
+  await savedSetup();
+  await render(<App />);
+  await screen.findByRole('button', {name: /^Qibla/});
+  const remove = jest.fn();
+  ExpoLocation.getForegroundPermissionsAsync.mockResolvedValue({granted: true, canAskAgain: true});
+  ExpoLocation.watchHeadingAsync.mockResolvedValue({remove});
+
+  await fireEvent.press(screen.getByRole('button', {name: /^Qibla/}));
+  expect(await screen.findByText('Starting the compass…')).toBeTruthy();
+  await waitFor(() => expect(ExpoLocation.watchHeadingAsync).toHaveBeenCalled());
+
+  await fireEvent.press(screen.getByRole('button', {name: /^Today/}));
+  await waitFor(() => expect(remove).toHaveBeenCalled());
+  expect(screen.queryByText('Starting the compass…')).toBeNull();
 });

@@ -130,6 +130,26 @@ export const widgetTimeline = (settings: Settings, now: Date = new Date()) => {
 };
 
 /**
+ * Android's snapshot: the props for now, plus an entry from every prayer time in the next two
+ * days, so the widget can move on by itself (see `NextPrayerProps.entries`).
+ */
+export const androidWidgetProps = (settings: Settings, now: Date = new Date()): NextPrayerProps => {
+  const base = startOfDay(now);
+  const end = addDays(base, TIMELINE_DAYS + 1).getTime();
+  const times = Array.from({length: TIMELINE_DAYS + 1}, (_, i) =>
+    prayerTimesFor(settings, addDays(base, i)),
+  )
+    .flat()
+    .map(p => p.time.getTime())
+    .filter(ms => ms > now.getTime() && ms < end)
+    .sort((a, b) => a - b);
+  return {
+    ...nextPrayerProps(settings, now),
+    entries: times.map(ms => ({from: ms, props: nextPrayerProps(settings, new Date(ms))})),
+  };
+};
+
+/**
  * The Live Activity for the next prayer, if it's within the hour and the setting is on;
  * otherwise null (and `syncLiveActivity` ends any running one).
  */

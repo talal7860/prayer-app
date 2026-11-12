@@ -65,6 +65,17 @@ const useHeading = () => {
     }
   }, [stop]);
 
+  /**
+   * Start the compass again from scratch: drops the last reading and resubscribes, so the
+   * phone gives a fresh heading (after calibrating, or when it looks off).
+   */
+  const recalibrate = useCallback(() => {
+    setHeading(null);
+    setAccuracy(null);
+    setStatus('starting');
+    watch();
+  }, [watch]);
+
   /** Ask for location permission (or open Settings once the phone won't ask again). */
   const allow = useCallback(async () => {
     if (!canAskAgain) {
@@ -100,7 +111,7 @@ const useHeading = () => {
     };
   }, [watch, stop]);
 
-  return {status, heading, accuracy, canAskAgain, allow};
+  return {status, heading, accuracy, canAskAgain, allow, recalibrate};
 };
 
 export default useHeading;

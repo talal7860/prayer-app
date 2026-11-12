@@ -38,7 +38,7 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
 (epic #21).
 
 - `App.tsx`: loads Inter, waits for the saved settings (`loaded`), then a root stack over
-  bottom tabs `today` / `week` / `qibla` / `settings`, plus `location`, `method`, `highLats`, `sound`.
+  bottom tabs `today` / `qibla` / `week` / `settings`, plus `location`, `method`, `highLats`, `sound`.
   `usePushNotifications()` is mounted once here.
 - **First-run setup** (`app/screens/SetupScreen`): while `settings.onboarded` is false the
   stack has only `setup`. It asks for location (GPS via `useLocate`, or a typed city through
@@ -78,7 +78,9 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
     location, so the background task (~every 12 h) runs `checkTravel` instead.
 - **Qibla finder** (#38): the `qibla` bottom tab (it was a stack screen behind a compass button in
   Today's top bar; moved to a tab on request). It's mounted only while its tab is focused
-  (`QiblaTab` in `App.tsx`), so the compass stops when you switch tabs. `app/lib/qibla.ts` (pure, tested): adhan's `Qibla()` bearing from
+  (`QiblaTab` in `App.tsx`), so the compass stops when you switch tabs.
+  **Recalibrate compass** (`useHeading().recalibrate`) drops the last reading, resubscribes and
+  shows the figure-8 steps for 15 s (`CALIBRATE_FOR_MS`), even if the phone reports good accuracy. `app/lib/qibla.ts` (pure, tested): adhan's `Qibla()` bearing from
   true north for `settings.location`, distance to the Kaaba, offset/`unwrap` (the dial turns the short
   way across north), facing within ±5° (stops past ±8°). `useHeading` wraps
   `watchHeadingAsync` (`trueHeading`, else `magHeading` when it's −1); location permission only, it
@@ -92,6 +94,8 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
   isn't in Today's list and is never notified: it's on the sun arc), `headsUp` (extra notification 10 min before), `timeFormat`, `city`, `highLats`
   (`NightMiddle` default / `AngleBased` / `OneSeventh`), `onboarded`, `adjustments`,
   `travelAlerts`, `liveActivity`.
+- During Fajr the countdown is to sunrise and reads **"Fajr ends in"** (`today.endsIn`), on Today,
+  in the widgets (`inLabel`, `untilLabel` → `widget.untilEnd`) and the Live Activity.
 - Far north in summer Isha can be after midnight (Calgary, June, Karachi: 01:38).
   adhan returns real instants, so that Isha is already on the next calendar day.
 - Times are always shown in the phone's timezone, even for a searched city elsewhere.

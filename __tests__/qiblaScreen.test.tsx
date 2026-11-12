@@ -1,5 +1,5 @@
 import React from 'react';
-import {act, render, screen} from '@testing-library/react-native';
+import {act, fireEvent, render, screen} from '@testing-library/react-native';
 import * as ExpoLocation from 'expo-location';
 import * as Haptics from 'expo-haptics';
 import QiblaScreen from '../app/screens/QiblaScreen';
@@ -77,4 +77,27 @@ it('asks to calibrate when accuracy is low', async () => {
   await act(async () => onHeading({trueHeading: -1, magHeading: 25, accuracy: 1}));
   expect(screen.getByText('Compass needs calibrating')).toBeTruthy();
   expect(screen.getByText('You’re facing the qibla')).toBeTruthy();
+});
+
+it('recalibrates: restarts the compass and shows the figure-8 steps for a while', async () => {
+  jest.useFakeTimers();
+  granted(true);
+  (ExpoLocation.watchHeadingAsync as jest.Mock).mockClear();
+  await render(<QiblaScreen />);
+  await act(async () => onHeading({trueHeading: 0, magHeading: 10, accuracy: 3}));
+  expect(screen.queryByText('Compass needs calibrating')).toBeNull();
+  expect(ExpoLocation.watchHeadingAsync).toHaveBeenCalledTimes(1);
+
+  await fireEvent.press(screen.getByRole('button', {name: 'Recalibrate compass'}));
+  expect(ExpoLocation.watchHeadingAsync).toHaveBeenCalledTimes(2);
+  expect(screen.getByText('Starting the compass…')).toBeTruthy();
+  expect(screen.getByText('Compass needs calibrating')).toBeTruthy();
+  // A good reading doesn't hide the steps straight away…
+  await act(async () => onHeading({trueHeading: 0, magHeading: 10, accuracy: 3}));
+  expect(screen.getByText('Turn right 25°')).toBeTruthy();
+  expect(screen.getByText('Compass needs calibrating')).toBeTruthy();
+  // …they go after 15 s.
+  await act(async () => jest.advanceTimersByTime(15000));
+  expect(screen.queryByText('Compass needs calibrating')).toBeNull();
+  jest.useRealTimers();
 });

@@ -40,6 +40,8 @@ const CARDINALS = [
 const KAABA_AT = 46;
 const KAABA_SIZE = 30;
 const NEEDLE_FROM = KAABA_AT + KAABA_SIZE + 4;
+/** How long the calibration steps stay up after Recalibrate. */
+const CALIBRATE_FOR_MS = 15000;
 
 /** A full-size layer turned by `deg` around the dial's centre; children sit at its top. */
 const Spoke = ({deg, children}: React.PropsWithChildren<{deg: number}>) => (
@@ -137,7 +139,21 @@ const QiblaScreen = () => {
   const {t} = usePalette();
   const {width} = useWindowDimensions();
   const {settings} = useAppSettings();
-  const {status, heading, accuracy, canAskAgain, allow} = useHeading();
+  const {status, heading, accuracy, canAskAgain, allow, recalibrate} = useHeading();
+  // After Recalibrate, the figure-8 steps stay up for a while even if the phone reports a
+  // good accuracy: that's when you'd follow them.
+  const [calibrating, setCalibrating] = useState(false);
+  useEffect(() => {
+    if (!calibrating) {
+      return;
+    }
+    const timer = setTimeout(() => setCalibrating(false), CALIBRATE_FOR_MS);
+    return () => clearTimeout(timer);
+  }, [calibrating]);
+  const startCalibrating = () => {
+    setCalibrating(true);
+    recalibrate();
+  };
 
   const bearing = useMemo(() => qiblaBearing(settings.location), [settings.location]);
   const distance = useMemo(() => qiblaDistanceKm(settings.location), [settings.location]);
@@ -232,7 +248,7 @@ const QiblaScreen = () => {
           </Text>
         </Card>
       ) : null}
-      {live && needsCalibration(accuracy) ? (
+      {calibrating || (live && needsCalibration(accuracy)) ? (
         <Card>
           <View style={styles.noteBody}>
             <Text weight="semibold" size={15} color={t.text}>{I18n.t('qibla.calibrateTitle')}</Text>
@@ -250,6 +266,16 @@ const QiblaScreen = () => {
         <Text size={13} color={t.muted} style={[styles.center, styles.tip]}>
           {I18n.t('qibla.tip')}
         </Text>
+      ) : null}
+      {status === 'ok' || status === 'unavailable' ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={startCalibrating}
+          style={({pressed}) => [styles.button, styles.outline, {borderColor: t.border, opacity: pressed ? 0.7 : 1}]}>
+          <Text weight="semibold" size={15} color={t.accent}>
+            {I18n.t('qibla.recalibrate')}
+          </Text>
+        </Pressable>
       ) : null}
     </ScrollView>
   );
@@ -289,6 +315,7 @@ const styles = StyleSheet.create({
   noteBody: {padding: 16, gap: 10},
   button: {height: 46, borderRadius: 12, alignItems: 'center', justifyContent: 'center'},
   tip: {paddingHorizontal: 16},
+  outline: {borderWidth: 1},
 });
 
 export default QiblaScreen;

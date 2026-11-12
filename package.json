@@ -55,7 +55,8 @@
     "preset": "jest-expo",
     "setupFiles": [
       "./jest.setup.js"
-    ]
+    ],
+    "globalSetup": "./jest.globalSetup.js"
   },
   "main": "index.js"
 }

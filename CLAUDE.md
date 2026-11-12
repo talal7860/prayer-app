@@ -200,6 +200,9 @@ Tracking epic: https://github.com/talal7860/prayer-app/issues/11 (sub-issues #3â
   ESLint 9 until eslint-config-expo supports 10.
 - `import/namespace` falsely flags `Notifications.AndroidImportance` (re-exported from a
   `.types` module); there is an inline disable for it.
+- **Jest runs in `America/Edmonton`** (`jest.globalSetup.js`), the zone of the Calgary test data.
+  Times are computed in the phone's zone, so without it tests that pick clock hours fail on CI
+  (UTC). A city ~12 h from the phone's zone still gets mixed-up days (known limitation).
 - **RNTL 14 `render` is async**: `await render(<App />)`. The App test mocks AsyncStorage,
   safe-area-context and expo-notifications (`__tests__/index.test.tsx`).
 - `setSetting(key)(undefined)` keeps the old value (lodash `merge` skips undefined). To clear a

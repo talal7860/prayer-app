@@ -205,6 +205,11 @@
     "m11": "Dhuʻl-Qiʻdah",
     "m12": "Dhuʻl-Hijjah"
   },
+  "watch": {
+    "app": "Adhan",
+    "today": "Today",
+    "until": "until {{label}}"
+  },
   "qibla": {
     "title": "Qibla",
     "starting": "Starting the compass…",

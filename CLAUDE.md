@@ -99,6 +99,40 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
   `fajrIshaCalculation: '90mins'` rule (Fajr = sunrise − 90 min, Isha = maghrib + 90 min,
   patched into the old `PrayTimes.js`) was **removed on purpose**; a saved value is dropped on load.
   Don't re-add a 90-minute option (the design's "Isha 18° / 90 min" control was dropped too).
+- **Apple Watch app** (#35, the canvas's "Apple Watch" board), via `@bacons/apple-targets`
+  (`ios/` stays generated):
+  - `targets/watch/` (SwiftUI app `AdhanWatch`, `com.conelabs.adhanapp.watchkitapp`): countdown home
+    (arc Fajr → Isha filled to now, dots per prayer) and, on the next vertical page, today's list.
+  - `targets/watch-widget/` (`AdhanComplications`, `….watchkitapp.complications`): circular ring,
+    rectangular with a progress bar, inline, corner. Timeline: every prayer + every 15 min, 24 h.
+  - `targets/_shared/` is compiled into every target: `Adhan/` is **adhan-swift, vendored** (no
+    SPM support; same library as the phone's `adhan`, so times match) and `PrayerCore.swift`
+    (settings model, the same method mapping as `prayerTimes.ts`, `PrayerSnapshot`, colours).
+  - Settings reach the watch over WatchConnectivity: `syncWatch` (`app/lib/watch.ts`, on every
+    settings change) → local Expo module `modules/watch-sync` (`updateApplicationContext`) →
+    `PhoneLink` on the watch saves them in the App Group and reloads the complications. Labels
+    (prayer names, "until %@") are sent in the phone's language. Without settings the watch
+    asks you to open the phone app.
+  - Compile check without a watch simulator: `xcodebuild -workspace ios/AdhanApp.xcworkspace
+    -scheme AdhanWatch -destination 'generic/platform=watchOS Simulator' CODE_SIGNING_ALLOWED=NO build`.
+    Big SwiftUI closures can time out the Swift type checker ("failed to produce diagnostic"):
+    split them into small views/functions.
+  - Running it in the simulator: the watchOS runtime pairs only with the same-generation iOS
+    runtime (watchOS 27 ↔ iOS 27). `xcrun simctl create` an iPhone and a watch, `simctl pair`
+    them, build the `AdhanWatch` scheme for the watch's id and `simctl install` the `.app`.
+    To skip the phone, write settings straight into the App Group:
+    `xcrun simctl spawn <watch> defaults write group.com.conelabs.adhanapp watchSettings -string '<json>'`
+    (the shape `watchPayload` sends). To test the real sync, build `AdhanApp` (Release bundles
+    the JS), install it on the iPhone, then install its `Watch/AdhanWatch.app` on the watch (the
+    phone doesn't install it by itself here) and relaunch the watch app. `WatchLink` keeps the
+    latest settings and resends them when the watch app gets installed (`sessionWatchStateDidChange`).
+    An unsigned build has no App Group, so `simctl spawn … defaults read` won't see what the app
+    saved; check the screen. Complications: add the rectangular one from the Smart Stack
+    (swipe up on the face → Edit → + → Adhan); most faces in the simulator have no free slots.
+  - Files in `targets/_shared` other than Swift sources get copied into every bundle, which is why
+    the vendored library's licence is a comment-only `Adhan/LICENSE.swift`.
+  - EAS signs two more bundle ids; the first build after adding them needs an interactive
+    `eas build -p ios` (or `eas credentials`) to create their profiles.
 - **Monthly timetable** (Week → "Share the {month} timetable"): `app/lib/timetable.ts` builds an
   A4 HTML page (RTL-aware), `expo-print` makes the PDF, `expo-sharing` opens the share sheet.
 - `getPrayerTimes(date)` computes that date (it used to ignore `date`), and labels Friday's

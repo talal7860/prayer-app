@@ -68,6 +68,9 @@ const TodayScreen = () => {
   const nextLabel =
     day.list.find(p => p.key === day.next.key && p.time.getTime() === day.next.time.getTime())
       ?.label ?? I18n.t(`prayer.${day.next.key}`);
+  // During Fajr the countdown is to sunrise, which is when Fajr's time ends.
+  const fajrEnding = day.period === 'fajr' && day.next.key === 'sunrise';
+  const fajrLabel = day.list.find(p => p.key === 'fajr')?.label ?? I18n.t('prayer.fajr');
   const nowLine =
     day.period === 'morning'
       ? I18n.t('today.fajrEnded')
@@ -100,13 +103,6 @@ const TodayScreen = () => {
                 {city}
               </Text>
             </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('today.settings')}
-              onPress={() => navigation.navigate('settings')}
-              style={styles.iconButton}>
-              <Icon name="sliders" size={20} color="#FFFFFF" strokeWidth={2} />
-            </Pressable>
           </View>
 
           <View style={styles.dates}>
@@ -118,17 +114,21 @@ const TodayScreen = () => {
 
           <View style={styles.next} accessible accessibilityLiveRegion="none">
             <Text weight="semibold" size={17} color="#FFFFFF">
-              {I18n.t('today.in', {label: nextLabel})}
+              {fajrEnding
+                ? I18n.t('today.endsIn', {label: fajrLabel})
+                : I18n.t('today.in', {label: nextLabel})}
             </Text>
             <Text weight="light" size={64} color="#FFFFFF" style={styles.countdown}>
               {formatCountdown(day.next.time.getTime() - day.now.getTime())}
             </Text>
-            <Text size={14} color={WHITE_88}>
-              {I18n.t(
-                // After Isha the countdown is to tomorrow's Fajr, which isn't the Fajr in the list.
-                day.next.time.toDateString() === day.now.toDateString() ? 'today.at' : 'today.atTomorrow',
-                {time: fmt(day.next.time), now: nowLine},
-              )}
+            <Text size={14} color={WHITE_88} style={styles.centered}>
+              {fajrEnding
+                ? I18n.t('today.endsAt', {time: fmt(day.next.time)})
+                : I18n.t(
+                    // After Isha the countdown is to tomorrow's Fajr, which isn't the Fajr in the list.
+                    day.next.time.toDateString() === day.now.toDateString() ? 'today.at' : 'today.atTomorrow',
+                    {time: fmt(day.next.time), now: nowLine},
+                  )}
             </Text>
           </View>
 
@@ -223,16 +223,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.16)',
     flexShrink: 1,
   },
-  iconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.16)',
-  },
   dates: {marginTop: 22, gap: 4},
-  next: {marginTop: 26, gap: 2},
+  next: {marginTop: 26, gap: 2, alignItems: 'center'},
+  centered: {textAlign: 'center'},
   countdown: {lineHeight: 68, letterSpacing: -1.9, fontVariant: ['tabular-nums']},
   skyBottom: {marginTop: 'auto', paddingTop: 20, paddingBottom: 34},
   arc: {height: 104},

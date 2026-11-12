@@ -2,7 +2,7 @@ import {Platform} from 'react-native';
 import NextPrayer from '../widgets/NextPrayer';
 import PrayerRing from '../widgets/PrayerRing';
 import PrayerActivity from '../widgets/PrayerActivity';
-import {activityFor, nextPrayerProps, widgetTimeline} from './widgetData';
+import {activityFor, androidWidgetProps, widgetTimeline} from './widgetData';
 
 /** Push fresh times to the home and lock screen widgets. Never throws. */
 export const refreshWidgets = (settings: Settings, now: Date = new Date()) => {
@@ -12,7 +12,7 @@ export const refreshWidgets = (settings: Settings, now: Date = new Date()) => {
       NextPrayer.updateTimeline(timeline);
       PrayerRing.updateTimeline(timeline);
     } else {
-      NextPrayer.updateSnapshot(nextPrayerProps(settings, now));
+      NextPrayer.updateSnapshot(androidWidgetProps(settings, now));
     }
   } catch (error) {
     console.warn(error);

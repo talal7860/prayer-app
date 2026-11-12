@@ -2,7 +2,12 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
-import {activityFor, nextPrayerProps, widgetTimeline} from '../app/lib/widgetData';
+import {
+  activityFor,
+  androidWidgetProps,
+  nextPrayerProps,
+  widgetTimeline,
+} from '../app/lib/widgetData';
 import {prayerTimesFor} from '../app/lib/prayerTimes';
 import {defaultSettings} from '../app/lib/settingsStore';
 
@@ -94,4 +99,17 @@ it('during Fajr counts down to the end of Fajr (sunrise)', () => {
   );
   // Outside Fajr it's the usual "{Prayer} in".
   expect(nextPrayerProps(settings, beforeDhuhr).inLabel).toBe('Dhuhr in');
+});
+
+it('gives Android an entry from every prayer time, so the widget moves on by itself', () => {
+  const props = androidWidgetProps(settings, beforeDhuhr);
+  expect(props.next).toBe('Dhuhr');
+  const entries = props.entries ?? [];
+  // From Dhuhr on, the widget shows Asr, counting down to Asr.
+  expect(entries[0]?.from).toBe(at('dhuhr').getTime());
+  expect(entries[0]?.props.next).toBe('Asr');
+  expect(entries[0]?.props.at).toBe(at('asr').getTime());
+  expect(entries.every((e, i) => i === 0 || e.from > (entries[i - 1]?.from ?? 0))).toBe(true);
+  expect(entries.length).toBeGreaterThan(8);
+  expect(entries.some(e => e.props.entries)).toBe(false);
 });

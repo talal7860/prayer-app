@@ -219,6 +219,12 @@ For the next SDK bump: `npx expo install expo@^<next> --fix`, then `npx expo-doc
   marketing version.
 - Signing credentials, the App Store Connect API key and the Play service account JSON live
   in EAS (`eas credentials`), not in the repo. The only GitHub secret is `EXPO_TOKEN`.
+- **Uploading by hand** (EAS Submit's free queue can take ~1 h): `scripts/upload-build.sh ios|android
+  [file]` uploads to TestFlight (`xcrun altool`) or Play internal testing (fastlane
+  `upload_to_play_store`). Without a file it downloads the latest finished EAS **cloud** build.
+  Settings come from env vars, read from `~/.config/adhan-app/env` (outside the repo, `chmod 600`):
+  `ASC_API_KEY_ID`, `ASC_API_ISSUER_ID`, `ASC_API_KEY_PATH` (the `.p8`), `PLAY_SERVICE_ACCOUNT_JSON`.
+  Android needs Homebrew's `fastlane` (an rvm Ruby's can be broken).
 - The workflow uses `--no-wait`: a green Action means "builds queued". Build and submit
   results are on expo.dev.
 

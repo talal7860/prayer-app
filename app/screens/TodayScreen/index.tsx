@@ -11,7 +11,7 @@ import usePalette from '../../hooks/usePalette';
 import usePrayerDay from '../../hooks/usePrayerDay';
 import useTravelCheck from '../../hooks/useTravelCheck';
 import useCityName from '../../hooks/useCityName';
-import I18n from '../../I18n';
+import I18n, {formatDate} from '../../I18n';
 import {
   formatCoords,
   formatCountdown,
@@ -111,7 +111,7 @@ const TodayScreen = () => {
 
           <View style={styles.dates}>
             <Text weight="medium" size={15} color="#FFFFFF">
-              {day.now.toLocaleDateString('en-US', {weekday: 'long', month: 'long', day: 'numeric'})}
+              {formatDate(day.now, {weekday: 'long', month: 'long', day: 'numeric'})}
             </Text>
             <Text size={13} color="rgba(255,255,255,0.85)">{hijriLabel(day.now)}</Text>
           </View>
@@ -154,7 +154,7 @@ const TodayScreen = () => {
             <Text size={13} color={t.muted} numberOfLines={1} style={styles.shrink}>
               {I18n.t('today.asrLabel', {
                 method: calculationMethod().split(',').pop()?.trim(),
-                asr: settings.asr,
+                asr: I18n.t(`asrNames.${settings.asr}`),
               })}
             </Text>
           </View>

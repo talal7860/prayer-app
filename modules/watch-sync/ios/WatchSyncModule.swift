@@ -3,6 +3,7 @@ import WatchConnectivity
 
 /// Sends the phone's settings to the Apple Watch app (#35). `updateApplicationContext` keeps
 /// only the latest value and delivers it when the watch app next runs, which is what settings need.
+/// They're also saved in the App Group, where the Siri intents read them (SiriIntents.swift).
 public class WatchSyncModule: Module {
   public func definition() -> ModuleDefinition {
     Name("WatchSync")
@@ -12,6 +13,8 @@ public class WatchSyncModule: Module {
     }
 
     Function("send") { (json: String) in
+      // Same suite and key as WatchStore (targets/_shared/PrayerCore.swift), which this pod can't see.
+      UserDefaults(suiteName: "group.com.conelabs.adhanapp")?.set(json, forKey: "watchSettings")
       WatchLink.shared.send(json)
     }
   }

@@ -5,7 +5,10 @@ type WatchSyncModule = {send(json: string): void};
 // iOS only; missing on Android, in Jest and in Expo Go.
 const native = requireOptionalNativeModule<WatchSyncModule>('WatchSync');
 
-/** Send a JSON string to the Apple Watch app. Does nothing without the native module. */
+/**
+ * Send a JSON string to the Apple Watch app, and save it in the App Group for Siri
+ * (targets/_shared/SiriIntents.swift). Does nothing without the native module.
+ */
 export const sendToWatch = (json: string) => {
   try {
     native?.send(json);

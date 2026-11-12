@@ -2,7 +2,7 @@ import {sendToWatch} from '../../modules/watch-sync';
 import I18n from '../I18n';
 
 /**
- * What the Apple Watch app needs (targets/_shared/PrayerCore.swift → WatchSettings): the
+ * What the Apple Watch app and Siri need (targets/_shared/PrayerCore.swift → WatchSettings): the
  * settings that change the times, plus the labels in the phone's language.
  */
 export const watchPayload = (settings: Settings) => ({
@@ -25,12 +25,19 @@ export const watchPayload = (settings: Settings) => ({
     today: I18n.t('watch.today'),
     // Swift's String(format:) placeholder.
     until: I18n.t('watch.until', {label: '%@'}),
+    // Siri's answers (targets/_shared/SiriIntents.swift), with positional placeholders because
+    // the word order differs between languages.
+    siriNext: I18n.t('siri.next', {prayer: '%1$@', time: '%2$@', left: '%3$@'}),
+    siriCurrent: I18n.t('siri.current', {prayer: '%1$@', end: '%2$@', left: '%3$@'}),
+    siriNone: I18n.t('siri.none', {prayer: '%1$@', time: '%2$@', left: '%3$@'}),
+    siriToday: I18n.t('siri.today', {prayer: '%1$@', time: '%2$@'}),
+    siriTomorrow: I18n.t('siri.tomorrow', {prayer: '%1$@', time: '%2$@'}),
   },
 });
 
 let last = '';
 
-/** Send the settings to the watch when they changed. */
+/** Send the settings to the watch (and save them for Siri) when they changed. */
 export const syncWatch = (settings: Settings) => {
   const json = JSON.stringify(watchPayload(settings));
   if (json !== last) {

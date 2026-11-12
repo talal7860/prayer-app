@@ -1,8 +1,9 @@
 import Foundation
 import SwiftUI
 
-// Shared by the watch app and its complications (#35). The phone sends its settings (and the
-// labels in the phone's language) over WatchConnectivity; the watch calculates the times itself
+// Shared by the watch app, its complications (#35) and the phone's Siri intents (#53,
+// SiriIntents.swift). The phone sends its settings (and the labels in the phone's language) over
+// WatchConnectivity and saves them in the App Group for Siri; the watch calculates the times itself
 // with the same adhan library the phone uses, so the complications work without the phone.
 
 enum WatchStore {
@@ -122,6 +123,21 @@ struct PrayerSnapshot {
     "isha": "Isha",
   ]
 
+  /// A day's six times (Sunrise included), named in the phone's language; Friday's Dhuhr is Jumu'ah.
+  static func items(_ t: PrayerTimes, _ settings: WatchSettings) -> [PrayerItem] {
+    let pairs: [(String, Date)] = [
+      ("fajr", t.fajr), ("sunrise", t.sunrise), ("dhuhr", t.dhuhr), ("asr", t.asr),
+      ("maghrib", t.maghrib), ("isha", t.isha),
+    ]
+    return pairs.map { key, time in
+      var name = settings.label(key, names[key] ?? key)
+      if key == "dhuhr", Calendar.current.component(.weekday, from: time) == 6 {
+        name = settings.label("jumuah", "Jumu’ah")
+      }
+      return PrayerItem(key: key, name: name, time: time)
+    }
+  }
+
   static func make(_ settings: WatchSettings, at now: Date = Date()) -> PrayerSnapshot? {
     let cal = Calendar.current
     guard
@@ -130,19 +146,7 @@ struct PrayerSnapshot {
       let tomorrow = settings.times(on: cal.date(byAdding: .day, value: 1, to: now)!)
     else { return nil }
 
-    func items(_ t: PrayerTimes) -> [PrayerItem] {
-      let pairs: [(String, Date)] = [
-        ("fajr", t.fajr), ("sunrise", t.sunrise), ("dhuhr", t.dhuhr), ("asr", t.asr),
-        ("maghrib", t.maghrib), ("isha", t.isha),
-      ]
-      return pairs.map { key, time in
-        var name = settings.label(key, names[key] ?? key)
-        if key == "dhuhr", cal.component(.weekday, from: time) == 6 {
-          name = settings.label("jumuah", "Jumu’ah")
-        }
-        return PrayerItem(key: key, name: name, time: time)
-      }
-    }
+    func items(_ t: PrayerTimes) -> [PrayerItem] { PrayerSnapshot.items(t, settings) }
 
     let all = items(yesterday) + items(today) + items(tomorrow)
     guard let next = all.first(where: { $0.time > now }) else { return nil }

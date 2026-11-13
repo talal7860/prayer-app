@@ -33,6 +33,11 @@
     "adhan": "صوت الأذان",
     "headsUp": "تذكير مسبق",
     "headsUpHint": "قبل كل صلاة بعشر دقائق",
+    "testNotification": "إشعار تجريبي",
+    "testNotificationHint": "إشعار أذان بعد 20 ثانية لتجربة الصوت",
+    "testNotificationSend": "إرسال",
+    "testNotificationSent": "سيصل بعد 20 ثانية. يمكنك قفل الهاتف.",
+    "testNotificationOff": "الإشعارات متوقفة لتطبيق أوقات الأذان. فعّلها من إعدادات الهاتف.",
     "liveActivity": "النشاط المباشر",
     "liveActivityHint": "شاشة القفل و Dynamic Island",
     "timeFormat": "صيغة الوقت",
@@ -51,7 +56,8 @@
       "description": "تنبيهات الصلاة"
     },
     "headsUp": "{{label}} بعد 10 دقائق - {{time}}",
-    "reminder": "افتح أوقات الأذان لتستمر تنبيهات الصلاة"
+    "reminder": "افتح أوقات الأذان لتستمر تنبيهات الصلاة",
+    "test": "أذان تجريبي من أوقات الأذان"
   },
   "prayer": {
     "fajr": "الفجر",

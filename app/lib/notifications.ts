@@ -1,6 +1,7 @@
 import {range} from 'lodash/fp';
 import * as Notifications from 'expo-notifications';
 import AppConstants from '../AppConstants';
+import I18n from '../I18n';
 import {addDays} from './prayerDay';
 import {prayerTimesFor} from './prayerTimes';
 import {DAYS_AHEAD, fillSchedule, type PlannedNotification} from './schedule';
@@ -11,6 +12,10 @@ import {DAYS_AHEAD, fillSchedule, type PlannedNotification} from './schedule';
  */
 export const notificationId = (n: PlannedNotification) =>
   `prayer:${n.kind}:${n.prayer ?? '-'}:${Math.floor(n.date.getTime() / 60000)}`;
+
+/** Test notifications (Settings → Test notification) aren't touched by a reschedule. */
+const TEST_PREFIX = 'test:';
+export const TEST_DELAY_SECONDS = 20;
 
 const startOfDay = (date: Date) => {
   const d = new Date(date);
@@ -28,7 +33,6 @@ const run = async (settings: Settings, now: Date) => {
   const plan = fillSchedule(days, settings, now);
   const adhan = AppConstants.notificationChannels[settings.sound];
   const plain = AppConstants.notificationChannels.default;
-  await Notifications.cancelAllScheduledNotificationsAsync();
   await Promise.all(
     plan.map(n => {
       const channel = n.kind === 'adhan' ? adhan : plain;
@@ -52,12 +56,14 @@ const run = async (settings: Settings, now: Date) => {
   );
   // The final say: drop anything pending that isn't in this plan (left by an earlier run, e.g.
   // the background task and the app rescheduling at the same moment). Two copies of the same
-  // prayer a minute apart showed up on an iPhone without this.
+  // prayer a minute apart showed up on an iPhone without this. Scheduling a plan id again
+  // replaces it, so there's no cancel-everything first; that would also drop a test
+  // notification that's due in a few seconds.
   const keep = new Set(plan.map(notificationId));
   const pending = await Notifications.getAllScheduledNotificationsAsync();
   await Promise.all(
     pending
-      .filter(p => !keep.has(p.identifier))
+      .filter(p => !keep.has(p.identifier) && !p.identifier.startsWith(TEST_PREFIX))
       .map(p => Notifications.cancelScheduledNotificationAsync(p.identifier)),
   );
   return plan.length;
@@ -79,4 +85,35 @@ export const rescheduleNotifications = (
     // The caller gets the error from `next`; the queue just moves on.
   });
   return next;
+};
+
+/**
+ * One adhan notification in TEST_DELAY_SECONDS, exactly like a real one (same channel, sound and
+ * interruption level), to try the sound, silent mode or Focus. Resolves to false without
+ * notification permission (after asking).
+ */
+export const scheduleTestNotification = async (settings: Settings): Promise<boolean> => {
+  let {granted} = await Notifications.getPermissionsAsync();
+  if (!granted) {
+    ({granted} = await Notifications.requestPermissionsAsync());
+  }
+  if (!granted) {
+    return false;
+  }
+  const channel = AppConstants.notificationChannels[settings.sound];
+  await Notifications.scheduleNotificationAsync({
+    identifier: `${TEST_PREFIX}${String(Date.now())}`,
+    content: {
+      title: I18n.t('notification.test'),
+      body: '',
+      sound: channel.soundName,
+      interruptionLevel: 'timeSensitive',
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DATE,
+      date: new Date(Date.now() + TEST_DELAY_SECONDS * 1000),
+      channelId: channel.channelId,
+    },
+  });
+  return true;
 };

@@ -20,6 +20,7 @@ import Toggle from '../../components/ui/Toggle';
 import AppConstants from '../../AppConstants';
 import useAppSettings from '../../hooks/useAppSettings';
 import useExactAlarms from '../../hooks/useExactAlarms';
+import {scheduleTestNotification} from '../../lib/notifications';
 import usePalette from '../../hooks/usePalette';
 import I18n from '../../I18n';
 import {formatCoords} from '../../lib/prayerDay';
@@ -33,6 +34,17 @@ const SettingsScreen = () => {
   const {t, isDark} = usePalette();
   const {settings, setSetting, calculationMethod} = useAppSettings();
   const exactAlarms = useExactAlarms();
+  const sendTest = () => {
+    scheduleTestNotification(settings)
+      .then(sent => {
+        Alert.alert(
+          I18n.t(sent ? 'settings.testNotificationSent' : 'settings.testNotificationOff'),
+        );
+      })
+      .catch((error: unknown) => {
+        Alert.alert(String(error));
+      });
+  };
 
   const setTravelAlerts = async (on: boolean) => {
     if (!on) {
@@ -155,10 +167,7 @@ const SettingsScreen = () => {
             value={AppConstants.soundName(settings.sound)}
             onPress={() => navigation.navigate('sound')}
           />
-          <Row
-            title={I18n.t('settings.headsUp')}
-            subtitle={I18n.t('settings.headsUpHint')}
-            last={Platform.OS !== 'ios'}>
+          <Row title={I18n.t('settings.headsUp')} subtitle={I18n.t('settings.headsUpHint')}>
             <Toggle
               value={settings.headsUp}
               onChange={setSetting('headsUp')}
@@ -168,8 +177,7 @@ const SettingsScreen = () => {
           {Platform.OS === 'ios' && (
             <Row
               title={I18n.t('settings.liveActivity')}
-              subtitle={I18n.t('settings.liveActivityHint')}
-              last>
+              subtitle={I18n.t('settings.liveActivityHint')}>
               <Toggle
                 value={settings.liveActivity}
                 onChange={setSetting('liveActivity')}
@@ -177,6 +185,23 @@ const SettingsScreen = () => {
               />
             </Row>
           )}
+          <Row
+            title={I18n.t('settings.testNotification')}
+            subtitle={I18n.t('settings.testNotificationHint')}
+            last>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${I18n.t('settings.testNotificationSend')}: ${I18n.t('settings.testNotification')}`}
+              onPress={sendTest}
+              style={({pressed}) => [
+                styles.allow,
+                {backgroundColor: t.accent, opacity: pressed ? 0.85 : 1},
+              ]}>
+              <Text weight="semibold" size={14} color={t.onAccent}>
+                {I18n.t('settings.testNotificationSend')}
+              </Text>
+            </Pressable>
+          </Row>
         </Card>
 
         <SectionLabel>{I18n.t('settings.displaySection')}</SectionLabel>

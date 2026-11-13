@@ -7,6 +7,7 @@ import usePalette from '../../../hooks/usePalette';
 import I18n from '../../../I18n';
 import {formatTime, PRAYER_KEYS} from '../../../lib/prayerDay';
 import useReadableWidth from '../../../hooks/useReadableWidth';
+import {joinLabel} from '../../../lib/a11y';
 
 const LIMIT = 30;
 
@@ -21,10 +22,12 @@ export const adjustmentSummary = (adjustments: Settings['adjustments']) => {
 
 const Step = ({
   label,
+  prayer,
   onPress,
   disabled,
 }: {
   label: string;
+  prayer: string;
   onPress: () => void;
   disabled: boolean;
 }) => {
@@ -32,7 +35,7 @@ const Step = ({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label === '+' ? I18n.t('adjust.later') : I18n.t('adjust.earlier')}
+      accessibilityLabel={`${prayer}: ${I18n.t(label === '+' ? 'adjust.later' : 'adjust.earlier')}`}
       disabled={disabled}
       onPress={onPress}
       hitSlop={6}
@@ -71,22 +74,43 @@ const AdjustScreen = () => {
       <Card>
         {today.map((p, i) => {
           const n = settings.adjustments[p.key] ?? 0;
+          const name = I18n.t(`prayer.${p.key}`);
+          const time = formatTime(p.time, settings.timeFormat);
           return (
+            // One adjustable stop per prayer: swipe up/down (VoiceOver) or use the volume keys /
+            // scroll actions (TalkBack) to move it a minute. The ± buttons are for touch.
             <View
               key={p.key}
+              accessible
+              accessibilityRole="adjustable"
+              accessibilityLabel={joinLabel(name, time)}
+              accessibilityValue={{text: I18n.t('adjust.minutes', {count: n})}}
+              accessibilityActions={[{name: 'increment'}, {name: 'decrement'}]}
+              onAccessibilityAction={e => {
+                if (e.nativeEvent.actionName === 'increment') {
+                  change(p.key, 1);
+                } else if (e.nativeEvent.actionName === 'decrement') {
+                  change(p.key, -1);
+                }
+              }}
               style={[
                 styles.row,
                 i < today.length - 1 && {borderBottomWidth: 1, borderBottomColor: t.divider},
               ]}>
               <View style={styles.flex}>
                 <Text weight="medium" size={15} color={t.text}>
-                  {I18n.t(`prayer.${p.key}`)}
+                  {name}
                 </Text>
                 <Text size={13} color={t.muted}>
-                  {formatTime(p.time, settings.timeFormat)}
+                  {time}
                 </Text>
               </View>
-              <Step label="-" disabled={n <= -LIMIT} onPress={() => change(p.key, -1)} />
+              <Step
+                label="-"
+                prayer={name}
+                disabled={n <= -LIMIT}
+                onPress={() => change(p.key, -1)}
+              />
               <Text
                 weight="semibold"
                 size={15}
@@ -95,7 +119,12 @@ const AdjustScreen = () => {
                 accessibilityLabel={I18n.t('adjust.minutes', {count: n})}>
                 {n > 0 ? `+${n}` : n < 0 ? `−${-n}` : '0'}
               </Text>
-              <Step label="+" disabled={n >= LIMIT} onPress={() => change(p.key, 1)} />
+              <Step
+                label="+"
+                prayer={name}
+                disabled={n >= LIMIT}
+                onPress={() => change(p.key, 1)}
+              />
             </View>
           );
         })}
@@ -117,7 +146,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  value: {width: 36, textAlign: 'center'},
+  value: {minWidth: 36, textAlign: 'center'},
 });
 
 export default AdjustScreen;

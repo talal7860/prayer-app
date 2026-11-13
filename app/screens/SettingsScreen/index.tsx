@@ -82,7 +82,7 @@ const SettingsScreen = () => {
           <View style={[styles.badge, {backgroundColor: t.hi}]}>
             <Icon name="pin" size={20} color={t.accent} />
           </View>
-          <View style={styles.flex}>
+          <View style={styles.flex} accessible>
             <Text weight="semibold" size={16} color={t.text} numberOfLines={1}>
               {settings.city ?? I18n.t('settings.unknownCity')}
             </Text>
@@ -109,6 +109,7 @@ const SettingsScreen = () => {
               value={settings.travelAlerts}
               onChange={on => void setTravelAlerts(on)}
               accessibilityLabel={I18n.t('settings.travelAlerts')}
+              accessibilityHint={I18n.t('settings.travelAlertsHint')}
             />
           </Row>
         </Card>
@@ -153,6 +154,8 @@ const SettingsScreen = () => {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={`${I18n.t('exactAlarm.allow')}: ${I18n.t('exactAlarm.title')}`}
+                accessibilityHint={I18n.t('exactAlarm.settingsHint')}
+                hitSlop={5}
                 onPress={exactAlarms.allow}
                 style={({pressed}) => [
                   styles.allow,
@@ -174,6 +177,7 @@ const SettingsScreen = () => {
               value={settings.headsUp}
               onChange={setSetting('headsUp')}
               accessibilityLabel={I18n.t('settings.headsUp')}
+              accessibilityHint={I18n.t('settings.headsUpHint')}
             />
           </Row>
           {Platform.OS === 'ios' && (
@@ -184,6 +188,7 @@ const SettingsScreen = () => {
                 value={settings.liveActivity}
                 onChange={setSetting('liveActivity')}
                 accessibilityLabel={I18n.t('settings.liveActivity')}
+                accessibilityHint={I18n.t('settings.liveActivityHint')}
               />
             </Row>
           )}
@@ -194,6 +199,8 @@ const SettingsScreen = () => {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={`${I18n.t('settings.testNotificationSend')}: ${I18n.t('settings.testNotification')}`}
+              accessibilityHint={I18n.t('settings.testNotificationHint')}
+              hitSlop={5}
               onPress={sendTest}
               style={({pressed}) => [
                 styles.allow,
@@ -229,7 +236,14 @@ const SettingsScreen = () => {
 const styles = StyleSheet.create({
   root: {flex: 1},
   scroll: {paddingHorizontal: 16, paddingBottom: 24},
-  allow: {paddingHorizontal: 14, height: 34, borderRadius: 17, justifyContent: 'center'},
+  // 34pt pill + 5pt hitSlop above and below = a 44pt target.
+  allow: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    minHeight: 34,
+    borderRadius: 17,
+    justifyContent: 'center',
+  },
   title: {paddingHorizontal: 4, paddingBottom: 6, letterSpacing: -0.6},
   locationCard: {
     flexDirection: 'row',

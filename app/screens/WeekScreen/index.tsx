@@ -6,6 +6,7 @@ import {
   ScrollView,
   StatusBar,
   StyleSheet,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import * as Print from 'expo-print';
@@ -29,6 +30,7 @@ import {
 import {errorMessage} from '../../lib/errors';
 import {timetableHtml} from '../../lib/timetable';
 import useReadableWidth from '../../hooks/useReadableWidth';
+import {isLargeText, joinLabel} from '../../lib/a11y';
 
 type Week = 'this' | 'next';
 const COLUMNS: PrayerKey[] = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
@@ -72,6 +74,27 @@ const WeekScreen = () => {
   };
 
   const hm = (d: Date) => formatTime(d, settings.timeFormat, false);
+  const full = (d: Date) => formatTime(d, settings.timeFormat);
+  // At large text sizes seven columns can't fit: each day becomes a card with a line per prayer.
+  const {fontScale} = useWindowDimensions();
+  const asList = isLargeText(fontScale);
+  const dayNote = (date: Date, isToday: boolean) =>
+    isToday
+      ? I18n.t('week.today')
+      : isFriday(date)
+        ? I18n.t('prayer.jumuah')
+        : formatDate(date, {month: 'short'});
+  /** "Thursday, November 12, Today: Fajr 6:12 AM, Sunrise 7:45 AM, …": one stop per day. */
+  const dayLabel = (date: Date, times: (typeof days)[number]['times'], isToday: boolean) =>
+    `${joinLabel(
+      formatDate(date, {weekday: 'long', month: 'long', day: 'numeric'}),
+      isToday && I18n.t('week.today'),
+    )}: ${joinLabel(
+      ...COLUMNS.map(
+        k =>
+          `${I18n.t(k === 'dhuhr' && isFriday(date) ? 'prayer.jumuah' : `prayer.${k}`)} ${full(times[k])}`,
+      ),
+    )}`;
   const city = settings.city ?? formatCoords(settings.location);
   const method = calculationMethod().split(',').pop()?.trim();
   const asrName = I18n.t(`asrNames.${settings.asr}`);
@@ -117,66 +140,104 @@ const WeekScreen = () => {
           />
         </View>
 
-        <Card style={styles.table}>
-          <View style={[styles.tr, styles.th, {borderBottomColor: t.border}]}>
-            <Text weight="semibold" size={11} color={t.muted} style={[styles.dayCol, styles.caps]}>
-              {I18n.t('week.day').toUpperCase()}
-            </Text>
-            {HEADERS.map(h => (
-              <Text
-                key={h}
-                weight="semibold"
-                size={11}
-                color={t.muted}
-                style={[styles.cell, styles.caps]}>
-                {I18n.t(`week.${h}`).toUpperCase()}
-              </Text>
-            ))}
-          </View>
-          {days.map(({date, times}, i) => {
+        {asList ? (
+          days.map(({date, times}, i) => {
             const isToday = week === 'this' && i === 0;
             const fri = isFriday(date);
             return (
-              <View
+              <Card
                 key={date.toDateString()}
-                style={[
-                  styles.tr,
-                  styles.td,
-                  {backgroundColor: isToday ? t.hi : t.bg, borderBottomColor: t.divider},
-                  i === days.length - 1 && styles.lastRow,
-                ]}>
-                <View style={styles.dayCol}>
-                  <Text weight="semibold" size={13.5} color={isToday ? t.accent : t.text}>
-                    {`${formatDate(date, {weekday: 'short'})} ${date.getDate()}`}
+                style={{...styles.dayCard, ...(isToday ? {borderColor: t.accent} : {})}}>
+                <View accessible accessibilityLabel={dayLabel(date, times, isToday)}>
+                  <Text weight="semibold" size={16} color={isToday ? t.accent : t.text}>
+                    {`${formatDate(date, {weekday: 'long', day: 'numeric'})} · ${dayNote(date, isToday)}`}
                   </Text>
-                  <Text size={11} color={t.muted}>
-                    {isToday
-                      ? I18n.t('week.today')
-                      : fri
-                        ? I18n.t('prayer.jumuah')
-                        : formatDate(date, {month: 'short'})}
-                  </Text>
+                  {COLUMNS.map(k => (
+                    <View key={k} style={styles.listRow}>
+                      <Text size={15} color={t.muted} style={styles.listName}>
+                        {I18n.t(k === 'dhuhr' && fri ? 'prayer.jumuah' : `prayer.${k}`)}
+                      </Text>
+                      <Text
+                        weight={k === 'dhuhr' && fri ? 'bold' : 'medium'}
+                        size={15}
+                        color={k === 'dhuhr' && fri ? t.accent : t.text}
+                        style={styles.listTime}>
+                        {full(times[k])}
+                      </Text>
+                    </View>
+                  ))}
                 </View>
-                {COLUMNS.map(k => (
-                  <Text
-                    key={k}
-                    weight={k === 'dhuhr' && fri ? 'bold' : 'regular'}
-                    size={13.5}
-                    color={k === 'sunrise' ? t.muted : k === 'dhuhr' && fri ? t.accent : t.text}
-                    style={styles.cell}>
-                    {hm(times[k])}
-                  </Text>
-                ))}
-              </View>
+              </Card>
             );
-          })}
-        </Card>
+          })
+        ) : (
+          <Card style={styles.table}>
+            <View
+              style={[styles.tr, styles.th, {borderBottomColor: t.border}]}
+              // The abbreviated headers are for the eye; each row says its prayer names.
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants">
+              <Text
+                weight="semibold"
+                size={11}
+                color={t.muted}
+                style={[styles.dayCol, styles.caps]}>
+                {I18n.t('week.day').toUpperCase()}
+              </Text>
+              {HEADERS.map(h => (
+                <Text
+                  key={h}
+                  weight="semibold"
+                  size={11}
+                  color={t.muted}
+                  style={[styles.cell, styles.caps]}>
+                  {I18n.t(`week.${h}`).toUpperCase()}
+                </Text>
+              ))}
+            </View>
+            {days.map(({date, times}, i) => {
+              const isToday = week === 'this' && i === 0;
+              const fri = isFriday(date);
+              return (
+                <View
+                  key={date.toDateString()}
+                  accessible
+                  accessibilityLabel={dayLabel(date, times, isToday)}
+                  style={[
+                    styles.tr,
+                    styles.td,
+                    {backgroundColor: isToday ? t.hi : t.bg, borderBottomColor: t.divider},
+                    i === days.length - 1 && styles.lastRow,
+                  ]}>
+                  <View style={styles.dayCol}>
+                    <Text weight="semibold" size={13.5} color={isToday ? t.accent : t.text}>
+                      {`${formatDate(date, {weekday: 'short'})} ${date.getDate()}`}
+                    </Text>
+                    <Text size={11} color={t.muted}>
+                      {dayNote(date, isToday)}
+                    </Text>
+                  </View>
+                  {COLUMNS.map(k => (
+                    <Text
+                      key={k}
+                      weight={k === 'dhuhr' && fri ? 'bold' : 'regular'}
+                      size={13.5}
+                      color={k === 'sunrise' ? t.muted : k === 'dhuhr' && fri ? t.accent : t.text}
+                      style={styles.cell}>
+                      {hm(times[k])}
+                    </Text>
+                  ))}
+                </View>
+              );
+            })}
+          </Card>
+        )}
 
         <Card style={styles.daylight}>
           <View style={[styles.badge, {backgroundColor: t.hi}]}>
             <Icon name="sunrise" size={20} color={t.accent} />
           </View>
-          <View style={styles.daylightText}>
+          <View style={styles.daylightText} accessible>
             <Text weight="semibold" size={15} color={t.text}>
               {I18n.t('week.daylight', {length})}
             </Text>
@@ -189,6 +250,8 @@ const WeekScreen = () => {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={I18n.t('timetable.share', {month: monthName})}
+          accessibilityHint={I18n.t('timetable.hint')}
+          accessibilityState={{busy: sharing, disabled: sharing}}
           disabled={sharing}
           onPress={shareMonth}
           style={({pressed}) => [
@@ -248,6 +311,10 @@ const styles = StyleSheet.create({
   },
   badge: {width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center'},
   daylightText: {flex: 1, minWidth: 0, gap: 2},
+  dayCard: {marginTop: 12, marginHorizontal: 16, padding: 16},
+  listRow: {flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', gap: 8, paddingTop: 8},
+  listName: {flex: 1, minWidth: 120},
+  listTime: {fontVariant: ['tabular-nums']},
 });
 
 export default WeekScreen;

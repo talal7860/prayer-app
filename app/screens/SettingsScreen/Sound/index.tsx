@@ -52,7 +52,7 @@ const SoundScreen = () => {
         accessibilityRole="button"
         accessibilityLabel={
           playing === sound.key
-            ? I18n.t('soundsScreen.stop')
+            ? `${I18n.t('soundsScreen.stop')}: ${sound.name}`
             : I18n.t('soundsScreen.play', {name: sound.name})
         }
         hitSlop={8}
@@ -83,28 +83,32 @@ const SoundScreen = () => {
         {options.map((o, i) => {
           const on = o.key === settings.sound;
           return (
-            <Pressable
+            // The play button sits next to the choice, not inside it: inside a radio, VoiceOver
+            // can't reach it.
+            <View
               key={o.key}
-              accessibilityRole="radio"
-              accessibilityState={{selected: on}}
-              onPress={() => {
-                setSetting('sound')(o.key);
-              }}
-              style={({pressed}) => [
+              style={[
                 styles.row,
                 i < options.length - 1 && {borderBottomWidth: 1, borderBottomColor: t.divider},
-                pressed && {backgroundColor: t.hi},
               ]}>
               {playButton(o)}
-              <Text
-                weight={on ? 'semibold' : 'medium'}
-                size={15}
-                color={t.text}
-                style={styles.flex}>
-                {o.name}
-              </Text>
-              {on ? <Icon name="check" size={20} color={t.accent} strokeWidth={2.2} /> : null}
-            </Pressable>
+              <Pressable
+                accessibilityRole="radio"
+                accessibilityState={{selected: on}}
+                onPress={() => {
+                  setSetting('sound')(o.key);
+                }}
+                style={({pressed}) => [styles.choice, pressed && {backgroundColor: t.hi}]}>
+                <Text
+                  weight={on ? 'semibold' : 'medium'}
+                  size={15}
+                  color={t.text}
+                  style={styles.flex}>
+                  {o.name}
+                </Text>
+                {on ? <Icon name="check" size={20} color={t.accent} strokeWidth={2.2} /> : null}
+              </Pressable>
+            </View>
           );
         })}
       </Card>
@@ -118,6 +122,7 @@ const SoundScreen = () => {
               value={settings.fajrAdhan}
               onChange={setSetting('fajrAdhan')}
               accessibilityLabel={I18n.t('soundsScreen.fajr')}
+              accessibilityHint={I18n.t('soundsScreen.fajrHint')}
             />
           </View>
         </Row>
@@ -137,7 +142,16 @@ const styles = StyleSheet.create({
   scroll: {padding: 16, paddingBottom: 32},
   row: {
     minHeight: 56,
-    paddingHorizontal: 16,
+    paddingStart: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  choice: {
+    flex: 1,
+    alignSelf: 'stretch',
+    minHeight: 56,
+    paddingHorizontal: 12,
     paddingVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',

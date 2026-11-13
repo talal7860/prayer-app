@@ -30,7 +30,7 @@ const Location = () => {
         <View style={[styles.badge, {backgroundColor: t.hi}]}>
           <Icon name="pin" size={20} color={t.accent} />
         </View>
-        <View style={styles.flex}>
+        <View style={styles.flex} accessible>
           <Text weight="semibold" size={16} color={t.text}>
             {settings.city ?? I18n.t('settings.unknownCity')}
           </Text>
@@ -70,7 +70,8 @@ const styles = StyleSheet.create({
   flex: {flex: 1, minWidth: 0, gap: 2},
   hint: {paddingHorizontal: 8},
   button: {
-    height: 52,
+    minHeight: 52,
+    paddingVertical: 8,
     borderRadius: 14,
     flexDirection: 'row',
     alignItems: 'center',

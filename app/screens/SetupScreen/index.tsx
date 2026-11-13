@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -8,6 +8,8 @@ import {
   StatusBar,
   StyleSheet,
   TextInput,
+  AccessibilityInfo,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -29,6 +31,7 @@ import {isHighLatitude, recommendedAsr, recommendedMethod} from '../../lib/recom
 import {fonts, radius} from '../../theme/tokens';
 import {highLatOptions} from '../SettingsScreen/HighLats';
 import useReadableWidth from '../../hooks/useReadableWidth';
+import {isLargeText, joinLabel} from '../../lib/a11y';
 
 type Step = 'location' | 'method' | 'asr' | 'highLats' | 'review';
 
@@ -74,6 +77,23 @@ const SetupScreen = () => {
   );
   const step = steps[Math.min(index, steps.length - 1)];
   const isLast = index >= steps.length - 1;
+
+  // A new step: move VoiceOver/TalkBack to its title, instead of leaving it on Continue.
+  const titleRef = useRef<React.ComponentRef<typeof Text>>(null);
+  const firstStep = useRef(true);
+  useEffect(() => {
+    if (firstStep.current) {
+      firstStep.current = false;
+      return;
+    }
+    if (titleRef.current) {
+      AccessibilityInfo.sendAccessibilityEvent(titleRef.current, 'focus');
+    }
+  }, [step]);
+
+  // At large text sizes the fixed footer would leave no room to scroll: it scrolls with the step.
+  const {fontScale} = useWindowDimensions();
+  const footerScrolls = isLargeText(fontScale);
 
   // A new place preselects what's common there, unless the user already chose.
   const choosePlace = (location: GeoLocation, found: Place) => {
@@ -145,6 +165,29 @@ const SetupScreen = () => {
     review: [I18n.t('setup.reviewTitle'), I18n.t('setup.reviewHint')],
   }[step];
 
+  const footer = (
+    <View style={[styles.footer, {paddingBottom: insets.bottom + 16}, column]}>
+      {!canContinue ? (
+        <Text size={13} color={t.muted} style={styles.footerHint}>
+          {I18n.t('setup.locationNeeded')}
+        </Text>
+      ) : null}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{disabled: !canContinue}}
+        disabled={!canContinue}
+        onPress={next}
+        style={({pressed}) => [
+          styles.button,
+          {backgroundColor: canContinue ? t.accent : t.track, opacity: pressed ? 0.85 : 1},
+        ]}>
+        <Text weight="semibold" size={16} color={canContinue ? t.onAccent : t.muted}>
+          {I18n.t(isLast ? 'setup.finish' : 'setup.continue')}
+        </Text>
+      </Pressable>
+    </View>
+  );
+
   return (
     <KeyboardAvoidingView
       style={[styles.root, {backgroundColor: t.surface}]}
@@ -153,7 +196,10 @@ const SetupScreen = () => {
       <View style={[styles.top, {paddingTop: insets.top + 12}, column]}>
         <View
           style={styles.progress}
-          accessibilityLabel={I18n.t('setup.step', {n: index + 1, total: steps.length})}>
+          accessible
+          accessibilityRole="progressbar"
+          accessibilityLabel={I18n.t('setup.step', {n: index + 1, total: steps.length})}
+          accessibilityValue={{min: 1, max: steps.length, now: index + 1}}>
           {steps.map((s, i) => (
             <View
               key={s}
@@ -182,6 +228,7 @@ const SetupScreen = () => {
           </Text>
         ) : null}
         <Text
+          ref={titleRef}
           weight="bold"
           size={28}
           color={t.text}
@@ -200,7 +247,7 @@ const SetupScreen = () => {
                 <View style={[styles.badge, {backgroundColor: t.hi}]}>
                   <Icon name="pin" size={20} color={t.accent} />
                 </View>
-                <View style={styles.flex}>
+                <View style={styles.flex} accessible>
                   <Text weight="semibold" size={16} color={t.text}>
                     {draft.city ?? I18n.t('settings.unknownCity')}
                   </Text>
@@ -317,6 +364,8 @@ const SetupScreen = () => {
               {preview.map((p, i) => (
                 <View
                   key={p.key}
+                  accessible
+                  accessibilityLabel={joinLabel(p.label, formatTime(p.time, settings.timeFormat))}
                   style={[
                     styles.timeRow,
                     i < preview.length - 1 && {borderBottomWidth: 1, borderBottomColor: t.divider},
@@ -346,6 +395,7 @@ const SetupScreen = () => {
                     value={draft.liveActivity}
                     onChange={liveActivity => setDraft(d => ({...d, liveActivity}))}
                     accessibilityLabel={I18n.t('settings.liveActivity')}
+                    accessibilityHint={I18n.t('setup.liveActivityHint')}
                   />
                 </Row>
               </Card>
@@ -356,28 +406,10 @@ const SetupScreen = () => {
             </Text>
           </View>
         ) : null}
+        {footerScrolls ? footer : null}
       </ScrollView>
 
-      <View style={[styles.footer, {paddingBottom: insets.bottom + 16}, column]}>
-        {!canContinue ? (
-          <Text size={13} color={t.muted} style={styles.footerHint}>
-            {I18n.t('setup.locationNeeded')}
-          </Text>
-        ) : null}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{disabled: !canContinue}}
-          disabled={!canContinue}
-          onPress={next}
-          style={({pressed}) => [
-            styles.button,
-            {backgroundColor: canContinue ? t.accent : t.track, opacity: pressed ? 0.85 : 1},
-          ]}>
-          <Text weight="semibold" size={16} color={canContinue ? t.onAccent : t.muted}>
-            {I18n.t(isLast ? 'setup.finish' : 'setup.continue')}
-          </Text>
-        </Pressable>
-      </View>
+      {footerScrolls ? null : footer}
     </KeyboardAvoidingView>
   );
 };
@@ -397,7 +429,8 @@ const styles = StyleSheet.create({
   badge: {width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center'},
   flex: {flex: 1, minWidth: 0, gap: 2},
   button: {
-    height: 52,
+    minHeight: 52,
+    paddingVertical: 8,
     borderRadius: radius.row,
     flexDirection: 'row',
     alignItems: 'center',
@@ -405,7 +438,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   searchRow: {
-    height: 52,
+    minHeight: 52,
     borderRadius: radius.row,
     borderWidth: 1,
     flexDirection: 'row',

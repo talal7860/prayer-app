@@ -29,6 +29,7 @@ import {
 } from '../../lib/qibla';
 import {kaaba, type Palette} from '../../theme/tokens';
 import useReadableWidth from '../../hooks/useReadableWidth';
+import useA11yPrefs, {announce} from '../../hooks/useA11yPrefs';
 
 const TICKS = Array.from({length: 72}, (_, i) => i * 5);
 const CARDINALS = [
@@ -174,21 +175,34 @@ const QiblaScreen = () => {
   if (nowFacing !== facing) {
     setFacing(nowFacing);
   }
-  // A light tap when you turn onto the qibla, so you can feel it without watching the screen.
+  // A light tap when you turn onto the qibla, so you can feel it without watching the screen,
+  // and VoiceOver/TalkBack say it. Only on the change: the turn-by-degrees headline isn't
+  // announced as it moves (focus it to hear where to turn).
+  const wasFacing = useRef(false);
   useEffect(() => {
     if (facing) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {
         // No haptics on this device.
       });
+      announce(I18n.t('qibla.facing'));
+    } else if (wasFacing.current) {
+      announce(I18n.t('qibla.notFacing'));
     }
+    wasFacing.current = facing;
   }, [facing]);
 
   // Turn the dial the short way round (359° → 1° is +2°, not −358°).
   const [rotation] = useState(() => new Animated.Value(0));
   const angle = useRef(0);
+  const {reduceMotion} = useA11yPrefs();
   useEffect(() => {
     const target = unwrap(angle.current, live ? heading : 0);
     angle.current = target;
+    if (reduceMotion) {
+      // Reduce Motion: the dial jumps to the heading instead of gliding.
+      rotation.setValue(target);
+      return;
+    }
     Animated.timing(rotation, {
       toValue: target,
       duration: 160,
@@ -197,7 +211,7 @@ const QiblaScreen = () => {
       easing: Easing.out(Easing.quad),
       useNativeDriver: true,
     }).start();
-  }, [heading, live, rotation]);
+  }, [heading, live, rotation, reduceMotion]);
   const deg = Math.round(bearing);
   const city = settings.city ?? formatCoords(settings.location);
   const size = Math.min(width - 64, 320);
@@ -223,7 +237,7 @@ const QiblaScreen = () => {
     <ScrollView
       style={{backgroundColor: t.surface}}
       contentContainerStyle={[styles.scroll, column]}>
-      <View style={styles.head} accessible accessibilityLiveRegion="polite">
+      <View style={styles.head} accessible accessibilityRole="header">
         {facing ? <Icon name="check" size={26} color={t.accent} strokeWidth={2.4} /> : null}
         <Text weight="semibold" size={22} color={headColor} style={styles.center}>
           {headline}

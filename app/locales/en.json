@@ -95,8 +95,6 @@
     "sunrise": "Sunrise {{time}}",
     "sunset": "Sunset {{time}}",
     "asrLabel": "{{method}} · {{asr}} Asr",
-    "bellOn": "Turn off {{label}} reminder",
-    "bellOff": "Turn on {{label}} reminder",
     "travelTitle": "Looks like you’re in {{city}} now",
     "travelBody": "Prayer times are still set for {{saved}}",
     "keep": "Keep {{saved}}",
@@ -265,12 +263,28 @@
     "n": "N",
     "e": "E",
     "s": "S",
-    "w": "W"
+    "w": "W",
+    "notFacing": "Not facing the qibla"
   },
   "exactAlarm": {
     "title": "On-time adhan",
     "body": "Android can deliver the adhan late unless Adhan Times may set exact alarms. Turn on “Alarms & reminders”.",
     "allow": "Allow",
     "settingsHint": "Off: the adhan can be late"
+  },
+  "a11y": {
+    "hours": {
+      "one": "{{count}} hour",
+      "other": "{{count}} hours"
+    },
+    "minutes": {
+      "one": "{{count}} minute",
+      "other": "{{count}} minutes"
+    },
+    "lessThanMinute": "less than a minute",
+    "and": " and ",
+    "comma": ", ",
+    "countdown": "{{headline}} {{left}}, {{at}}",
+    "reminder": "Reminder"
   }
 }

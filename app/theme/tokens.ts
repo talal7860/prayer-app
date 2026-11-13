@@ -14,6 +14,8 @@ export type Palette = {
   past: string;
   track: string;
   trackOff: string;
+  /** Outline of an off switch: 3:1 against the card (WCAG 1.4.11), which `trackOff` alone isn't. */
+  control: string;
 };
 
 export const light: Palette = {
@@ -27,9 +29,10 @@ export const light: Palette = {
   hi: '#EDF2FC',
   accent: '#2453B3',
   onAccent: '#FFFFFF',
-  past: '#6B7180',
+  past: '#646A79',
   track: '#EEF0F4',
   trackOff: '#C7CBD6',
+  control: '#8A90A0',
 };
 
 export const dark: Palette = {
@@ -46,7 +49,35 @@ export const dark: Palette = {
   past: '#8C93AA',
   track: '#1A2038',
   trackOff: '#3A4260',
+  control: '#6B7390',
 };
+
+/** iOS Increase Contrast / Android high-contrast text: darker greys, stronger lines. */
+export const contrastLight: Palette = {
+  ...light,
+  muted: '#454B5A',
+  past: '#4F5564',
+  border: '#8A90A0',
+  divider: '#C7CBD6',
+  accent: '#163A85',
+  trackOff: '#8A90A0',
+  control: '#5A6070',
+};
+
+export const contrastDark: Palette = {
+  ...dark,
+  muted: '#C3C9DA',
+  past: '#B2B9CE',
+  border: '#4A5378',
+  divider: '#3A4366',
+  accent: '#B8CCFF',
+  trackOff: '#6B7390',
+  control: '#8E96B0',
+};
+
+/** The palette for a theme, with the system's contrast setting. */
+export const paletteFor = (isDark: boolean, highContrast = false): Palette =>
+  isDark ? (highContrast ? contrastDark : dark) : highContrast ? contrastLight : light;
 
 export type Period = 'fajr' | 'morning' | 'dhuhr' | 'asr' | 'maghrib' | 'isha';
 

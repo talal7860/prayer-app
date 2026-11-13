@@ -95,8 +95,6 @@
     "sunrise": "الشروق {{time}}",
     "sunset": "الغروب {{time}}",
     "asrLabel": "{{method}} · عصر {{asr}}",
-    "bellOn": "إيقاف تنبيه {{label}}",
-    "bellOff": "تشغيل تنبيه {{label}}",
     "travelTitle": "يبدو أنك في {{city}} الآن",
     "travelBody": "أوقات الصلاة ما زالت مضبوطة على {{saved}}",
     "keep": "إبقاء {{saved}}",
@@ -265,12 +263,28 @@
     "n": "ش",
     "e": "ق",
     "s": "ج",
-    "w": "غ"
+    "w": "غ",
+    "notFacing": "لم تعد باتجاه القبلة"
   },
   "exactAlarm": {
     "title": "أذان في وقته",
     "body": "قد يُرسل أندرويد الأذان متأخرًا ما لم يُسمح لتطبيق أوقات الأذان بضبط منبهات دقيقة. فعّل «المنبهات والتذكيرات».",
     "allow": "السماح",
     "settingsHint": "متوقف: قد يتأخر الأذان"
+  },
+  "a11y": {
+    "hours": {
+      "one": "{{count}} ساعة",
+      "other": "{{count}} ساعة"
+    },
+    "minutes": {
+      "one": "{{count}} دقيقة",
+      "other": "{{count}} دقيقة"
+    },
+    "lessThanMinute": "أقل من دقيقة",
+    "and": " و",
+    "comma": "، ",
+    "countdown": "{{headline}} {{left}}، {{at}}",
+    "reminder": "التذكير"
   }
 }

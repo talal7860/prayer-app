@@ -277,7 +277,10 @@ For the next SDK bump: `npx expo install expo@^<next> --fix`, then `npx expo-doc
   testing (fastlane `upload_to_play_store`). Settings come from env vars, read from
   `~/.config/adhan-app/env` (outside the repo, `chmod 600`): `ASC_API_KEY_ID`,
   `ASC_API_ISSUER_ID`, `ASC_API_KEY_PATH` (the `.p8`), `PLAY_SERVICE_ACCOUNT_JSON`. It checks them
-  before building. Needs Homebrew's `fastlane` (only that is put first on PATH: an rvm Ruby's
+  before building. For iOS it also exports `EXPO_APPLE_TEAM_ID`/`EXPO_APPLE_TEAM_TYPE` and
+  `EXPO_ASC_API_KEY_PATH`/`EXPO_ASC_KEY_ID`/`EXPO_ASC_ISSUER_ID` (from those), so `eas build` uses the
+  API key and never asks for the team or an Apple ID login. The env file sets them too, for
+  plain `eas build` / `eas submit` runs. Needs Homebrew's `fastlane` (only that is put first on PATH: an rvm Ruby's
   fastlane can be broken, and Homebrew's CocoaPods can be too), Xcode, and a JDK 17 for Android.
   Only run local builds when asked; CI and "ship it" use EAS cloud builds.
 - The workflow uses `--no-wait`: a green Action means "builds queued". Build and submit

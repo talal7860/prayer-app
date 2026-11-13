@@ -43,9 +43,7 @@
     "timeFormat": "Time format",
     "unknownCity": "Current location",
     "highLats": "High latitudes",
-    "adjust": "Adjust times",
-    "travelAlerts": "Travel alerts",
-    "travelAlertsHint": "Notify me when I'm in another city"
+    "adjust": "Adjust times"
   },
   "notification": {
     "title": "It's {{label}} time - {{time}}",
@@ -180,14 +178,6 @@
       "one": "{{count}} minute",
       "other": "{{count}} minutes"
     }
-  },
-  "travel": {
-    "title": "You're in {{city}}",
-    "titleNoCity": "You're somewhere new",
-    "body": "Tap to update prayer times.",
-    "needsAlways": "Allow location \"Always\"",
-    "needsAlwaysBody": "Travel alerts check your location in the background. Allow it in Settings: Location → Always.",
-    "notNow": "Not now"
   },
   "widget": {
     "next": "Next prayer",

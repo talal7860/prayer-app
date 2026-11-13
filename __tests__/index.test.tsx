@@ -33,6 +33,7 @@ jest.mock('expo-notifications', () => ({
 jest.mock('expo-task-manager', () => ({
   defineTask: jest.fn(),
   isTaskRegisteredAsync: jest.fn(() => Promise.resolve(false)),
+  unregisterTaskAsync: jest.fn(() => Promise.resolve()),
 }));
 
 jest.mock('expo-background-task', () => ({
@@ -158,6 +159,19 @@ it('creates the adhan channel with audio attributes, and deletes the old silent 
   );
   expect(defaults?.[1]).not.toHaveProperty('audioAttributes');
   Platform.OS = os;
+});
+
+it('stops the removed travel alerts geofence an older version registered', async () => {
+  const TaskManager = require('expo-task-manager');
+  (TaskManager.isTaskRegisteredAsync as jest.Mock).mockImplementation((name: string) =>
+    Promise.resolve(name === 'travel-geofence'),
+  );
+  await savedSetup();
+  await render(<App />);
+  await waitFor(() => {
+    expect(TaskManager.unregisterTaskAsync).toHaveBeenCalledWith('travel-geofence');
+  });
+  (TaskManager.isTaskRegisteredAsync as jest.Mock).mockImplementation(() => Promise.resolve(false));
 });
 
 it('renders Today with the five prayers, and never schedules Sunrise', async () => {

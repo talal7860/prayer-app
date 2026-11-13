@@ -16,7 +16,6 @@ export const defaultSettings: Settings = Object.freeze({
   fajrAdhan: true,
   muted: {sunrise: true},
   adjustments: {},
-  travelAlerts: false,
   headsUp: false,
   // Opt-in: off until someone turns it on (setup or Settings → Notifications).
   liveActivity: false,
@@ -26,17 +25,20 @@ export const defaultSettings: Settings = Object.freeze({
 });
 
 /** What may be saved: any subset of the settings, plus keys from older versions. */
-type StoredSettings = Partial<Settings> & {fajrIshaCalculation?: string};
+type StoredSettings = Partial<Settings> & {fajrIshaCalculation?: string; travelAlerts?: boolean};
 
 /** Saved settings on top of `base`, with old keys dropped. */
 export const parseSettings = (
   stored: string | null,
   base: Settings = defaultSettings,
 ): Settings => {
-  // `fajrIshaCalculation` (the old 90-minute rule) was removed; drop it if saved.
-  const {fajrIshaCalculation: _removed, ...parsed} = stored
-    ? (JSON.parse(stored) as StoredSettings)
-    : {};
+  // Removed settings, dropped if saved: `fajrIshaCalculation` (the old 90-minute rule) and
+  // `travelAlerts` (background "Always" location).
+  const {
+    fajrIshaCalculation: _removed,
+    travelAlerts: _travel,
+    ...parsed
+  } = stored ? (JSON.parse(stored) as StoredSettings) : {};
   const next: Settings = merge(base)(parsed);
   // Installed before the setup screen existed: they've already set things up.
   if (stored && parsed.onboarded === undefined) {

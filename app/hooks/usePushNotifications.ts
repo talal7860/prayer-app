@@ -7,13 +7,16 @@ import AppConstants from '../AppConstants';
 import useAppSettings from './useAppSettings';
 import {rescheduleNotifications} from '../lib/notifications';
 import {registerRescheduleTask} from '../backgroundTask';
-import {syncTravelAlerts} from '../travelTask';
+import * as TaskManager from 'expo-task-manager';
 import {refreshWidgets, syncLiveActivity} from '../lib/widgets';
 import {syncWatch} from '../lib/watch';
 
 // Channels from older versions. A channel's sound can't change once created, so a fix needs a new
 // id: the WAV adhan replaced the MP3 one, and `adhan-makkah` was created without audio attributes
 // (silent on Android 17).
+/** The removed travel alerts' geofence task. */
+const OLD_GEOFENCE_TASK = 'travel-geofence';
+
 const OLD_CHANNELS = ['prayer-time-notifications-mecca', 'adhan-makkah'];
 
 const createChannels = async () => {
@@ -90,15 +93,20 @@ const usePushNotifications = () => {
     rescheduleNotifications(settings).catch((error: unknown) => console.warn(error));
   }, [ready, registered, settings, today, foregrounded]);
 
-  // Keep the travel geofence on the saved location (or stopped when the setting is off).
-  const {travelAlerts, location} = settings;
+  // Travel alerts (an "Always"-location geofence) were removed. Stop a geofence that an older
+  // version registered, so iOS doesn't keep a region for a task that no longer exists.
   useEffect(() => {
     if (!ready) {
       return;
     }
-    syncTravelAlerts(settings).catch((error: unknown) => console.warn(error));
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only these fields matter
-  }, [ready, travelAlerts, location.lat, location.lng]);
+    TaskManager.isTaskRegisteredAsync(OLD_GEOFENCE_TASK)
+      .then(registered =>
+        registered ? TaskManager.unregisterTaskAsync(OLD_GEOFENCE_TASK) : undefined,
+      )
+      .catch((error: unknown) => {
+        console.warn(error);
+      });
+  }, [ready]);
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', state => {

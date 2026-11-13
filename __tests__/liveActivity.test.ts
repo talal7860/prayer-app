@@ -56,3 +56,9 @@ it('never starts or updates one when off, and ends a running one right away', as
   expect(current.update).not.toHaveBeenCalled();
   expect(current.end).toHaveBeenCalledWith('immediate');
 });
+
+it('drops the removed travel alerts setting from saved settings', () => {
+  const saved = parseSettings(JSON.stringify({travelAlerts: true, headsUp: true}));
+  expect(saved).not.toHaveProperty('travelAlerts');
+  expect(saved.headsUp).toBe(true);
+});

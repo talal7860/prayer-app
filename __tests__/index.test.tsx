@@ -2,6 +2,7 @@ import React from 'react';
 import {fireEvent, render, screen, waitFor} from '@testing-library/react-native';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {Dimensions} from 'react-native';
 import App from '../App';
 import {SETTINGS_KEY} from '../app/lib/settingsStore';
 
@@ -146,6 +147,34 @@ it('renders Today with the five prayers, and never schedules Sunrise', async () 
     'reschedule-prayer-notifications',
     {minimumInterval: 720},
   );
+});
+
+describe('larger screens', () => {
+  const windowOf = (width: number, height: number) =>
+    jest.spyOn(Dimensions, 'get').mockReturnValue({width, height, scale: 2, fontScale: 1});
+  afterEach(() => jest.restoreAllMocks());
+
+  it('shows the iPad board: six cards, a This week link and a Settings button', async () => {
+    windowOf(1194, 834);
+    await savedSetup();
+    await render(<App />);
+    expect(await screen.findByLabelText('Turn off Fajr reminder')).toBeTruthy();
+    expect(screen.getByText('Sunrise')).toBeTruthy();
+    // Sunrise is never notified, so its card has no bell.
+    expect(screen.queryByLabelText(/Sunrise reminder/)).toBeNull();
+    expect(screen.getByText('NEXT')).toBeTruthy();
+    await fireEvent.press(screen.getByRole('link', {name: 'This week'}));
+    expect(await screen.findByText('Next week')).toBeTruthy();
+  });
+
+  it('shows the cover-screen board at foldable cover width', async () => {
+    windowOf(480, 672);
+    await savedSetup();
+    await render(<App />);
+    expect(await screen.findByLabelText('Turn off Isha reminder')).toBeTruthy();
+    expect(screen.getByText('NEXT')).toBeTruthy();
+    expect(screen.queryByRole('link', {name: 'This week'})).toBeNull();
+  });
 });
 
 it('switches to Week and Settings', async () => {

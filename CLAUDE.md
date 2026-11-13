@@ -145,6 +145,12 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
     the vendored library's licence is a comment-only `Adhan/LICENSE.swift`.
   - EAS signs two more bundle ids; the first build after adding them needs an interactive
     `eas build -p ios` (or `eas credentials`) to create their profiles.
+- **iPad and foldable layouts** (#52): Today picks `phone` / `cover` / `wide` from the window width
+  (`todayLayout` in `app/lib/layout.ts`; `CoverToday.tsx`, `WideToday.tsx`, shared `useToday.ts`,
+  `SemiArc.tsx`). Other screens sit in a 640 pt column on wide windows (`useReadableWidth`).
+  In a resizable iPadOS 26 window the close/minimise controls cover the top leading corner and
+  aren't in React Native's safe area: the local module `modules/window-controls` (iOS) reads UIKit's
+  `safeArea(cornerAdaptation: .horizontal)` and `useWindowControls` pads Today's top bars by it.
 - **Monthly timetable** (Week → "Share the {month} timetable"): `app/lib/timetable.ts` builds an
   A4 HTML page (RTL-aware), `expo-print` makes the PDF, `expo-sharing` opens the share sheet.
 - `getPrayerTimes(date)` computes that date (it used to ignore `date`), and labels Friday's

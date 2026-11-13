@@ -28,6 +28,7 @@ import {METHOD_KEYS, methodName, prayerTimesFor} from '../../lib/prayerTimes';
 import {isHighLatitude, recommendedAsr, recommendedMethod} from '../../lib/recommend';
 import {fonts, radius} from '../../theme/tokens';
 import {highLatOptions} from '../SettingsScreen/HighLats';
+import useReadableWidth from '../../hooks/useReadableWidth';
 
 type Step = 'location' | 'method' | 'asr' | 'highLats' | 'review';
 
@@ -42,6 +43,7 @@ type Draft = Pick<Settings, 'calculationMethod' | 'asr' | 'highLats' | 'liveActi
  * Nothing is saved until Start, so quitting halfway shows the setup again next time.
  */
 const SetupScreen = () => {
+  const column = useReadableWidth();
   const {t, isDark} = usePalette();
   const insets = useSafeAreaInsets();
   const {settings, setSettings} = useAppSettings();
@@ -148,7 +150,7 @@ const SetupScreen = () => {
       style={[styles.root, {backgroundColor: t.surface}]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      <View style={[styles.top, {paddingTop: insets.top + 12}]}>
+      <View style={[styles.top, {paddingTop: insets.top + 12}, column]}>
         <View
           style={styles.progress}
           accessibilityLabel={I18n.t('setup.step', {n: index + 1, total: steps.length})}>
@@ -171,7 +173,9 @@ const SetupScreen = () => {
         ) : null}
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={[styles.scroll, column]}
+        keyboardShouldPersistTaps="handled">
         {step === 'location' ? (
           <Text weight="medium" size={15} color={t.accent} style={styles.welcome}>
             {I18n.t('setup.welcome')}
@@ -354,7 +358,7 @@ const SetupScreen = () => {
         ) : null}
       </ScrollView>
 
-      <View style={[styles.footer, {paddingBottom: insets.bottom + 16}]}>
+      <View style={[styles.footer, {paddingBottom: insets.bottom + 16}, column]}>
         {!canContinue ? (
           <Text size={13} color={t.muted} style={styles.footerHint}>
             {I18n.t('setup.locationNeeded')}

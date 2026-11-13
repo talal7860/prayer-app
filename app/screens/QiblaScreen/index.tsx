@@ -28,6 +28,7 @@ import {
   unwrap,
 } from '../../lib/qibla';
 import {kaaba, type Palette} from '../../theme/tokens';
+import useReadableWidth from '../../hooks/useReadableWidth';
 
 const TICKS = Array.from({length: 72}, (_, i) => i * 5);
 const CARDINALS = [
@@ -142,6 +143,7 @@ const Dial = ({size, rotation, bearing, facing, t}: DialProps) => {
 };
 
 const QiblaScreen = () => {
+  const column = useReadableWidth();
   const {t} = usePalette();
   const {width} = useWindowDimensions();
   const {settings} = useAppSettings();
@@ -218,7 +220,9 @@ const QiblaScreen = () => {
   }
 
   return (
-    <ScrollView style={{backgroundColor: t.surface}} contentContainerStyle={styles.scroll}>
+    <ScrollView
+      style={{backgroundColor: t.surface}}
+      contentContainerStyle={[styles.scroll, column]}>
       <View style={styles.head} accessible accessibilityLiveRegion="polite">
         {facing ? <Icon name="check" size={26} color={t.accent} strokeWidth={2.4} /> : null}
         <Text weight="semibold" size={22} color={headColor} style={styles.center}>

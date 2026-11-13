@@ -160,3 +160,49 @@ export const formatCoords = ({lat, lng}: GeoLocation) =>
   `${Math.abs(lat).toFixed(2)}° ${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lng).toFixed(
     2,
   )}° ${lng >= 0 ? 'E' : 'W'}`;
+
+/** 0 at Fajr, 1 at Isha (clamped): where a time sits on the big semicircle arc. */
+export const arcFraction = (time: Date, today: DayTimes): number => {
+  const span = today.isha.getTime() - today.fajr.getTime();
+  if (span <= 0) {
+    return 0;
+  }
+  return Math.min(1, Math.max(0, (time.getTime() - today.fajr.getTime()) / span));
+};
+
+/** A point on the big semicircle arc (iPad and cover layouts), on a 600x300 canvas. */
+export const semiArcPoint = (fraction: number): {x: number; y: number} => {
+  const a = Math.PI * (1 - fraction);
+  return {x: 300 + 280 * Math.cos(a), y: 290 - 270 * Math.sin(a)};
+};
+
+export type DaySlot = {
+  key: PrayerKey;
+  label: string;
+  time: Date;
+  /** The prayer the countdown is to. */
+  isNext: boolean;
+  /** Its time has gone by today (and it isn't next). */
+  past: boolean;
+};
+
+/**
+ * All six times for the iPad and cover layouts, which mark the next prayer rather than the current one.
+ * After Isha the next one is tomorrow's Fajr, so the Fajr slot shows tomorrow's time.
+ */
+export const daySlots = (
+  list: PrayerTimeLabel[],
+  now: Date,
+  next: {key: PrayerKey; time: Date},
+): DaySlot[] =>
+  list.map(p => {
+    const isNext = p.key === next.key;
+    const time = isNext ? next.time : p.time;
+    return {
+      key: p.key,
+      label: p.label,
+      time,
+      isNext,
+      past: !isNext && p.time.getTime() <= now.getTime(),
+    };
+  });

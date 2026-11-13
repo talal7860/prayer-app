@@ -27,8 +27,10 @@ import {formatCoords} from '../../lib/prayerDay';
 import {isHighLatitude} from '../../lib/recommend';
 import {backgroundLocationAllowed} from '../../travelTask';
 import {adjustmentSummary} from './Adjust';
+import useReadableWidth from '../../hooks/useReadableWidth';
 
 const SettingsScreen = () => {
+  const column = useReadableWidth();
   const navigation = useNavigation<TabNavigation>();
   const insets = useSafeAreaInsets();
   const {t, isDark} = usePalette();
@@ -65,7 +67,7 @@ const SettingsScreen = () => {
   return (
     <View style={[styles.root, {backgroundColor: t.surface}]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      <ScrollView contentContainerStyle={[styles.scroll, {paddingTop: insets.top + 24}]}>
+      <ScrollView contentContainerStyle={[styles.scroll, {paddingTop: insets.top + 24}, column]}>
         <Text
           weight="bold"
           size={30}

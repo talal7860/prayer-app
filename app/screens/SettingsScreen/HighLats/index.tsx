@@ -5,6 +5,7 @@ import Text from '../../../components/ui/Text';
 import useAppSettings from '../../../hooks/useAppSettings';
 import usePalette from '../../../hooks/usePalette';
 import I18n from '../../../I18n';
+import useReadableWidth from '../../../hooks/useReadableWidth';
 
 const RULES: HighLatRule[] = ['NightMiddle', 'AngleBased', 'OneSeventh'];
 
@@ -16,10 +17,11 @@ export const highLatOptions = () =>
   }));
 
 const HighLatsScreen = () => {
+  const column = useReadableWidth();
   const {settings, setSetting} = useAppSettings();
   const {t} = usePalette();
   return (
-    <ScrollView contentContainerStyle={styles.scroll}>
+    <ScrollView contentContainerStyle={[styles.scroll, column]}>
       <Text size={13} color={t.muted} style={styles.hint}>
         {I18n.t('highLats.hint')}
       </Text>

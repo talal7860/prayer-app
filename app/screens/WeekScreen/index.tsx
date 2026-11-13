@@ -28,12 +28,14 @@ import {
 } from '../../lib/prayerDay';
 import {errorMessage} from '../../lib/errors';
 import {timetableHtml} from '../../lib/timetable';
+import useReadableWidth from '../../hooks/useReadableWidth';
 
 type Week = 'this' | 'next';
 const COLUMNS: PrayerKey[] = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
 const HEADERS = ['fajr', 'rise', 'dhuhr', 'asr', 'magh', 'isha'];
 
 const WeekScreen = () => {
+  const column = useReadableWidth();
   const insets = useSafeAreaInsets();
   const {t, isDark} = usePalette();
   const {settings, getPrayerTimes, today, calculationMethod} = useAppSettings();
@@ -87,7 +89,7 @@ const WeekScreen = () => {
   return (
     <View style={[styles.root, {backgroundColor: t.surface}]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      <ScrollView contentContainerStyle={[styles.scroll, {paddingTop: insets.top + 16}]}>
+      <ScrollView contentContainerStyle={[styles.scroll, {paddingTop: insets.top + 16}, column]}>
         <View style={styles.head}>
           <Text
             weight="bold"

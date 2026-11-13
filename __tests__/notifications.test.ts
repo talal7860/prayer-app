@@ -37,7 +37,7 @@ it('schedules well beyond 5 days, up to the iOS limit', async () => {
   const dates = scheduled().map(r => r.trigger.date as Date);
   const lastDay = Math.max(...dates.map(d => d.getTime()));
   expect((lastDay - now.getTime()) / 86400000).toBeGreaterThan(10);
-  expect(scheduled()[0].trigger.channelId).toBe('adhan-makkah');
+  expect(scheduled()[0].trigger.channelId).toBe('adhan-makkah-v2');
   expect(scheduled()[MAX_PENDING - 1].trigger.channelId).toBe('prayer-time-notifications');
 });
 
@@ -72,7 +72,7 @@ it('sends a test adhan in 20 seconds, which a reschedule leaves alone', async ()
   const [test] = scheduled();
   expect(test.identifier).toMatch(/^test:\d+$/);
   expect(test.content.title).toBe('Test adhan from Adhan Times');
-  expect(test.trigger.channelId).toBe('adhan-makkah');
+  expect(test.trigger.channelId).toBe('adhan-makkah-v2');
   const due = (test.trigger.date as Date).getTime() - before;
   expect(due).toBeGreaterThanOrEqual(20_000);
   expect(due).toBeLessThan(21_000);

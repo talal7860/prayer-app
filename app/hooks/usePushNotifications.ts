@@ -11,8 +11,10 @@ import {syncTravelAlerts} from '../travelTask';
 import {refreshWidgets, syncLiveActivity} from '../lib/widgets';
 import {syncWatch} from '../lib/watch';
 
-// Channels from older versions. A channel's sound can't change, so the WAV adhan got a new one.
-const OLD_CHANNELS = ['prayer-time-notifications-mecca'];
+// Channels from older versions. A channel's sound can't change once created, so a fix needs a new
+// id: the WAV adhan replaced the MP3 one, and `adhan-makkah` was created without audio attributes
+// (silent on Android 17).
+const OLD_CHANNELS = ['prayer-time-notifications-mecca', 'adhan-makkah'];
 
 const createChannels = async () => {
   await Promise.all(OLD_CHANNELS.map(id => Notifications.deleteNotificationChannelAsync(id)));
@@ -24,8 +26,20 @@ const createChannels = async () => {
         // eslint-disable-next-line import/namespace -- re-exported via `export *` from a .types module
         importance: Notifications.AndroidImportance.HIGH,
         // Leaving `sound` out gives the system default. Passing 'default' makes
-        // expo-notifications look for a bundled file called "default".
-        ...(channel.soundName === 'default' ? {} : {sound: channel.soundName}),
+        // expo-notifications look for a bundled file called "default". With a sound, pass the
+        // audio attributes too: without them expo-notifications sets `null`, which Android 16
+        // fills in but Android 17 doesn't, so the notification arrives silently.
+        ...(channel.soundName === 'default'
+          ? {}
+          : {
+              sound: channel.soundName,
+              audioAttributes: {
+                // eslint-disable-next-line import/namespace -- re-exported via `export *` from a .types module
+                usage: Notifications.AndroidAudioUsage.NOTIFICATION,
+                // eslint-disable-next-line import/namespace -- re-exported via `export *` from a .types module
+                contentType: Notifications.AndroidAudioContentType.SONIFICATION,
+              },
+            }),
         enableVibrate: true,
       }),
     ),

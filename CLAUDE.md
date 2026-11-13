@@ -211,6 +211,33 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
     widget shows "Can't show content" (`NoSuchMethodException: …setRemoteViews`). Debug builds
     aren't minified, so test widget changes with `./gradlew assembleRelease` too.
 
+## Accessibility (#62)
+
+- **Screen readers**: one stop per thing a person would name. A Today prayer row is one `switch`
+  ("Asr, 3:04 PM, now, Reminder", checked = bell on, double tap toggles; `rowA11y` in
+  `useToday.ts`); the bell inside it is hidden (`hiddenFromA11y`). `Row` reads title + subtitle +
+  value; with a control, the control carries the title as its label and the subtitle as its hint.
+  Week rows read as one day with full prayer names; Adjust rows are `adjustable`.
+- **Countdowns aren't live regions**: the label is in words and to the minute
+  (`countdownLabel`/`spokenDuration` in `app/lib/a11y.ts`), and `announce()` speaks once when the
+  next prayer changes, when the Qibla turns to/away from facing, and when the travel banner
+  appears. iOS ignores `accessibilityLiveRegion` and `role=alert`; use `announce`.
+- Upper-case visual labels ("NOW", "TODAY") get a normal-case `accessibilityLabel`.
+- **Large text** (`isLargeText`, fontScale ≥ 1.5): Today rows put the time under the name,
+  Settings rows stack the control under the text, Week becomes a card per day, Setup's footer
+  scrolls with the step. Use `minHeight`, not `height`, on anything with text. Only fixed-size
+  art is capped (`maxFontSizeMultiplier`: the countdowns, big titles at 2×).
+- `useA11yPrefs` (one app-wide subscription): Reduce Motion (the Qibla dial snaps), Bold Text
+  (`Text` bumps Inter one weight), Increase Contrast (`paletteFor` → `contrastLight/Dark`).
+- **Contrast**: white text on the skies is full white near the bottom (the morning sky's last stop
+  is under 4.5:1 at 90%). Off switches have a `control` outline (3:1).
+- **Watch**: text styles (Dynamic Type; the home page caps at `.xxxLarge` for the arc), rows
+  combine into "Asr, 3:04 PM" with the value "Next" (`labels.next` from the phone).
+- **Widgets**: arcs are `accessibilityHidden`, chips/rows `accessibilityElement('combine')` with a
+  full label; never put `accessibilityLabel` on a timer `Text` (it replaces the time). Android:
+  the expo-widgets patch maps `semantics({contentDescription})` to Glance.
+- Tests query by role and label (`__tests__/index.test.tsx` "screen readers", `a11y.test.ts`).
+
 ## Commands
 
 ```bash

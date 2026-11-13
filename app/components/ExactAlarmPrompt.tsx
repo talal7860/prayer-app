@@ -47,13 +47,15 @@ const ExactAlarmPrompt = ({onAllow, palette}: Props) => {
 const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     gap: 12,
     padding: 14,
     borderRadius: 16,
     borderWidth: 1,
   },
-  text: {flex: 1, gap: 2},
+  // Wraps the button under the text when large text leaves no room beside it.
+  text: {flex: 1, minWidth: 160, gap: 2},
   // 36pt + 4pt hitSlop above and below = 44pt.
   button: {
     paddingHorizontal: 14,

@@ -117,6 +117,8 @@ const WeekScreen = () => {
           <Text
             weight="bold"
             size={30}
+            // Already large: past 2× a word like "Settings" no longer fits a line and breaks.
+            maxFontSizeMultiplier={2}
             color={t.text}
             accessibilityRole="header"
             style={styles.title}>

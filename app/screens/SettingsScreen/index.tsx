@@ -7,6 +7,7 @@ import {
   ScrollView,
   StatusBar,
   StyleSheet,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
@@ -28,6 +29,7 @@ import {isHighLatitude} from '../../lib/recommend';
 import {backgroundLocationAllowed} from '../../travelTask';
 import {adjustmentSummary} from './Adjust';
 import useReadableWidth from '../../hooks/useReadableWidth';
+import {isLargeText} from '../../lib/a11y';
 
 const SettingsScreen = () => {
   const column = useReadableWidth();
@@ -36,6 +38,9 @@ const SettingsScreen = () => {
   const {t, isDark} = usePalette();
   const {settings, setSetting, calculationMethod} = useAppSettings();
   const exactAlarms = useExactAlarms();
+  // At large text sizes the location card stacks, so the city isn't squeezed to a letter.
+  const {fontScale} = useWindowDimensions();
+  const big = isLargeText(fontScale);
   const sendTest = () => {
     scheduleTestNotification(settings)
       .then(sent => {
@@ -71,6 +76,8 @@ const SettingsScreen = () => {
         <Text
           weight="bold"
           size={30}
+          // Already large: past 2× a word like "Settings" no longer fits a line and breaks.
+          maxFontSizeMultiplier={2}
           color={t.text}
           accessibilityRole="header"
           style={styles.title}>
@@ -78,11 +85,11 @@ const SettingsScreen = () => {
         </Text>
 
         <SectionLabel>{I18n.t('settings.locationSection')}</SectionLabel>
-        <Card style={styles.locationCard}>
+        <Card style={big ? {...styles.locationCard, ...styles.stacked} : styles.locationCard}>
           <View style={[styles.badge, {backgroundColor: t.hi}]}>
             <Icon name="pin" size={20} color={t.accent} />
           </View>
-          <View style={styles.flex} accessible>
+          <View style={big ? styles.stackedText : styles.flex} accessible>
             <Text weight="semibold" size={16} color={t.text} numberOfLines={1}>
               {settings.city ?? I18n.t('settings.unknownCity')}
             </Text>
@@ -255,6 +262,8 @@ const styles = StyleSheet.create({
   badge: {width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center'},
   flex: {flex: 1, minWidth: 0, gap: 2},
   below: {marginTop: 10},
+  stacked: {flexDirection: 'column', alignItems: 'flex-start'},
+  stackedText: {alignSelf: 'stretch', gap: 2},
   link: {minHeight: 44, justifyContent: 'center', paddingHorizontal: 4},
 });
 

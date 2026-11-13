@@ -48,7 +48,8 @@ type RowProps = PropsWithChildren<{
 export const Row = ({title, subtitle, value, onPress, last, children}: RowProps) => {
   const {t} = usePalette();
   const {fontScale} = useWindowDimensions();
-  const stacked = !!children && isLargeText(fontScale);
+  const large = isLargeText(fontScale);
+  const stacked = !!children && large;
   const label = joinLabel(title, subtitle, value);
   const body = (
     <>
@@ -61,7 +62,7 @@ export const Row = ({title, subtitle, value, onPress, last, children}: RowProps)
           {title}
         </Text>
         {subtitle ? (
-          <Text size={13} color={t.muted} numberOfLines={stacked ? undefined : 1}>
+          <Text size={13} color={t.muted} numberOfLines={large ? undefined : 1}>
             {subtitle}
           </Text>
         ) : null}

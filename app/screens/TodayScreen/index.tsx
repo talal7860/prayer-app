@@ -166,7 +166,11 @@ const PhoneToday = ({m}: {m: TodayModel}) => {
             <Text weight="semibold" size={13} color={t.muted} style={styles.caps}>
               {I18n.t('today.title').toUpperCase()}
             </Text>
-            <Text size={13} color={t.muted} numberOfLines={big ? 2 : 1} style={styles.shrink}>
+            <Text
+              size={13}
+              color={t.muted}
+              numberOfLines={big ? undefined : 1}
+              style={styles.shrink}>
               {m.asrLabel}
             </Text>
           </View>
@@ -273,6 +277,7 @@ const styles = StyleSheet.create({
   },
   sheetHead: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,

@@ -61,17 +61,23 @@ struct ComplicationView: View {
     if let snap = entry.snap {
       let short = String(snap.next.name.prefix(3)).uppercased()
       let progress = snap.progress(at: entry.date)
+      let until = String(format: snap.settings.label("until", "until %@"), snap.next.name)
       switch family {
       case .accessoryCircular:
         // The board's ring: gold progress, short name, time left.
         ZStack {
-          Circle().stroke(Palette.track, lineWidth: 4)
-          Circle()
-            .trim(from: 0, to: progress)
-            .stroke(Palette.gold, style: StrokeStyle(lineWidth: 4, lineCap: .round))
-            .rotationEffect(.degrees(-90))
+          Group {
+            Circle().stroke(Palette.track, lineWidth: 4)
+            Circle()
+              .trim(from: 0, to: progress)
+              .stroke(Palette.gold, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+              .rotationEffect(.degrees(-90))
+          }
+          .accessibilityHidden(true)
           VStack(spacing: 0) {
+            // "ASR" is for the eye; VoiceOver says the name, then the time left.
             Text(short).font(.system(size: 9, weight: .bold)).foregroundStyle(Palette.gold)
+              .accessibilityLabel(snap.next.name)
             Text(snap.next.time, style: .timer)
               .font(.system(size: 12, weight: .bold))
               .monospacedDigit()
@@ -79,6 +85,7 @@ struct ComplicationView: View {
               .minimumScaleFactor(0.5)
           }
           .padding(4)
+          .accessibilityElement(children: .combine)
         }
         .widgetAccentable()
       case .accessoryRectangular:
@@ -95,12 +102,14 @@ struct ComplicationView: View {
             .monospacedDigit()
           ProgressView(value: progress)
             .tint(Palette.gold)
+            .accessibilityLabel(until)
         }
       case .accessoryCorner:
         Text(short)
           .font(.system(size: 14, weight: .bold))
+          .accessibilityLabel(snap.next.name)
           .widgetLabel {
-            ProgressView(value: progress).tint(Palette.gold)
+            ProgressView(value: progress).tint(Palette.gold).accessibilityLabel(until)
           }
       default:
         // Inline: "Asr 3:42 PM"
@@ -108,6 +117,7 @@ struct ComplicationView: View {
       }
     } else {
       Image(systemName: "moon.stars.fill")
+        .accessibilityLabel("Adhan Times")
     }
   }
 }

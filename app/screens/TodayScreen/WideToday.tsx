@@ -11,9 +11,9 @@ import {daySlots, formatCountdown, hijriLabel, type DaySlot} from '../../lib/pra
 import {skies, skyLocations} from '../../theme/tokens';
 import SemiArc from './SemiArc';
 import TravelBanner from './TravelBanner';
-import {nextAtLine, type TodayModel} from './useToday';
+import {hiddenFromA11y, nextAtLine, type TodayModel} from './useToday';
+import {joinLabel} from '../../lib/a11y';
 
-const WHITE_90 = 'rgba(255,255,255,0.9)';
 const PILL = 'rgba(255,255,255,0.16)';
 
 type CardProps = {m: TodayModel; slot: DaySlot; width: number; height: number; timeSize: number};
@@ -24,11 +24,12 @@ const PrayerCard = ({m, slot, width, height, timeSize}: CardProps) => {
   const color = slot.past ? t.past : t.text;
   return (
     <View
+      {...m.rowA11y(slot.key, slot.label, slot.time, slot.isNext ? 'next' : undefined)}
       style={[
         styles.card,
         {
           width,
-          height,
+          minHeight: height,
           backgroundColor: slot.isNext ? t.hi : t.raised,
           borderColor: slot.isNext ? t.accent : t.border,
         },
@@ -43,10 +44,7 @@ const PrayerCard = ({m, slot, width, height, timeSize}: CardProps) => {
           <View style={styles.bell} />
         ) : (
           <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t(off ? 'today.bellOff' : 'today.bellOn', {
-              label: slot.label,
-            })}
+            {...hiddenFromA11y}
             onPress={() => m.toggleBell(slot.key)}
             hitSlop={6}
             style={styles.bell}>
@@ -60,7 +58,12 @@ const PrayerCard = ({m, slot, width, height, timeSize}: CardProps) => {
             {I18n.t('today.next').toUpperCase()}
           </Text>
         ) : null}
-        <Text weight="semibold" size={timeSize} color={color} style={styles.tabular}>
+        <Text
+          weight="semibold"
+          size={timeSize}
+          color={color}
+          maxFontSizeMultiplier={1.4}
+          style={styles.tabular}>
           {m.fmt(slot.time)}
         </Text>
       </View>
@@ -112,7 +115,7 @@ const WideToday = ({m, width, height}: {m: TodayModel; width: number; height: nu
               </Text>
             </Pressable>
           </View>
-          <View style={[styles.third, styles.center]}>
+          <View style={[styles.third, styles.center]} accessible>
             <Text weight="semibold" size={17} color="#FFFFFF" style={styles.centered}>
               {formatDate(day.now, {weekday: 'long', month: 'long', day: 'numeric'})}
             </Text>
@@ -138,26 +141,34 @@ const WideToday = ({m, width, height}: {m: TodayModel; width: number; height: nu
             today={day.today}
             next={day.next}
             size="wide"
-            overlayTop={Math.round(arcW * 0.18)}>
-            <Text weight="semibold" size={18} color="#FFFFFF">
+            overlayTop={Math.round(arcW * 0.18)}
+            accessibilityLabel={m.countdownA11y}>
+            <Text weight="semibold" size={18} color="#FFFFFF" maxFontSizeMultiplier={1.4}>
               {m.headline}
             </Text>
             <Text
               weight="light"
               size={Math.round(104 * s)}
               color="#FFFFFF"
+              maxFontSizeMultiplier={1}
               style={[styles.tabular, {lineHeight: Math.round(110 * s), letterSpacing: -3 * s}]}>
               {formatCountdown(day.next.time.getTime() - day.now.getTime())}
             </Text>
-            <Text size={15} color={WHITE_90}>
+            <Text size={15} color="#FFFFFF" maxFontSizeMultiplier={1.4}>
               {nextAtLine(m)}
             </Text>
           </SemiArc>
-          <View style={[styles.arcLabels, {width: arcW}]}>
-            <Text size={13} color={WHITE_90} style={styles.tabular}>
+          <View
+            style={[styles.arcLabels, {width: arcW}]}
+            accessible
+            accessibilityLabel={joinLabel(
+              I18n.t('today.sunrise', {time: m.fmt(day.today.sunrise)}),
+              I18n.t('today.sunset', {time: m.fmt(day.today.maghrib)}),
+            )}>
+            <Text size={13} color="#FFFFFF" style={styles.tabular}>
               {I18n.t('today.sunrise', {time: m.fmt(day.today.sunrise)})}
             </Text>
-            <Text size={13} color={WHITE_90} style={styles.tabular}>
+            <Text size={13} color="#FFFFFF" style={styles.tabular}>
               {I18n.t('today.sunset', {time: m.fmt(day.today.maghrib)})}
             </Text>
           </View>
@@ -192,6 +203,8 @@ const WideToday = ({m, width, height}: {m: TodayModel; width: number; height: nu
               size={13}
               color={t.muted}
               numberOfLines={1}
+              accessibilityRole="header"
+              accessibilityLabel={joinLabel(I18n.t('today.title'), m.asrLabel)}
               style={[styles.caps, styles.shrink]}>
               {`${I18n.t('today.title')} · ${m.asrLabel}`.toUpperCase()}
             </Text>
@@ -234,7 +247,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    height: 44,
+    minHeight: 44,
     paddingLeft: 12,
     paddingRight: 16,
     borderRadius: 999,

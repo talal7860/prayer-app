@@ -19,7 +19,7 @@ const ExactAlarmPrompt = ({onAllow, palette}: Props) => {
   return (
     <View style={[styles.card, {backgroundColor: t.hi, borderColor: t.border}]}>
       <Icon name="bell" size={20} color={t.accent} />
-      <View style={styles.text}>
+      <View style={styles.text} accessible>
         <Text weight="semibold" size={15} color={t.text}>
           {I18n.t('exactAlarm.title')}
         </Text>
@@ -29,6 +29,8 @@ const ExactAlarmPrompt = ({onAllow, palette}: Props) => {
       </View>
       <Pressable
         accessibilityRole="button"
+        accessibilityLabel={`${I18n.t('exactAlarm.allow')}: ${I18n.t('exactAlarm.title')}`}
+        hitSlop={4}
         onPress={onAllow}
         style={({pressed}) => [
           styles.button,
@@ -45,14 +47,23 @@ const ExactAlarmPrompt = ({onAllow, palette}: Props) => {
 const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     gap: 12,
     padding: 14,
     borderRadius: 16,
     borderWidth: 1,
   },
-  text: {flex: 1, gap: 2},
-  button: {paddingHorizontal: 14, height: 36, borderRadius: 18, justifyContent: 'center'},
+  // Wraps the button under the text when large text leaves no room beside it.
+  text: {flex: 1, minWidth: 160, gap: 2},
+  // 36pt + 4pt hitSlop above and below = 44pt.
+  button: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    minHeight: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+  },
 });
 
 export default ExactAlarmPrompt;

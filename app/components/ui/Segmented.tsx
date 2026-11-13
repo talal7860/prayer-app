@@ -40,6 +40,8 @@ function Segmented<T extends string>({
             key={o.value}
             accessibilityRole="radio"
             accessibilityState={{selected: on}}
+            // iOS doesn't read a radio group's label, so each option carries it.
+            accessibilityLabel={`${accessibilityLabel}: ${o.label}`}
             onPress={() => onChange(o.value)}
             style={[
               styles.option,
@@ -61,8 +63,9 @@ const styles = StyleSheet.create({
   track: {flexDirection: 'row', padding: 3, gap: 3, borderRadius: 11},
   stretch: {alignSelf: 'stretch'},
   option: {
-    height: 40,
+    minHeight: 44,
     paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',

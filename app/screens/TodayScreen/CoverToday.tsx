@@ -10,7 +10,7 @@ import {daySlots, formatCountdown, hijriLabel} from '../../lib/prayerDay';
 import {skies, skyLocations} from '../../theme/tokens';
 import SemiArc from './SemiArc';
 import TravelBanner from './TravelBanner';
-import {nextAtLine, type TodayModel} from './useToday';
+import {hiddenFromA11y, nextAtLine, type TodayModel} from './useToday';
 
 /** The "iPhone Duo — closed" board: a short sky with the semicircle, then a compact list. */
 const CoverToday = ({m, width}: {m: TodayModel; width: number}) => {
@@ -38,7 +38,7 @@ const CoverToday = ({m, width}: {m: TodayModel; width: number}) => {
                 {m.city}
               </Text>
             </Pressable>
-            <View style={styles.dates}>
+            <View style={styles.dates} accessible>
               <Text weight="semibold" size={14} color="#FFFFFF">
                 {formatDate(day.now, {weekday: 'short', month: 'short', day: 'numeric'})}
               </Text>
@@ -55,14 +55,20 @@ const CoverToday = ({m, width}: {m: TodayModel; width: number}) => {
               today={day.today}
               next={day.next}
               size="cover"
-              overlayTop={Math.round(arcW * 0.17)}>
-              <Text weight="semibold" size={16} color="#FFFFFF">
+              overlayTop={Math.round(arcW * 0.17)}
+              accessibilityLabel={m.countdownA11y}>
+              <Text weight="semibold" size={16} color="#FFFFFF" maxFontSizeMultiplier={1.4}>
                 {m.headline}
               </Text>
-              <Text weight="light" size={60} color="#FFFFFF" style={styles.countdown}>
+              <Text
+                weight="light"
+                size={60}
+                color="#FFFFFF"
+                maxFontSizeMultiplier={1.15}
+                style={styles.countdown}>
                 {formatCountdown(day.next.time.getTime() - day.now.getTime())}
               </Text>
-              <Text size={14} color="rgba(255,255,255,0.9)">
+              <Text size={14} color="#FFFFFF" maxFontSizeMultiplier={1.4}>
                 {nextAtLine(m)}
               </Text>
             </SemiArc>
@@ -90,9 +96,12 @@ const CoverToday = ({m, width}: {m: TodayModel; width: number}) => {
             const color = s.past ? t.past : t.text;
             const weight = s.isNext ? 'semibold' : 'medium';
             return (
-              <View key={s.key} style={[styles.row, s.isNext && {backgroundColor: t.hi}]}>
+              <View
+                key={s.key}
+                style={[styles.row, s.isNext && {backgroundColor: t.hi}]}
+                {...m.rowA11y(s.key, s.label, s.time, s.isNext ? 'next' : undefined)}>
                 <Icon name={s.key} size={19} color={s.isNext ? t.accent : t.muted} />
-                <Text weight={weight} size={16} color={color}>
+                <Text weight={weight} size={16} color={color} style={styles.shrink}>
                   {s.label}
                 </Text>
                 {s.isNext ? (
@@ -110,10 +119,7 @@ const CoverToday = ({m, width}: {m: TodayModel; width: number}) => {
                   <View style={styles.bell} />
                 ) : (
                   <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={I18n.t(off ? 'today.bellOff' : 'today.bellOn', {
-                      label: s.label,
-                    })}
+                    {...hiddenFromA11y}
                     onPress={() => m.toggleBell(s.key)}
                     style={styles.bell}>
                     <Icon name={off ? 'bellOff' : 'bell'} size={18} color={off ? t.past : t.text} />
@@ -137,7 +143,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    height: 44,
+    minHeight: 44,
     paddingLeft: 12,
     paddingRight: 16,
     borderRadius: 999,
@@ -161,7 +167,8 @@ const styles = StyleSheet.create({
   prompt: {paddingBottom: 12},
   caps: {letterSpacing: 0.6},
   row: {
-    height: 46,
+    minHeight: 46,
+    flexWrap: 'wrap',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
@@ -171,6 +178,7 @@ const styles = StyleSheet.create({
   },
   nextPill: {paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999},
   time: {marginLeft: 'auto', fontVariant: ['tabular-nums']},
+  shrink: {flexShrink: 1},
   bell: {width: 44, height: 44, alignItems: 'center', justifyContent: 'center'},
 });
 

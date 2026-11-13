@@ -23,6 +23,8 @@ export const watchPayload = (settings: Settings) => ({
     jumuah: I18n.t('prayer.jumuah'),
     app: I18n.t('watch.app'),
     today: I18n.t('watch.today'),
+    // VoiceOver's value for the next prayer's row.
+    next: I18n.t('today.next'),
     // Swift's String(format:) placeholder.
     until: I18n.t('watch.until', {label: '%@'}),
     // Siri's answers (targets/_shared/SiriIntents.swift), with positional placeholders because

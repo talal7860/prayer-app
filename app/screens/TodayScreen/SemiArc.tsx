@@ -12,6 +12,8 @@ type Props = React.PropsWithChildren<{
   size: 'cover' | 'wide';
   /** Where the overlay (the countdown) starts, from the top of the arc. */
   overlayTop: number;
+  /** The overlay read as one: the countdown in words. */
+  accessibilityLabel: string;
 }>;
 
 const DOTS = {
@@ -24,7 +26,16 @@ const DOTS = {
  * (the next one bigger and ringed, past ones faded) and the sun on it in daylight.
  * Time runs with the reading direction, so it's mirrored in Arabic and Urdu.
  */
-const SemiArc = ({width, now, today, next, size, overlayTop, children}: Props) => {
+const SemiArc = ({
+  width,
+  now,
+  today,
+  next,
+  size,
+  overlayTop,
+  accessibilityLabel,
+  children,
+}: Props) => {
   const d = DOTS[size];
   const mirror = (p: {x: number; y: number}) => (I18nManager.isRTL ? {x: 600 - p.x, y: p.y} : p);
   const nextToday = next.time.toDateString() === now.toDateString();
@@ -68,7 +79,12 @@ const SemiArc = ({width, now, today, next, size, overlayTop, children}: Props) =
           </>
         ) : null}
       </Svg>
-      <View style={[styles.overlay, {top: overlayTop}]}>{children}</View>
+      <View
+        style={[styles.overlay, {top: overlayTop}]}
+        accessible
+        accessibilityLabel={accessibilityLabel}>
+        {children}
+      </View>
     </View>
   );
 };

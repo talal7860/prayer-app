@@ -82,6 +82,7 @@ export const nextPrayerProps = (settings: Settings, at: Date): NextPrayerProps =
     untilLabel: fajrEnding
       ? I18n.t('widget.untilEnd', {label: fajr, time})
       : I18n.t('widget.until', {label: next, time}),
+    nextTag: I18n.t('today.next'),
     at: nextAt,
     prevAt,
     sky: WIDGET_SKIES[info.period],

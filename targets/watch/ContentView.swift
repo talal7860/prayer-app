@@ -43,35 +43,45 @@ struct HomeView: View {
         Spacer()
         Text(snap.city).foregroundStyle(Palette.muted).lineLimit(1)
       }
-      .font(.system(size: 13))
+      .font(.footnote)
       .padding(.horizontal, 6)
+      .accessibilityElement(children: .combine)
 
       ZStack(alignment: .bottom) {
+        // The arc is a picture of the day so far; VoiceOver gets the same as words below.
         ArcView(snap: snap)
           .frame(height: 92)
+          .accessibilityHidden(true)
         VStack(spacing: 1) {
+          // A timer Text reads as a duration ("1 hour, 23 minutes") with VoiceOver.
           Text(snap.next.time, style: .timer)
-            .font(.system(size: 30, weight: .semibold))
+            .font(.system(.title2, weight: .semibold))
             .monospacedDigit()
             .minimumScaleFactor(0.6)
             .lineLimit(1)
           Text(String(format: s.label("until", "until %@"), snap.next.name))
-            .font(.system(size: 13))
+            .font(.footnote)
             .foregroundStyle(Palette.soft)
             .lineLimit(1)
+            .minimumScaleFactor(0.7)
         }
         .padding(.bottom, 2)
+        .accessibilityElement(children: .combine)
       }
       .padding(.top, 6)
 
       Spacer(minLength: 4)
       Text("\(snap.next.name) · \(s.format(snap.next.time))")
-        .font(.system(size: 15, weight: .semibold))
+        .font(.system(.headline, weight: .semibold))
         .monospacedDigit()
         .foregroundStyle(Palette.gold)
         .lineLimit(1)
         .minimumScaleFactor(0.7)
+        .accessibilityLabel("\(snap.next.name), \(s.format(snap.next.time))")
     }
+    // Text styles follow the watch's text size; the arc is fixed-size art, so the home page stops
+    // growing at the largest non-accessibility size (the list on the next page doesn't).
+    .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     .containerBackground(.black, for: .tabView)
   }
 }
@@ -138,26 +148,57 @@ struct TodayView: View {
     ScrollView {
       VStack(alignment: .leading, spacing: 3) {
         Text(snap.settings.label("today", "Today"))
-          .font(.system(size: 13, weight: .semibold))
+          .font(.system(.footnote, weight: .semibold))
           .foregroundStyle(Palette.accent)
           .padding(.horizontal, 10)
           .padding(.bottom, 2)
+          .accessibilityAddTraits(.isHeader)
         ForEach(snap.prayers) { p in
           let isNext = p.time == snap.next.time
           let isPast = !isNext && p.time <= now
-          HStack {
-            Text(p.name)
-            Spacer()
-            Text(snap.settings.format(p.time, withPeriod: false)).monospacedDigit()
-          }
-          .font(.system(size: 15, weight: isNext ? .bold : .medium))
-          .foregroundStyle(isNext ? Color.black : (isPast ? Palette.past : Color.white))
-          .padding(.horizontal, 10)
-          .frame(height: 30)
-          .background(isNext ? Palette.gold : Palette.row, in: RoundedRectangle(cornerRadius: 12))
+          PrayerRow(
+            name: p.name, time: snap.settings.format(p.time, withPeriod: false),
+            spokenTime: snap.settings.format(p.time), isNext: isNext, isPast: isPast,
+            nextLabel: snap.settings.label("next", "Next"))
         }
       }
     }
     .containerBackground(.black, for: .tabView)
+  }
+}
+
+/// One line of the list. Small views keep the Swift type checker fast.
+private struct PrayerRow: View {
+  let name: String
+  let time: String
+  let spokenTime: String
+  let isNext: Bool
+  let isPast: Bool
+  let nextLabel: String
+
+  var body: some View {
+    // At large text sizes the time goes under the name instead of squeezing it.
+    ViewThatFits(in: .horizontal) {
+      HStack {
+        Text(name)
+        Spacer()
+        Text(time).monospacedDigit()
+      }
+      VStack(alignment: .leading, spacing: 0) {
+        Text(name)
+        Text(time).monospacedDigit()
+      }
+    }
+    .font(.system(.body, weight: isNext ? .bold : .medium))
+    .foregroundStyle(isNext ? Color.black : (isPast ? Palette.past : Color.white))
+    .padding(.horizontal, 10)
+    .padding(.vertical, 4)
+    .frame(minHeight: 30)
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .background(isNext ? Palette.gold : Palette.row, in: RoundedRectangle(cornerRadius: 12))
+    // "Asr, 3:04 PM, next": one stop per prayer, with AM/PM spoken.
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel("\(name), \(spokenTime)")
+    .accessibilityValue(isNext ? nextLabel : "")
   }
 }

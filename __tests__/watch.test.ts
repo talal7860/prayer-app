@@ -21,6 +21,7 @@ it('sends what changes the times, and the labels', () => {
   expect(p.labels.maghrib).toBe('Maghrib');
   // Swift fills this in with String(format:).
   expect(p.labels.until).toBe('until %@');
+  expect(p.labels.next).toBe('Next');
   expect(p.labels.siriNext).toBe('%1$@ is at %2$@, in %3$@.');
   expect(p.labels.siriToday).toBe('%1$@ is at %2$@ today.');
   // Nothing the watch doesn't need (notification bells, travel state...).

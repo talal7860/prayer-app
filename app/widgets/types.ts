@@ -36,6 +36,8 @@ export type NextPrayerProps = {
   inLabel: string;
   atLabel: string;
   untilLabel: string;
+  /** "Next": the large widget's tag, and what VoiceOver adds to the next prayer's row. */
+  nextTag: string;
   /** The next prayer and the one before it, in ms since the epoch (live countdown, progress). */
   at: number;
   prevAt: number;

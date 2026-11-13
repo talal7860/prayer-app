@@ -1,5 +1,8 @@
 import {Circle, Text, VStack, ZStack} from '@expo/ui/swift-ui';
 import {
+  accessibilityElement,
+  accessibilityHidden,
+  accessibilityLabel,
   containerBackground,
   font,
   foregroundStyle,
@@ -32,7 +35,7 @@ const PrayerRing = (p: NextPrayerProps, env: WidgetEnvironment) => {
   const fill = lock ? '#FFFFFF' : '#FFE7A3';
 
   const ring = (
-    <ZStack modifiers={[frame({width: size, height: size})]}>
+    <ZStack modifiers={[frame({width: size, height: size}), accessibilityHidden(true)]}>
       <Circle
         modifiers={[
           foregroundStyle('rgba(0,0,0,0)'),
@@ -63,8 +66,16 @@ const PrayerRing = (p: NextPrayerProps, env: WidgetEnvironment) => {
     return (
       <ZStack modifiers={[containerBackground('clear', 'widget')]}>
         {ring}
-        <VStack spacing={0}>
-          <Text modifiers={[font({size: 9, weight: 'semibold'}), lineLimit(1)]}>{p.nextShort}</Text>
+        <VStack spacing={0} modifiers={[accessibilityElement('combine')]}>
+          {/* "ASR" for the eye, "Asr in" for VoiceOver, then the timer. */}
+          <Text
+            modifiers={[
+              font({size: 9, weight: 'semibold'}),
+              lineLimit(1),
+              accessibilityLabel(p.inLabel),
+            ]}>
+            {p.nextShort}
+          </Text>
           <Text
             date={at}
             dateStyle="timer"
@@ -85,12 +96,13 @@ const PrayerRing = (p: NextPrayerProps, env: WidgetEnvironment) => {
   return (
     <ZStack modifiers={[containerBackground('#141A2C', 'widget'), foregroundStyle('#FFFFFF')]}>
       {ring}
-      <VStack spacing={2}>
+      <VStack spacing={2} modifiers={[accessibilityElement('combine')]}>
         <Text
           modifiers={[
             font({size: 12, weight: 'semibold'}),
             foregroundStyle('#A4ABC2'),
             lineLimit(1),
+            accessibilityLabel(p.inLabel),
           ]}>
           {p.next}
         </Text>

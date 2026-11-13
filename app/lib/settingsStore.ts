@@ -24,6 +24,9 @@ export const defaultSettings: Settings = Object.freeze({
   onboarded: false,
 });
 
+/** Adhan sounds that were removed; a saved one goes back to Makkah. */
+const REMOVED_SOUNDS = ['istanbul', 'konya', 'casablanca', 'tripoli', 'isfahan', 'azeez'];
+
 /** What may be saved: any subset of the settings, plus keys from older versions. */
 type StoredSettings = Partial<Settings> & {fajrIshaCalculation?: string; travelAlerts?: boolean};
 
@@ -43,6 +46,9 @@ export const parseSettings = (
   // Installed before the setup screen existed: they've already set things up.
   if (stored && parsed.onboarded === undefined) {
     next.onboarded = true;
+  }
+  if (REMOVED_SOUNDS.includes(next.sound)) {
+    next.sound = 'mecca';
   }
   // Saved before city names existed: don't show the default city for it.
   return parsed.location && !parsed.city ? {...next, city: undefined} : next;

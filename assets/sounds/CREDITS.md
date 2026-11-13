@@ -8,23 +8,18 @@ shared under the same licence.
 | File | Recording | Author | Licence | Source |
 |---|---|---|---|---|
 | `makkah_azan.wav` | Makkah adhan | (bundled since the first version) | | |
-| `adhan_istanbul.wav` | Adhan in Istanbul | Viceskeeni2 | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Adhan_in_Istanbul.webm) |
-| `adhan_konya.wav` | Hminsec150 Konya | Frans van der Vaart | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Hminsec150_Konya.webm) |
-| `adhan_casablanca.wav` | Llamada a oración, Mezquita Hassan II (Casablanca) | Fraguando | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Llamada_a_oraci%C3%B3n_Mezquita_Hassan_II.wav) |
-| `adhan_tripoli.wav` | Adhan in Al-Nour Square, Tripoli, Lebanon (2019) | باسم | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Adhan_During_the_Lebanese_Protests_in_Tripoli_2019.webm) |
-| `adhan_isfahan.wav` | Adhan in the Shah Mosque, Isfahan, Iran | 10EldarionElessar | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Tour_guide_recite_Adhan_in_the_Shah_mosque_in_Isfahan,_Iran.webm) |
-| `adhan_azeez.wav` | The Adhan, Aaqib Azeez | Atcovi | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:The_Adhan_-_Muslim_Call_to_Prayer_-_Aaqib_Azeez.mp3) |
+| `adhan_madinah.wav` | Madinah adhan (Masjid an-Nabawi) | | Source given by the app's owner | [assabile.com](https://media.assabile.com/assabile/adhan_3435370/e9bb86af0d30.mp3) |
+| `adhan_aqsa.wav` | Al-Aqsa adhan | | Source given by the app's owner | [assabile.com](https://media.assabile.com/assabile/adhan_3435370/c888cbd50d15.mp3) (16 kbps source, so it sounds thin) |
 | `adhan_fajr.wav` | Eid al-Fitr Fajr azan, Malmö Mosque (2012) | Islamic Center Malmö | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Eid_al-Fitr_Fajr_azan_at_Malm%C3%B6_Mosque_-_19_August_2012.webm) |
 
-The in-app credit is in Settings → Adhan sound (`app/screens/SettingsScreen/Sound`). Recordings
-of specific mosques' broadcasts (Madinah, Al-Aqsa) or reciters' albums aren't included: no openly
-licensed copies were found, and copies marked "public domain" by third-party uploaders aren't
-theirs to license.
+The in-app credit is in Settings → Adhan sound (`app/screens/SettingsScreen/Sound`). Madinah and
+Al-Aqsa were added at the owner's request from assabile.com; their licence isn't stated there, so
+confirm the right to use them before a public release.
 
-How a clip was made (ffmpeg), e.g. Casablanca, whose adhan starts 2 s in:
+How a clip was made (ffmpeg), e.g. Madinah, whose adhan starts 4 s in:
 
 ```bash
-ffmpeg -ss 2 -t 29.5 -i input.wav \
+ffmpeg -ss 4 -t 29.5 -i input.wav \
   -af "afade=t=in:d=0.05,afade=t=out:st=27:d=2.5,loudnorm=I=-12:TP=-1:LRA=11" \
-  -ac 1 -ar 22050 -c:a pcm_s16le adhan_casablanca.wav
+  -ac 1 -ar 22050 -c:a pcm_s16le adhan_madinah.wav
 ```

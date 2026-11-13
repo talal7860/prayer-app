@@ -60,12 +60,8 @@
         {
           "sounds": [
             "./assets/sounds/makkah_azan.wav",
-            "./assets/sounds/adhan_istanbul.wav",
-            "./assets/sounds/adhan_konya.wav",
-            "./assets/sounds/adhan_casablanca.wav",
-            "./assets/sounds/adhan_tripoli.wav",
-            "./assets/sounds/adhan_isfahan.wav",
-            "./assets/sounds/adhan_azeez.wav",
+            "./assets/sounds/adhan_madinah.wav",
+            "./assets/sounds/adhan_aqsa.wav",
             "./assets/sounds/adhan_fajr.wav"
           ],
           "color": "#ffffff",

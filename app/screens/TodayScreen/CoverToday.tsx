@@ -27,7 +27,7 @@ const CoverToday = ({m, width}: {m: TodayModel; width: number}) => {
           colors={skies[day.period]}
           locations={skyLocations}
           style={[styles.sky, {paddingTop: insets.top + 8}]}>
-          <View style={styles.topBar}>
+          <View style={[styles.topBar, m.topBarInset]}>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={`${I18n.t('locations.title')}: ${m.city}`}

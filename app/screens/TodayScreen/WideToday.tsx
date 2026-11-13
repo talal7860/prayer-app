@@ -93,6 +93,7 @@ const WideToday = ({m, width, height}: {m: TodayModel; width: number; height: nu
         <View
           style={[
             styles.topBar,
+            m.topBarInset,
             {
               paddingTop: insets.top + Math.round(16 * s),
               paddingLeft: insets.left + padX,

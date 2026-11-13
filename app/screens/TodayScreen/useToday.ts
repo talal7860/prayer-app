@@ -7,6 +7,7 @@ import usePrayerDay from '../../hooks/usePrayerDay';
 import useTravelCheck from '../../hooks/useTravelCheck';
 import useCityName from '../../hooks/useCityName';
 import useExactAlarms from '../../hooks/useExactAlarms';
+import useWindowControls from '../../hooks/useWindowControls';
 import I18n from '../../I18n';
 import {formatCoords, formatTime} from '../../lib/prayerDay';
 import {dark, light} from '../../theme/tokens';
@@ -20,6 +21,7 @@ const useToday = () => {
   const travel = useTravelCheck();
   const exactAlarms = useExactAlarms();
   useCityName();
+  const controls = useWindowControls();
 
   const night = day.period === 'isha' || day.period === 'fajr';
   const t = systemDark || night ? dark : light;
@@ -69,6 +71,8 @@ const useToday = () => {
     city,
     muted,
     toggleBell,
+    /** Room the top bar leaves for the iPadOS window controls. */
+    topBarInset: {marginStart: controls.leading, marginEnd: controls.trailing},
   };
 };
 

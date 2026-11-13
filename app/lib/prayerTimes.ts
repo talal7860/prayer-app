@@ -13,25 +13,48 @@ import {PRAYER_KEYS} from './prayerDay';
 type Method = Settings['calculationMethod'];
 
 // The saved setting keeps the old PrayTimes keys, so existing installs carry over.
-const METHODS: Record<Method, {name: string; params: () => CalculationParameters}> = {
-  MWL: {name: 'Muslim World League', params: CalculationMethod.MuslimWorldLeague},
-  ISNA: {name: 'Islamic Society of North America (ISNA)', params: CalculationMethod.NorthAmerica},
-  Egypt: {name: 'Egyptian General Authority of Survey', params: CalculationMethod.Egyptian},
-  Makkah: {name: 'Umm Al-Qura University, Makkah', params: CalculationMethod.UmmAlQura},
-  Karachi: {name: 'University of Islamic Sciences, Karachi', params: CalculationMethod.Karachi},
-  Tehran: {name: 'Institute of Geophysics, University of Tehran', params: CalculationMethod.Tehran},
-  // adhan has no preset for Qum: Fajr 16°, Isha 14°, Maghrib 4° below the horizon.
-  Jafari: {
-    name: 'Shia Ithna-Ashari, Leva Institute, Qum',
-    params: () => {
-      const p = CalculationMethod.Other();
-      p.fajrAngle = 16;
-      p.ishaAngle = 14;
-      p.maghribAngle = 4;
-      return p;
+// `short` is the acronym on Today ("UKIS"); it isn't translated, like the names.
+const METHODS: Record<Method, {name: string; short: string; params: () => CalculationParameters}> =
+  {
+    MWL: {name: 'Muslim World League', short: 'MWL', params: CalculationMethod.MuslimWorldLeague},
+    ISNA: {
+      name: 'Islamic Society of North America (ISNA)',
+      short: 'ISNA',
+      params: CalculationMethod.NorthAmerica,
     },
-  },
-};
+    Egypt: {
+      name: 'Egyptian General Authority of Survey',
+      short: 'EGAS',
+      params: CalculationMethod.Egyptian,
+    },
+    Makkah: {
+      name: 'Umm Al-Qura University, Makkah',
+      short: 'UQU',
+      params: CalculationMethod.UmmAlQura,
+    },
+    Karachi: {
+      name: 'University of Islamic Sciences, Karachi',
+      short: 'UKIS',
+      params: CalculationMethod.Karachi,
+    },
+    Tehran: {
+      name: 'Institute of Geophysics, University of Tehran',
+      short: 'IGUT',
+      params: CalculationMethod.Tehran,
+    },
+    // adhan has no preset for Qum: Fajr 16°, Isha 14°, Maghrib 4° below the horizon.
+    Jafari: {
+      name: 'Shia Ithna-Ashari, Leva Institute, Qum',
+      short: 'LIQ',
+      params: () => {
+        const p = CalculationMethod.Other();
+        p.fajrAngle = 16;
+        p.ishaAngle = 14;
+        p.maghribAngle = 4;
+        return p;
+      },
+    },
+  };
 
 export const METHOD_KEYS = Object.keys(METHODS) as Method[];
 
@@ -47,6 +70,9 @@ const methodFor = (method: Method) =>
 
 /** The method's display name, e.g. "University of Islamic Sciences, Karachi". */
 export const methodName = (method: Method): string => methodFor(method)?.name ?? method;
+
+/** The method's acronym, e.g. "UKIS" for the University of Islamic Sciences, Karachi. */
+export const methodShort = (method: Method): string => methodFor(method)?.short ?? method;
 
 type Calc = Pick<Settings, 'calculationMethod' | 'asr' | 'location'> &
   Partial<Pick<Settings, 'highLats' | 'adjustments'>>;

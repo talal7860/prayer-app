@@ -204,9 +204,9 @@ const WideToday = ({m, width, height}: {m: TodayModel; width: number; height: nu
               color={t.muted}
               numberOfLines={1}
               accessibilityRole="header"
-              accessibilityLabel={joinLabel(I18n.t('today.title'), m.asrLabel)}
+              accessibilityLabel={joinLabel(I18n.t('today.title'), m.method.name)}
               style={[styles.caps, styles.shrink]}>
-              {`${I18n.t('today.title')} · ${m.asrLabel}`.toUpperCase()}
+              {`${I18n.t('today.title').toUpperCase()} · ${m.method.short}`}
             </Text>
             <Pressable
               accessibilityRole="link"

@@ -1,4 +1,4 @@
-import {METHOD_KEYS, methodName, prayerTimesFor} from '../app/lib/prayerTimes';
+import {METHOD_KEYS, methodName, methodShort, prayerTimesFor} from '../app/lib/prayerTimes';
 
 const calgary = {lat: 51.05, lng: -114.07};
 const at = (list: PrayerTimeLabel[], key: PrayerKey) => list.find(p => p.key === key)!.time;
@@ -47,4 +47,14 @@ it('labels Friday’s Dhuhr Jumu’ah', () => {
     new Date(2026, 2, 13, 12),
   );
   expect(friday.find(p => p.key === 'dhuhr')!.label).toBe('Jumu’ah');
+});
+
+it('every method has a short acronym for Today', () => {
+  expect(methodShort('Karachi')).toBe('UKIS');
+  expect(methodShort('Makkah')).toBe('UQU');
+  for (const key of METHOD_KEYS) {
+    expect(methodShort(key)).toMatch(/^[A-Z]{2,5}$/);
+  }
+  // A key saved by another version shows as it is.
+  expect(methodShort('Unknown' as PrayerCalculationMethod)).toBe('Unknown');
 });

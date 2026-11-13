@@ -330,7 +330,7 @@ One-time setup (needs the account owner):
   (`AppConstants.sounds.mecca.path`). **iOS notification sounds must be â‰¤ 30 s and
   WAV/AIFF/CAF**; the old MP3 silently fell back to the default sound. Made with
   `afconvert -f WAVE -d LEI16@22050 -c 1 in.mp3 out.wav`. Changing it on Android needs a new
-  channel id (the WAV one is `adhan-makkah`; the old `prayer-time-notifications-mecca` is deleted
+  channel id (it's `adhan-makkah-v2`; the older `prayer-time-notifications-mecca` and `adhan-makkah` are deleted
   on launch).
 - Android permissions include `SCHEDULE_EXACT_ALARM` so prayer notifications fire on time.
   **Android 14+ doesn't grant it to new installs**: without it Android may deliver the adhan
@@ -394,6 +394,10 @@ Tracking epic: https://github.com/talal7860/prayer-app/issues/11 (sub-issues #3â
   channel's sound or importance, give it a new `channelId` in `app/AppConstants.ts`.
 - iOS takes the sound from the notification content, Android from the channel; both are
   set in `scheduleNotifications`.
+- An Android channel with a custom `sound` needs **`audioAttributes`** too. Without them
+  expo-notifications calls `setSound(uri, null)`: Android 16 fills in defaults, but Android 17 keeps
+  `null` and the notification arrives silently (seen on a Pixel 7; that's why the adhan channel is
+  `adhan-makkah-v2`). Check a device's channels with `adb shell dumpsys notification --noredact`.
 - For an Android channel with the system default sound, **leave `sound` out**. `sound: 'default'`
   makes expo-notifications look for a bundled file named "default". That throws, and it used to
   stop the permission request, so no notifications were scheduled at all.

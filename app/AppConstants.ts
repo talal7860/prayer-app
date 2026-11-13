@@ -17,7 +17,8 @@ const notificationChannels: NotificationChannels = {
     soundName: sounds.default.path,
   },
   mecca: {
-    channelId: 'adhan-makkah',
+    // v2: the first one was created without audio attributes, and Android 17 plays nothing then.
+    channelId: 'adhan-makkah-v2',
     soundName: sounds.mecca.path,
   },
 };

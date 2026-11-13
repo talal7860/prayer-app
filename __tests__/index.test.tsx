@@ -25,6 +25,8 @@ jest.mock('expo-notifications', () => ({
   getAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve([])),
   cancelScheduledNotificationAsync: jest.fn(() => Promise.resolve()),
   AndroidImportance: {HIGH: 4},
+  AndroidAudioUsage: {NOTIFICATION: 5},
+  AndroidAudioContentType: {SONIFICATION: 4},
   SchedulableTriggerInputTypes: {DATE: 'date'},
 }));
 
@@ -129,6 +131,30 @@ describe('first run', () => {
     await render(<App />);
     expect(await screen.findByLabelText('Turn off Fajr reminder')).toBeTruthy();
   });
+});
+
+it('creates the adhan channel with audio attributes, and deletes the old silent one', async () => {
+  const {Platform} = require('react-native');
+  const os = Platform.OS;
+  Platform.OS = 'android';
+  await savedSetup();
+  await render(<App />);
+  await waitFor(() => {
+    expect(Notifications.setNotificationChannelAsync).toHaveBeenCalledWith(
+      'adhan-makkah-v2',
+      expect.objectContaining({
+        sound: 'makkah_azan.wav',
+        audioAttributes: {usage: 5, contentType: 4},
+      }),
+    );
+  });
+  expect(Notifications.deleteNotificationChannelAsync).toHaveBeenCalledWith('adhan-makkah');
+  // The system-default channel keeps the default sound and attributes.
+  const defaults = (Notifications.setNotificationChannelAsync as jest.Mock).mock.calls.find(
+    ([id]) => id === 'prayer-time-notifications',
+  );
+  expect(defaults?.[1]).not.toHaveProperty('audioAttributes');
+  Platform.OS = os;
 });
 
 it('renders Today with the five prayers, and never schedules Sunrise', async () => {

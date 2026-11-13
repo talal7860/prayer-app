@@ -33,6 +33,11 @@
     "adhan": "اذان کی آواز",
     "headsUp": "پیشگی یاد دہانی",
     "headsUpHint": "ہر نماز سے 10 منٹ پہلے",
+    "testNotification": "آزمائشی اطلاع",
+    "testNotificationHint": "آواز آزمانے کے لیے 20 سیکنڈ میں اذان کی اطلاع",
+    "testNotificationSend": "بھیجیں",
+    "testNotificationSent": "20 سیکنڈ میں آئے گی۔ آپ فون لاک کر سکتے ہیں۔",
+    "testNotificationOff": "اذان ٹائمز کی اطلاعات بند ہیں۔ انہیں فون کی ترتیبات میں آن کریں۔",
     "liveActivity": "لائیو ایکٹیویٹی",
     "liveActivityHint": "لاک اسکرین اور Dynamic Island",
     "timeFormat": "وقت کا انداز",
@@ -51,7 +56,8 @@
       "description": "نماز کی اطلاعات"
     },
     "headsUp": "{{label}} 10 منٹ میں - {{time}}",
-    "reminder": "نماز کی اطلاعات جاری رکھنے کے لیے اذان ٹائمز کھولیں"
+    "reminder": "نماز کی اطلاعات جاری رکھنے کے لیے اذان ٹائمز کھولیں",
+    "test": "اذان ٹائمز سے آزمائشی اذان"
   },
   "prayer": {
     "fajr": "فجر",

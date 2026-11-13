@@ -154,13 +154,16 @@ const NextPrayer = (snapshot: NextPrayerProps) => {
                 width(58),
                 padding(0, 6, 0, 6),
                 cornerRadius(10),
-                background(r.next ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0)'),
+                // Filled = it's that prayer's time now, as on Today; the next one is gold.
+                background(r.now ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0)'),
                 // TalkBack reads "Maghrib, 5:54 PM, Next", not "MAGH 5:54" (the expo-widgets
                 // patch maps `semantics` to Glance).
                 semantics({
                   contentDescription: r.next
                     ? `${r.name}, ${r.time}, ${p.nextTag}`
-                    : `${r.name}, ${r.time}`,
+                    : r.now
+                      ? `${r.name}, ${r.time}, ${p.nowTag}`
+                      : `${r.name}, ${r.time}`,
                 }),
               ]}>
               <Text

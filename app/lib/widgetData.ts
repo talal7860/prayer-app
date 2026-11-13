@@ -68,6 +68,9 @@ export const nextPrayerProps = (settings: Settings, at: Date): NextPrayerProps =
   // After Isha the next prayer is tomorrow's Fajr: list tomorrow's times then.
   const listDay = nextAt > today[today.length - 1].time.getTime() ? tomorrow : today;
   const isNext = (p: PrayerTimeLabel) => p.key === info.next.key && p.time.getTime() === nextAt;
+  // The prayer whose time it is now (none between sunrise and Dhuhr). After Isha the list is
+  // tomorrow's, so nothing in it is now.
+  const isNow = (p: PrayerTimeLabel) => listDay === today && p.key === info.current;
 
   return {
     city: settings.city?.split(',')[0] ?? I18n.t('settings.unknownCity'),
@@ -83,6 +86,7 @@ export const nextPrayerProps = (settings: Settings, at: Date): NextPrayerProps =
       ? I18n.t('widget.untilEnd', {label: fajr, time})
       : I18n.t('widget.until', {label: next, time}),
     nextTag: I18n.t('today.next'),
+    nowTag: I18n.t('today.now'),
     at: nextAt,
     prevAt,
     sky: WIDGET_SKIES[info.period],
@@ -100,8 +104,9 @@ export const nextPrayerProps = (settings: Settings, at: Date): NextPrayerProps =
           p.key === 'dhuhr' && p.label !== I18n.t('prayer.dhuhr') ? p.label : I18n.t(SHORT[p.key]),
         time: fmt(p.time),
         hm: formatTime(p.time, settings.timeFormat, false),
+        now: isNow(p),
         next: isNext(p),
-        past: !isNext(p) && p.time.getTime() <= t,
+        past: !isNext(p) && !isNow(p) && p.time.getTime() <= t,
       })),
   };
 };

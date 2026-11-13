@@ -39,6 +39,20 @@ it('after Isha the next prayer is the next day’s Fajr', () => {
   expect(props.prayers.filter(p => p.next).map(p => p.name)).toEqual(['Fajr']);
 });
 
+it('fills the prayer whose time it is, not the next one (as on Today)', () => {
+  // Five minutes before Asr: it's still Dhuhr's time, and the countdown is to Asr.
+  const props = nextPrayerProps(settings, new Date(at('asr').getTime() - minutes(5)));
+  expect(props.prayers.filter(p => p.now).map(p => p.name)).toEqual(['Dhuhr']);
+  expect(props.prayers.filter(p => p.next).map(p => p.name)).toEqual(['Asr']);
+  expect(props.prayers.find(p => p.now)?.past).toBe(false);
+  expect(props.nowTag).toBe('Now');
+  // Between sunrise and Dhuhr it isn't any prayer's time.
+  expect(nextPrayerProps(settings, beforeDhuhr).prayers.some(p => p.now)).toBe(false);
+  // After Isha the list is tomorrow's, so nothing in it is now.
+  const late = nextPrayerProps(settings, new Date(at('isha').getTime() + minutes(30)));
+  expect(late.prayers.some(p => p.now)).toBe(false);
+});
+
 it('the timeline has an entry now and at each prayer time, moving to the next prayer', () => {
   const entries = widgetTimeline(settings, beforeDhuhr);
   expect(entries[0].date).toBe(beforeDhuhr);

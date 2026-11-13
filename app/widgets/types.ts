@@ -8,6 +8,9 @@ export type WidgetPrayer = {
   time: string;
   /** "5:54" (no AM/PM, for the chips) */
   hm: string;
+  /** The prayer whose time it is: the filled chip or row, as on Today. */
+  now: boolean;
+  /** The one the countdown is to: gold name, bold time. */
   next: boolean;
   past: boolean;
 };
@@ -38,6 +41,8 @@ export type NextPrayerProps = {
   untilLabel: string;
   /** "Next": the large widget's tag, and what VoiceOver adds to the next prayer's row. */
   nextTag: string;
+  /** "Now": the large widget's tag on the current prayer's row, and what VoiceOver adds. */
+  nowTag: string;
   /** The next prayer and the one before it, in ms since the epoch (live countdown, progress). */
   at: number;
   prevAt: number;

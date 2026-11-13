@@ -24,11 +24,16 @@ set -euo pipefail
 export LANG="${LANG:-en_US.UTF-8}" LC_ALL="${LC_ALL:-en_US.UTF-8}"
 export EAS_BUILD_NO_EXPO_GO_WARNING=true
 
-ENV_FILE="$HOME/.config/adhan-app/env"
-# shellcheck source=/dev/null
-[ -f "$ENV_FILE" ] && source "$ENV_FILE"
-
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+# Settings: ~/.config/adhan-app/env, then the project's .env.release (git-ignored; copy
+# .env.release.example). A later file overrides an earlier one and the shell.
+ENV_FILE="$ROOT/.env.release"
+for file in "$HOME/.config/adhan-app/env" "$ENV_FILE"; do
+  # shellcheck source=/dev/null
+  [ -f "$file" ] && { set -a; source "$file"; set +a; }
+done
+
 OUT="$ROOT/build/releases"
 PACKAGE=com.conelabs.adhanapp
 
@@ -63,7 +68,8 @@ for p in "${platforms[@]}"; do
     ASC_API_KEY_PATH="${ASC_API_KEY_PATH:-$HOME/.appstoreconnect/private_keys/AuthKey_$ASC_API_KEY_ID.p8}"
     [ -f "$ASC_API_KEY_PATH" ] || die "App Store Connect key not found: $ASC_API_KEY_PATH"
     # EAS: the Apple team, and the API key instead of an Apple ID login, so it never asks.
-    export EXPO_APPLE_TEAM_ID="${EXPO_APPLE_TEAM_ID:-4XYSPPP9LW}"
+    need EXPO_APPLE_TEAM_ID
+    export EXPO_APPLE_TEAM_ID
     export EXPO_APPLE_TEAM_TYPE="${EXPO_APPLE_TEAM_TYPE:-COMPANY_OR_ORGANIZATION}"
     export EXPO_ASC_API_KEY_PATH="${EXPO_ASC_API_KEY_PATH:-$ASC_API_KEY_PATH}"
     export EXPO_ASC_KEY_ID="${EXPO_ASC_KEY_ID:-$ASC_API_KEY_ID}"

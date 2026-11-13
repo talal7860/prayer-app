@@ -259,8 +259,12 @@ For the next SDK bump: `npx expo install expo@^<next> --fix`, then `npx expo-doc
   (CI) builds can't create credentials: create them once with an interactive `eas build -p ios`
   or `eas credentials -p ios` (needs the Apple ID login). An App Store Connect API key is stored
   on EAS, so non-interactive builds and submits need no Apple login, only
-  `EXPO_APPLE_TEAM_ID=4XYSPPP9LW EXPO_APPLE_TEAM_TYPE=COMPANY_OR_ORGANIZATION` (set in
-  `deploy.yml`; without them `--non-interactive` still prompts for the team).
+  `EXPO_APPLE_TEAM_ID` + `EXPO_APPLE_TEAM_TYPE=COMPANY_OR_ORGANIZATION` (`deploy.yml`, the team id from
+  the `APPLE_TEAM_ID` secret; without them `--non-interactive` still prompts for the team).
+  **The team id is not in the repo** (public): `app.config.js` reads `EXPO_APPLE_TEAM_ID` into
+  `ios.appleTeamId`. Set it in `.env.release` / `~/.config/adhan-app/env` locally, as the
+  `APPLE_TEAM_ID` GitHub secret, and as an EAS environment variable (production) for cloud builds.
+  Prebuild without it signs nothing (`@bacons/apple-targets` warns).
 - Export compliance is declared in `app.json` (`ios.config.usesNonExemptEncryption: false`), so
   neither EAS nor TestFlight asks.
 - Android release builds run `lintVitalRelease`. Strings in `app/locales/native/*.json` must be
@@ -305,7 +309,7 @@ One-time setup (needs the account owner):
   (Nov 2026). It's `app.json` → `name` plus `app/locales/native/*.json` (`CFBundleDisplayName`,
   `app_name`), and the in-app strings. The store listing names are set separately in Play Console
   and App Store Connect. iOS bundle id and
-  Android package `com.conelabs.adhanapp`, Apple team `4XYSPPP9LW` (`ios.appleTeamId`), from
+  Android package `com.conelabs.adhanapp`, the Apple team from `EXPO_APPLE_TEAM_ID` (`ios.appleTeamId`, see CI / CD), from
   #23. Renamed from `org.personal.talal7860.PrayerTimes` / `com.talal7860.prayertimes` before
   any store release. Don't change them again once the app is in the stores.
 - iOS entitlements: App Group `group.com.conelabs.adhanapp`, Time Sensitive notifications

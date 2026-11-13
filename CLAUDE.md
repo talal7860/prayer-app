@@ -194,6 +194,11 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
     To change the patch: edit `node_modules/expo-widgets`, then
     `npx patch-package expo-widgets --exclude '^package\.json$|android/build|android/\.cxx|\.gradle'`
     (without the exclude it picks up 1.5 MB of build output).
+    **Release builds are minified** (`android.enableMinifyInReleaseBuilds=true` in the generated
+    `gradle.properties`). The patch creates Glance's `EmittableAndroidRemoteViews` by reflection,
+    so it also adds a `-keep` rule to expo-widgets' `proguard-rules.pro`; without it the release
+    widget shows "Can't show content" (`NoSuchMethodException: …setRemoteViews`). Debug builds
+    aren't minified, so test widget changes with `./gradlew assembleRelease` too.
 
 ## Commands
 

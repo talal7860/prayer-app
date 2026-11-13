@@ -259,8 +259,12 @@ For the next SDK bump: `npx expo install expo@^<next> --fix`, then `npx expo-doc
   (CI) builds can't create credentials: create them once with an interactive `eas build -p ios`
   or `eas credentials -p ios` (needs the Apple ID login). An App Store Connect API key is stored
   on EAS, so non-interactive builds and submits need no Apple login, only
-  `EXPO_APPLE_TEAM_ID=APPLE_TEAM_ID_REDACTED EXPO_APPLE_TEAM_TYPE=COMPANY_OR_ORGANIZATION` (set in
-  `deploy.yml`; without them `--non-interactive` still prompts for the team).
+  `EXPO_APPLE_TEAM_ID` + `EXPO_APPLE_TEAM_TYPE=COMPANY_OR_ORGANIZATION` (`deploy.yml`, the team id from
+  the `APPLE_TEAM_ID` secret; without them `--non-interactive` still prompts for the team).
+  **The team id is not in the repo** (public): `app.config.js` reads `EXPO_APPLE_TEAM_ID` into
+  `ios.appleTeamId`. Set it in `.env.release` / `~/.config/adhan-app/env` locally, as the
+  `APPLE_TEAM_ID` GitHub secret, and as an EAS environment variable (production) for cloud builds.
+  Prebuild without it signs nothing (`@bacons/apple-targets` warns).
 - Export compliance is declared in `app.json` (`ios.config.usesNonExemptEncryption: false`), so
   neither EAS nor TestFlight asks.
 - Android release builds run `lintVitalRelease`. Strings in `app/locales/native/*.json` must be
@@ -277,7 +281,10 @@ For the next SDK bump: `npx expo install expo@^<next> --fix`, then `npx expo-doc
   testing (fastlane `upload_to_play_store`). Settings come from env vars, read from
   `~/.config/adhan-app/env` (outside the repo, `chmod 600`): `ASC_API_KEY_ID`,
   `ASC_API_ISSUER_ID`, `ASC_API_KEY_PATH` (the `.p8`), `PLAY_SERVICE_ACCOUNT_JSON`. It checks them
-  before building. Needs Homebrew's `fastlane` (only that is put first on PATH: an rvm Ruby's
+  before building. For iOS it also exports `EXPO_APPLE_TEAM_ID`/`EXPO_APPLE_TEAM_TYPE` and
+  `EXPO_ASC_API_KEY_PATH`/`EXPO_ASC_KEY_ID`/`EXPO_ASC_ISSUER_ID` (from those), so `eas build` uses the
+  API key and never asks for the team or an Apple ID login. The env file sets them too, for
+  plain `eas build` / `eas submit` runs. Needs Homebrew's `fastlane` (only that is put first on PATH: an rvm Ruby's
   fastlane can be broken, and Homebrew's CocoaPods can be too), Xcode, and a JDK 17 for Android.
   Only run local builds when asked; CI and "ship it" use EAS cloud builds.
 - The workflow uses `--no-wait`: a green Action means "builds queued". Build and submit
@@ -302,7 +309,7 @@ One-time setup (needs the account owner):
   (Nov 2026). It's `app.json` → `name` plus `app/locales/native/*.json` (`CFBundleDisplayName`,
   `app_name`), and the in-app strings. The store listing names are set separately in Play Console
   and App Store Connect. iOS bundle id and
-  Android package `com.conelabs.adhanapp`, Apple team `APPLE_TEAM_ID_REDACTED` (`ios.appleTeamId`), from
+  Android package `com.conelabs.adhanapp`, the Apple team from `EXPO_APPLE_TEAM_ID` (`ios.appleTeamId`, see CI / CD), from
   #23. Renamed from `org.personal.talal7860.PrayerTimes` / `com.talal7860.prayertimes` before
   any store release. Don't change them again once the app is in the stores.
 - iOS entitlements: App Group `group.com.conelabs.adhanapp`, Time Sensitive notifications

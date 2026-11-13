@@ -27,7 +27,8 @@ jobs:
     env:
       EAS_BUILD_NO_EXPO_GO_WARNING: 'true'
       # With the App Store Connect API key, non-interactive iOS builds still ask for the team.
-      EXPO_APPLE_TEAM_ID: APPLE_TEAM_ID_REDACTED
+      # The team id is a repository secret, kept out of the public repo.
+      EXPO_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       EXPO_APPLE_TEAM_TYPE: COMPANY_OR_ORGANIZATION
     steps:
       - uses: actions/checkout@v4

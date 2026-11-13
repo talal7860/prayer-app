@@ -73,3 +73,6 @@ credentials.json
 *.mobileprovision
 *.jks
 *.keystore
+
+# Release settings for scripts/release.sh (see .env.release.example)
+.env.release

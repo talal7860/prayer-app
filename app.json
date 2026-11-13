@@ -21,7 +21,6 @@
           "UIInterfaceOrientationLandscapeRight"
         ]
       },
-      "appleTeamId": "APPLE_TEAM_ID_REDACTED",
       "entitlements": {
         "com.apple.security.application-groups": ["group.com.conelabs.adhanapp"],
         "com.apple.developer.usernotifications.time-sensitive": true

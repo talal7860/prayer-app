@@ -20,7 +20,8 @@ import TravelBanner from './TravelBanner';
 import ExactAlarmPrompt from '../../components/ExactAlarmPrompt';
 import CoverToday from './CoverToday';
 import WideToday from './WideToday';
-import useToday, {type TodayModel} from './useToday';
+import useToday, {hiddenFromA11y, type TodayModel} from './useToday';
+import {isLargeText, joinLabel} from '../../lib/a11y';
 
 const WHITE_88 = 'rgba(255,255,255,0.88)';
 
@@ -33,7 +34,13 @@ const SunArc = ({
   sunrise: string;
   sunset: string;
 }) => (
-  <View style={styles.arc}>
+  <View
+    style={styles.arc}
+    accessible
+    accessibilityLabel={joinLabel(
+      I18n.t('today.sunrise', {time: sunrise}),
+      I18n.t('today.sunset', {time: sunset}),
+    )}>
     <Svg width="100%" height={96} viewBox="0 0 342 96" preserveAspectRatio="none" aria-hidden>
       <Path
         d="M16 78 Q171 -30 326 78"
@@ -50,11 +57,12 @@ const SunArc = ({
         </>
       ) : null}
     </Svg>
+    {/* Full white: at 90% it's under 4.5:1 on the bottom of the morning and noon skies. */}
     <View style={styles.arcLabels}>
-      <Text size={12} color="rgba(255,255,255,0.9)">
+      <Text size={12} color="#FFFFFF" maxFontSizeMultiplier={1.6}>
         {I18n.t('today.sunrise', {time: sunrise})}
       </Text>
-      <Text size={12} color="rgba(255,255,255,0.9)">
+      <Text size={12} color="#FFFFFF" maxFontSizeMultiplier={1.6}>
         {I18n.t('today.sunset', {time: sunset})}
       </Text>
     </View>
@@ -63,14 +71,10 @@ const SunArc = ({
 
 const PhoneToday = ({m}: {m: TodayModel}) => {
   const insets = useSafeAreaInsets();
-  const {navigation, day, travel, exactAlarms, t, fmt, fajrEnding, city, muted} = m;
-  const ishaLabel = I18n.t('prayer.isha');
-  const nowLine =
-    day.period === 'morning'
-      ? I18n.t('today.fajrEnded')
-      : I18n.t('today.nowTime', {
-          label: day.current ? day.list.find(p => p.key === day.current)?.label : ishaLabel,
-        });
+  const {fontScale} = useWindowDimensions();
+  // At large text sizes the time goes under the prayer's name, so nothing overlaps.
+  const big = isLargeText(fontScale);
+  const {navigation, day, travel, exactAlarms, t, fmt, fajrEnding, city, muted, nowLine} = m;
   const toggleBell = m.toggleBell;
 
   return (
@@ -94,7 +98,7 @@ const PhoneToday = ({m}: {m: TodayModel}) => {
             </Pressable>
           </View>
 
-          <View style={styles.dates}>
+          <View style={styles.dates} accessible>
             <Text weight="medium" size={15} color="#FFFFFF">
               {formatDate(day.now, {weekday: 'long', month: 'long', day: 'numeric'})}
             </Text>
@@ -103,11 +107,20 @@ const PhoneToday = ({m}: {m: TodayModel}) => {
             </Text>
           </View>
 
-          <View style={styles.next} accessible accessibilityLiveRegion="none">
+          <View
+            style={styles.next}
+            accessible
+            accessibilityLabel={joinLabel(m.countdownA11y, !fajrEnding && nowLine)}>
             <Text weight="semibold" size={17} color="#FFFFFF">
               {m.headline}
             </Text>
-            <Text weight="light" size={64} color="#FFFFFF" style={styles.countdown}>
+            {/* Already huge: it scales a little, then stops before it overflows the sky. */}
+            <Text
+              weight="light"
+              size={64}
+              color="#FFFFFF"
+              maxFontSizeMultiplier={1.3}
+              style={styles.countdown}>
               {formatCountdown(day.next.time.getTime() - day.now.getTime())}
             </Text>
             <Text size={14} color={WHITE_88} style={styles.centered}>
@@ -145,11 +158,15 @@ const PhoneToday = ({m}: {m: TodayModel}) => {
               <ExactAlarmPrompt onAllow={exactAlarms.allow} palette={t} />
             </View>
           ) : null}
-          <View style={styles.sheetHead}>
+          <View
+            style={styles.sheetHead}
+            accessible
+            accessibilityRole="header"
+            accessibilityLabel={joinLabel(I18n.t('today.title'), m.asrLabel)}>
             <Text weight="semibold" size={13} color={t.muted} style={styles.caps}>
               {I18n.t('today.title').toUpperCase()}
             </Text>
-            <Text size={13} color={t.muted} numberOfLines={1} style={styles.shrink}>
+            <Text size={13} color={t.muted} numberOfLines={big ? 2 : 1} style={styles.shrink}>
               {m.asrLabel}
             </Text>
           </View>
@@ -160,34 +177,43 @@ const PhoneToday = ({m}: {m: TodayModel}) => {
               const isNow = p.key === day.current;
               const past = p.time.getTime() <= day.now.getTime() && !isNow;
               const off = !!muted[p.key];
+              const time = (
+                <Text
+                  weight={isNow ? 'semibold' : 'medium'}
+                  size={16}
+                  color={past ? t.past : t.text}
+                  style={styles.time}>
+                  {fmt(p.time)}
+                </Text>
+              );
               return (
-                <View key={p.key} style={[styles.row, isNow && {backgroundColor: t.hi}]}>
+                <View
+                  key={p.key}
+                  style={[styles.row, isNow && {backgroundColor: t.hi}]}
+                  {...m.rowA11y(p.key, p.label, p.time, isNow ? 'now' : undefined)}>
                   <Icon name={p.key} size={20} color={isNow ? t.accent : t.muted} />
-                  <Text
-                    weight={isNow ? 'semibold' : 'medium'}
-                    size={16}
-                    color={past ? t.past : t.text}>
-                    {p.label}
-                  </Text>
-                  {isNow ? (
-                    <View style={[styles.nowPill, {backgroundColor: t.accent}]}>
-                      <Text weight="bold" size={11} color={t.onAccent} style={styles.caps}>
-                        {I18n.t('today.now').toUpperCase()}
+                  <View style={styles.rowText}>
+                    <View style={styles.rowName}>
+                      <Text
+                        weight={isNow ? 'semibold' : 'medium'}
+                        size={16}
+                        color={past ? t.past : t.text}
+                        style={styles.shrink}>
+                        {p.label}
                       </Text>
+                      {isNow ? (
+                        <View style={[styles.nowPill, {backgroundColor: t.accent}]}>
+                          <Text weight="bold" size={11} color={t.onAccent} style={styles.caps}>
+                            {I18n.t('today.now').toUpperCase()}
+                          </Text>
+                        </View>
+                      ) : null}
                     </View>
-                  ) : null}
-                  <Text
-                    weight={isNow ? 'semibold' : 'medium'}
-                    size={16}
-                    color={past ? t.past : t.text}
-                    style={styles.time}>
-                    {fmt(p.time)}
-                  </Text>
+                    {big ? time : null}
+                  </View>
+                  {big ? null : time}
                   <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={I18n.t(off ? 'today.bellOff' : 'today.bellOn', {
-                      label: p.label,
-                    })}
+                    {...hiddenFromA11y}
                     onPress={() => toggleBell(p.key)}
                     style={styles.bell}>
                     <Icon
@@ -214,7 +240,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    height: 44,
+    minHeight: 44,
     paddingLeft: 12,
     paddingRight: 16,
     borderRadius: 999,
@@ -258,7 +284,8 @@ const styles = StyleSheet.create({
   prompt: {paddingTop: 16},
   shrink: {flexShrink: 1},
   row: {
-    height: 52,
+    minHeight: 52,
+    paddingVertical: 4,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
@@ -267,7 +294,9 @@ const styles = StyleSheet.create({
     borderRadius: 14,
   },
   nowPill: {paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999},
-  time: {marginLeft: 'auto', fontVariant: ['tabular-nums']},
+  rowText: {flex: 1, minWidth: 0, gap: 2},
+  rowName: {flexDirection: 'row', alignItems: 'center', gap: 14, flexWrap: 'wrap'},
+  time: {fontVariant: ['tabular-nums']},
   bell: {width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center'},
 });
 

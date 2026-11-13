@@ -65,6 +65,9 @@ beforeEach(async () => {
   jest.clearAllMocks();
 });
 
+/** A Today prayer row: one switch, "Fajr, 6:12 AM, Reminder" (bell on = checked). */
+const reminder = (prayer: string) => new RegExp(`^${prayer}, .*Reminder$`);
+
 describe('first run', () => {
   it('shows the setup, preselects what is common there, and saves on Start', async () => {
     await render(<App />);
@@ -93,7 +96,7 @@ describe('first run', () => {
     await fireEvent.press(liveActivity);
     await fireEvent.press(screen.getByRole('button', {name: 'Start'}));
 
-    expect(await screen.findByLabelText('Turn off Fajr reminder')).toBeTruthy();
+    expect(await screen.findByRole('switch', {name: reminder('Fajr')})).toBeTruthy();
     await waitFor(async () =>
       expect(JSON.parse((await AsyncStorage.getItem(SETTINGS_KEY))!)).toMatchObject({
         onboarded: true,
@@ -129,7 +132,7 @@ describe('first run', () => {
   it('skips the setup for people who used the app before it existed', async () => {
     await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify({calculationMethod: 'ISNA'}));
     await render(<App />);
-    expect(await screen.findByLabelText('Turn off Fajr reminder')).toBeTruthy();
+    expect(await screen.findByRole('switch', {name: reminder('Fajr')})).toBeTruthy();
   });
 });
 
@@ -161,9 +164,9 @@ it('renders Today with the five prayers, and never schedules Sunrise', async () 
   await savedSetup();
   await render(<App />);
   expect(await screen.findAllByText(/fajr/i)).not.toHaveLength(0);
-  expect(screen.getByLabelText('Turn off Fajr reminder')).toBeTruthy();
+  expect(screen.getByRole('switch', {name: reminder('Fajr')})).toBeTruthy();
   // Sunrise is on the sun arc, not in the list.
-  expect(screen.queryByLabelText(/Sunrise reminder/)).toBeNull();
+  expect(screen.queryByRole('switch', {name: /^Sunrise/})).toBeNull();
   await waitFor(() => expect(Notifications.scheduleNotificationAsync).toHaveBeenCalled());
   const titles = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls.map(
     ([request]) => request.content.title,
@@ -184,10 +187,10 @@ describe('larger screens', () => {
     windowOf(1194, 834);
     await savedSetup();
     await render(<App />);
-    expect(await screen.findByLabelText('Turn off Fajr reminder')).toBeTruthy();
+    expect(await screen.findByRole('switch', {name: reminder('Fajr')})).toBeTruthy();
     expect(screen.getByText('Sunrise')).toBeTruthy();
     // Sunrise is never notified, so its card has no bell.
-    expect(screen.queryByLabelText(/Sunrise reminder/)).toBeNull();
+    expect(screen.queryByRole('switch', {name: /^Sunrise/})).toBeNull();
     expect(screen.getByText('NEXT')).toBeTruthy();
     await fireEvent.press(screen.getByRole('link', {name: 'This week'}));
     expect(await screen.findByText('Next week')).toBeTruthy();
@@ -197,7 +200,7 @@ describe('larger screens', () => {
     windowOf(480, 672);
     await savedSetup();
     await render(<App />);
-    expect(await screen.findByLabelText('Turn off Isha reminder')).toBeTruthy();
+    expect(await screen.findByRole('switch', {name: reminder('Isha')})).toBeTruthy();
     expect(screen.getByText('NEXT')).toBeTruthy();
     expect(screen.queryByRole('link', {name: 'This week'})).toBeNull();
   });
@@ -209,7 +212,7 @@ it('switches to Week and Settings', async () => {
   await fireEvent.press(await screen.findByRole('button', {name: /^Week/}));
   expect(await screen.findByText('Next week')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', {name: /^Settings/}));
-  expect(await screen.findByText('Heads-up reminder')).toBeTruthy();
+  expect(await screen.findByRole('switch', {name: 'Heads-up reminder'})).toBeTruthy();
 });
 
 it('has a Qibla tab whose compass runs only while it is open', async () => {
@@ -228,4 +231,57 @@ it('has a Qibla tab whose compass runs only while it is open', async () => {
   await fireEvent.press(screen.getByRole('button', {name: /^Today/}));
   await waitFor(() => expect(remove).toHaveBeenCalled());
   expect(screen.queryByText('Starting the compass…')).toBeNull();
+});
+
+describe('screen readers', () => {
+  it('reads each prayer row as one switch, and double tap toggles the bell', async () => {
+    await savedSetup();
+    await render(<App />);
+    const asr = await screen.findByRole('switch', {name: reminder('Asr')});
+    expect(asr).toBeChecked();
+    await fireEvent(asr, 'accessibilityAction', {nativeEvent: {actionName: 'activate'}});
+    await waitFor(() =>
+      expect(screen.getByRole('switch', {name: reminder('Asr')})).not.toBeChecked(),
+    );
+    const saved = JSON.parse((await AsyncStorage.getItem(SETTINGS_KEY)) ?? '{}');
+    expect(saved.muted.asr).toBe(true);
+    // The bell button inside the row isn't a second stop.
+    expect(screen.queryByRole('button', {name: /reminder/i})).toBeNull();
+  });
+
+  it('says the countdown in words, not digits', async () => {
+    await savedSetup();
+    await render(<App />);
+    expect(
+      await screen.findByLabelText(
+        / in (\d+ hours?)?( and )?(\d+ minutes?)?(less than a minute)?, at /,
+      ),
+    ).toBeTruthy();
+  });
+
+  it('reads a week row as one day with the prayer names', async () => {
+    await savedSetup();
+    await render(<App />);
+    await fireEvent.press(await screen.findByRole('button', {name: /^Week/}));
+    expect(
+      await screen.findByLabelText(
+        /, Today: Fajr \d+:\d\d [AP]M, Sunrise .*, Isha \d+:\d\d [AP]M$/,
+      ),
+    ).toBeTruthy();
+  });
+});
+
+describe('large text', () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  it('turns the week table into a list of days', async () => {
+    jest
+      .spyOn(Dimensions, 'get')
+      .mockReturnValue({width: 390, height: 844, scale: 3, fontScale: 2.5});
+    await savedSetup();
+    await render(<App />);
+    await fireEvent.press(await screen.findByRole('button', {name: /^Week/}));
+    expect(await screen.findAllByText('Fajr')).toHaveLength(7);
+    expect(screen.queryByText('MAGH')).toBeNull();
+  });
 });

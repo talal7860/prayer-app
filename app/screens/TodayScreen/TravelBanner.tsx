@@ -1,8 +1,10 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Pressable, StyleSheet, View} from 'react-native';
 import Icon from '../../components/ui/Icon';
 import Text from '../../components/ui/Text';
 import I18n from '../../I18n';
+import {announce} from '../../hooks/useA11yPrefs';
+import {joinLabel} from '../../lib/a11y';
 
 type Props = {city: string; saved: string; onKeep: () => void; onUpdate: () => void};
 
@@ -11,16 +13,22 @@ const BLUE = '#2453B3';
 /** "Looks like you're in X now" card from the redesign. Always light. */
 const TravelBanner = ({city, saved, onKeep, onUpdate}: Props) => {
   const savedShort = saved.split(',')[0];
+  const title = I18n.t('today.travelTitle', {city: city.split(',')[0]});
+  const body = I18n.t('today.travelBody', {saved: savedShort});
+  // role="alert" is only announced by TalkBack; say it on iOS too, once, when it appears.
+  useEffect(() => {
+    announce(joinLabel(title, body));
+  }, [title, body]);
   return (
     <View accessibilityRole="alert" style={styles.card}>
-      <View style={styles.head}>
+      <View style={styles.head} accessible>
         <Icon name="navigate" size={18} color={BLUE} strokeWidth={2} />
         <View style={styles.text}>
           <Text weight="semibold" size={14} color="#14161C">
-            {I18n.t('today.travelTitle', {city: city.split(',')[0]})}
+            {title}
           </Text>
           <Text size={12} color="#5A6070">
-            {I18n.t('today.travelBody', {saved: savedShort})}
+            {body}
           </Text>
         </View>
       </View>
@@ -63,7 +71,13 @@ const styles = StyleSheet.create({
   head: {flexDirection: 'row', alignItems: 'center', gap: 10},
   text: {flex: 1, minWidth: 0, gap: 1},
   actions: {flexDirection: 'row', justifyContent: 'flex-end', gap: 8, flexWrap: 'wrap'},
-  button: {height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center'},
+  button: {
+    minHeight: 44,
+    paddingVertical: 8,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   ghost: {paddingHorizontal: 14},
   primary: {paddingHorizontal: 16, backgroundColor: BLUE},
 });

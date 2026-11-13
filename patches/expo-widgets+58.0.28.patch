@@ -23,10 +23,18 @@ index 2fa6c08..51f14b2 100644
    </application>
  </manifest>
 diff --git a/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt b/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
-index 3df9e4a..5fc6b12 100644
+index 3df9e4a..05c9bd6 100644
 --- a/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
 +++ b/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
-@@ -152,6 +152,7 @@ private fun ReadableMap.toPeekNodes(converterContext: WidgetConverterContext, so
+@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.sp
+ import com.facebook.react.bridge.ReadableArray
+ import com.facebook.react.bridge.ReadableMap
+ import com.facebook.react.bridge.ReadableType
++import expo.modules.kotlin.records.Field
+ import expo.modules.kotlin.records.Record
+ import expo.modules.kotlin.records.recordFromMap
+ import expo.modules.kotlin.runtime.Runtime
+@@ -152,6 +153,7 @@ private fun ReadableMap.toPeekNodes(converterContext: WidgetConverterContext, so
      "SpacerView" -> listOf(toPeekSpacer(converterContext))
      "SwitchView" -> listOf(toPeekSwitch(converterContext))
      "TextView" -> listOf(toPeekText(converterContext))
@@ -34,7 +42,7 @@ index 3df9e4a..5fc6b12 100644
      "Button", "FilledTonalButton", "OutlinedButton", "ElevatedButton", "TextButton" -> listOf(
        toPeekButton(converterContext, source)
      )
-@@ -231,6 +232,43 @@ private fun ReadableMap.toPeekText(converterContext: ConverterContext): Emittabl
+@@ -231,6 +233,43 @@ private fun ReadableMap.toPeekText(converterContext: ConverterContext): Emittabl
    }
  }
  
@@ -78,6 +86,28 @@ index 3df9e4a..5fc6b12 100644
  private fun ReadableMap.toPeekImage(converterContext: WidgetConverterContext): Emittable {
    val props = props<WidgetImageProps>(converterContext)
    val source = props.source
+@@ -419,11 +458,21 @@ private fun ModifierType.toPeekModifier(converterContext: ConverterContext): Gla
+     "background" -> asRecord<BackgroundParams>(converterContext)?.color?.toGlanceColorProvider()
+       ?.let { GlanceModifier.background(it) }
+     "cornerRadius" -> asRecord<CornerRadiusParams>(converterContext)?.let { GlanceModifier.cornerRadius(it.radius.dp) }
++    // prayer-app patch: a content description for TalkBack (e.g. a chip read as "Maghrib, 5:54 PM").
++    "semantics" -> asRecord<WidgetSemanticsParams>(converterContext)?.contentDescription?.let { description ->
++      GlanceModifier.semantics { contentDescription = description }
++    }
+     // Unsupported Expo UI modifiers are ignored until they have exact Glance semantics.
+     else -> null
+   } ?: GlanceModifier
+ }
+ 
++// prayer-app patch: the `semantics` modifier's options that Glance can show.
++internal class WidgetSemanticsParams : Record {
++  @Field
++  val contentDescription: String? = null
++}
++
+ private inline fun <reified T : Record> ModifierType.asRecord(converterContext: ConverterContext): T? {
+   return runCatching { recordFromMap<T>(this, converterContext) }.getOrNull()
+ }
 diff --git a/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/WidgetTicker.kt b/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/WidgetTicker.kt
 new file mode 100644
 index 0000000..389d6f5

@@ -1,5 +1,7 @@
 import {Circle, HStack, Image, Spacer, Text, VStack} from '@expo/ui/swift-ui';
 import {
+  accessibilityHidden,
+  accessibilityLabel,
   activityBackgroundTint,
   font,
   foregroundStyle,
@@ -47,11 +49,25 @@ const PrayerActivity = (props: PrayerActivityProps) => {
       </HStack>
     ),
     // The board's black pill: a gold dot and the countdown.
-    compactLeading: <Circle modifiers={[foregroundStyle(accent), frame({width: 8, height: 8})]} />,
+    compactLeading: (
+      <Circle
+        modifiers={[
+          foregroundStyle(accent),
+          frame({width: 8, height: 8}),
+          accessibilityHidden(true),
+        ]}
+      />
+    ),
     compactTrailing: (
       <Text date={at} dateStyle="timer" modifiers={[monospacedDigit(), foregroundStyle(accent)]} />
     ),
-    minimal: <Image systemName="moon.stars.fill" color={accent} />,
+    minimal: (
+      <Image
+        systemName="moon.stars.fill"
+        color={accent}
+        modifiers={[accessibilityLabel(props.inLabel)]}
+      />
+    ),
     expandedLeading: (
       <VStack alignment="leading" spacing={2}>
         <Text modifiers={[font({size: 13}), opacity(0.8)]}>{props.inLabel}</Text>

@@ -7,6 +7,7 @@ import {
   height,
   padding,
   paddingAll,
+  semantics,
   size,
   width,
 } from '@expo/ui/jetpack-compose/modifiers';
@@ -154,6 +155,13 @@ const NextPrayer = (snapshot: NextPrayerProps) => {
                 padding(0, 6, 0, 6),
                 cornerRadius(10),
                 background(r.next ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0)'),
+                // TalkBack reads "Maghrib, 5:54 PM, Next", not "MAGH 5:54" (the expo-widgets
+                // patch maps `semantics` to Glance).
+                semantics({
+                  contentDescription: r.next
+                    ? `${r.name}, ${r.time}, ${p.nextTag}`
+                    : `${r.name}, ${r.time}`,
+                }),
               ]}>
               <Text
                 color={r.next ? gold : soft}

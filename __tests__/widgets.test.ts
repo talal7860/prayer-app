@@ -69,6 +69,8 @@ describe('the redesigned widgets', () => {
     expect(props.prevAt).toBe(at('sunrise').getTime());
     expect(props.inLabel).toBe('Dhuhr in');
     expect(props.untilLabel).toBe(`until Dhuhr · ${props.time}`);
+    // VoiceOver/TalkBack's tag for the next prayer's chip, and the large widget's label.
+    expect(props.nextTag).toBe('Next');
     expect(props.nextShort).toBe('DHU');
   });
 

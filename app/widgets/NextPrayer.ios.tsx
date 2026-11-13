@@ -1,5 +1,8 @@
 import {Circle, HStack, Image, ProgressView, Spacer, Text, VStack, ZStack} from '@expo/ui/swift-ui';
 import {
+  accessibilityElement,
+  accessibilityHidden,
+  accessibilityLabel,
   background,
   containerBackground,
   font,
@@ -72,13 +75,23 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
       items.push(dot('sun', p.sunT, 10, gold, 1));
     }
     return (
+      // Dozens of dots: hidden from VoiceOver, which gets the times as text.
       <ZStack
         alignment="topLeading"
-        modifiers={[frame({width: w, height: h, alignment: 'topLeading'})]}>
+        modifiers={[
+          frame({width: w, height: h, alignment: 'topLeading'}),
+          accessibilityHidden(true),
+        ]}>
         {items}
       </ZStack>
     );
   };
+
+  // "Asr, 3:42 PM, Next": a chip or row read as one, with the full name and AM/PM.
+  const rowA11y = (r: {name: string; time: string; next: boolean}) => [
+    accessibilityElement('combine'),
+    accessibilityLabel(r.next ? `${r.name}, ${r.time}, ${p.nextTag}` : `${r.name}, ${r.time}`),
+  ];
 
   // A timer Text takes the full width, so it's aligned explicitly.
   const countdown = (size: number, centered = false) => (
@@ -98,7 +111,8 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
   if (family === 'accessoryInline') {
     return (
       <HStack modifiers={[containerBackground('clear', 'widget')]}>
-        <Image systemName="moon.stars.fill" />
+        {/* Read as "Asr in", then the timer, instead of "moon stars". */}
+        <Image systemName="moon.stars.fill" modifiers={[accessibilityLabel(p.inLabel)]} />
         <Text date={at} dateStyle="timer" />
       </HStack>
     );
@@ -114,7 +128,7 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
         <ProgressView
           timerInterval={range}
           countsDown={false}
-          modifiers={[progressViewStyle('linear'), tint(white)]}>
+          modifiers={[progressViewStyle('linear'), tint(white), accessibilityLabel(p.untilLabel)]}>
           <Text> </Text>
         </ProgressView>
       </VStack>
@@ -133,7 +147,7 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
               {p.hijriShort}
             </Text>
           </HStack>
-          <VStack spacing={2} modifiers={[padding({top: 46})]}>
+          <VStack spacing={2} modifiers={[padding({top: 46}), accessibilityElement('combine')]}>
             {countdown(30, true)}
             <Text modifiers={[font({size: 12}), foregroundStyle(soft), lineLimit(1)]}>
               {p.untilLabel}
@@ -157,6 +171,7 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
                   r.next ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0)',
                   shapes.roundedRectangle({cornerRadius: 10}),
                 ),
+                ...rowA11y(r),
               ]}>
               <Text
                 modifiers={[
@@ -203,7 +218,7 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
               {p.hijri}
             </Text>
           </HStack>
-          <VStack spacing={3} modifiers={[padding({top: 62})]}>
+          <VStack spacing={3} modifiers={[padding({top: 62}), accessibilityElement('combine')]}>
             <Text modifiers={[font({size: 13, weight: 'semibold'}), foregroundStyle(soft)]}>
               {p.inLabel}
             </Text>
@@ -223,6 +238,7 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
                   r.next ? '#1E2848' : 'rgba(0,0,0,0)',
                   shapes.roundedRectangle({cornerRadius: 9}),
                 ),
+                ...rowA11y(r),
               ]}>
               <Circle
                 modifiers={[
@@ -239,7 +255,7 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
               </Text>
               {r.next ? (
                 <Text modifiers={[font({size: 10, weight: 'bold'}), foregroundStyle(gold)]}>
-                  NEXT
+                  {p.nextTag.toUpperCase()}
                 </Text>
               ) : null}
               <Spacer />

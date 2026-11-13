@@ -53,6 +53,11 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
   change, on every foreground, and from the background task (`expo-background-task`, at most
   every 12 h, reading settings from AsyncStorage via `loadSettings`). Calls are queued so they
   never interleave.
+  **Settings → Test notification** (`scheduleTestNotification`) schedules one adhan notification
+  in 20 s, exactly like a real one (channel, sound, interruption level), to try the sound, silent
+  mode or Focus. Its id starts with `test:`, and a reschedule leaves those alone: there's no
+  cancel-everything any more, since scheduling a plan id replaces it and the clean-up cancels
+  only other leftovers.
   Each notification has a fixed id (`notificationId`: kind, prayer, minute), and after scheduling
   any pending notification not in the plan is cancelled, so overlapping runs can't leave two
   copies of a prayer (seen on an iPhone: the same adhan a minute early and on time). Before this, only 5 days were scheduled and only while the app was open,

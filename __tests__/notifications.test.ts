@@ -1,5 +1,9 @@
 import * as Notifications from 'expo-notifications';
-import {notificationId, rescheduleNotifications} from '../app/lib/notifications';
+import {
+  notificationId,
+  rescheduleNotifications,
+  scheduleTestNotification,
+} from '../app/lib/notifications';
 import {MAX_PENDING} from '../app/lib/schedule';
 import {defaultSettings, SETTINGS_KEY} from '../app/lib/settingsStore';
 
@@ -9,6 +13,7 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 
 jest.mock('expo-notifications', () => ({
   getPermissionsAsync: jest.fn(() => Promise.resolve({granted: true})),
+  requestPermissionsAsync: jest.fn(() => Promise.resolve({granted: true})),
   cancelAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve()),
   scheduleNotificationAsync: jest.fn(() => Promise.resolve('id')),
   getAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve([])),
@@ -42,10 +47,11 @@ it('does nothing without notification permission', async () => {
   expect(Notifications.cancelAllScheduledNotificationsAsync).not.toHaveBeenCalled();
 });
 
-it('runs calls one at a time, so cancels never interleave', async () => {
+it('runs calls one at a time, so one run never cleans up in the middle of another', async () => {
   const order: string[] = [];
-  (Notifications.cancelAllScheduledNotificationsAsync as jest.Mock).mockImplementation(async () => {
-    order.push('cancel');
+  (Notifications.getAllScheduledNotificationsAsync as jest.Mock).mockImplementation(async () => {
+    order.push('clean up');
+    return [];
   });
   (Notifications.scheduleNotificationAsync as jest.Mock).mockImplementation(async () => {
     if (order[order.length - 1] !== 'schedule') {
@@ -56,7 +62,37 @@ it('runs calls one at a time, so cancels never interleave', async () => {
     rescheduleNotifications(defaultSettings),
     rescheduleNotifications(defaultSettings),
   ]);
-  expect(order).toEqual(['cancel', 'schedule', 'cancel', 'schedule']);
+  expect(order).toEqual(['schedule', 'clean up', 'schedule', 'clean up']);
+  expect(Notifications.cancelAllScheduledNotificationsAsync).not.toHaveBeenCalled();
+});
+
+it('sends a test adhan in 20 seconds, which a reschedule leaves alone', async () => {
+  const before = Date.now();
+  await expect(scheduleTestNotification(defaultSettings)).resolves.toBe(true);
+  const [test] = scheduled();
+  expect(test.identifier).toMatch(/^test:\d+$/);
+  expect(test.content.title).toBe('Test adhan from Adhan Times');
+  expect(test.trigger.channelId).toBe('adhan-makkah');
+  const due = (test.trigger.date as Date).getTime() - before;
+  expect(due).toBeGreaterThanOrEqual(20_000);
+  expect(due).toBeLessThan(21_000);
+
+  (Notifications.getAllScheduledNotificationsAsync as jest.Mock).mockResolvedValueOnce([
+    {identifier: test.identifier},
+    {identifier: 'leftover'},
+  ]);
+  await rescheduleNotifications(defaultSettings);
+  const cancelled = (Notifications.cancelScheduledNotificationAsync as jest.Mock).mock.calls.map(
+    ([id]) => id,
+  );
+  expect(cancelled).toEqual(['leftover']);
+});
+
+it('asks for permission for the test, and says so when it is off', async () => {
+  (Notifications.getPermissionsAsync as jest.Mock).mockResolvedValueOnce({granted: false});
+  (Notifications.requestPermissionsAsync as jest.Mock).mockResolvedValueOnce({granted: false});
+  await expect(scheduleTestNotification(defaultSettings)).resolves.toBe(false);
+  expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
 });
 
 it('the background task reschedules from the saved settings', async () => {

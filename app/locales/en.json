@@ -33,6 +33,11 @@
     "adhan": "Adhan sound",
     "headsUp": "Heads-up reminder",
     "headsUpHint": "10 minutes before each prayer",
+    "testNotification": "Test notification",
+    "testNotificationHint": "An adhan notification in 20 seconds, to try the sound",
+    "testNotificationSend": "Send",
+    "testNotificationSent": "Coming in 20 seconds. You can lock the phone.",
+    "testNotificationOff": "Notifications are off for Adhan Times. Turn them on in the phone’s Settings.",
     "liveActivity": "Live Activity",
     "liveActivityHint": "Lock screen and Dynamic Island",
     "timeFormat": "Time format",
@@ -51,7 +56,8 @@
       "description": "Prayer Notifications"
     },
     "headsUp": "{{label}} in 10 minutes - {{time}}",
-    "reminder": "Open Adhan Times to keep getting prayer notifications"
+    "reminder": "Open Adhan Times to keep getting prayer notifications",
+    "test": "Test adhan from Adhan Times"
   },
   "prayer": {
     "fajr": "Fajr",

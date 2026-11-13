@@ -1,3 +1,14 @@
+diff --git a/node_modules/expo-widgets/android/proguard-rules.pro b/node_modules/expo-widgets/android/proguard-rules.pro
+index 222bdfd..748f879 100644
+--- a/node_modules/expo-widgets/android/proguard-rules.pro
++++ b/node_modules/expo-widgets/android/proguard-rules.pro
+@@ -1,2 +1,6 @@
+ # WorkManager creates its Room database by reflection during app startup.
+ -keep class * extends androidx.room.RoomDatabase { <init>(); }
++
++# ChronometerView (our patch) creates Glance's EmittableAndroidRemoteViews by reflection
++# (it's Kotlin-internal); keep its name and setRemoteViews/setModifier in release builds.
++-keep class androidx.glance.appwidget.EmittableAndroidRemoteViews { *; }
 diff --git a/node_modules/expo-widgets/android/src/main/AndroidManifest.xml b/node_modules/expo-widgets/android/src/main/AndroidManifest.xml
 index 2fa6c08..51f14b2 100644
 --- a/node_modules/expo-widgets/android/src/main/AndroidManifest.xml
@@ -12,7 +23,7 @@ index 2fa6c08..51f14b2 100644
    </application>
  </manifest>
 diff --git a/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt b/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
-index 3df9e4a..7c77dd9 100644
+index 3df9e4a..5fc6b12 100644
 --- a/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
 +++ b/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
 @@ -152,6 +152,7 @@ private fun ReadableMap.toPeekNodes(converterContext: WidgetConverterContext, so
@@ -23,13 +34,13 @@ index 3df9e4a..7c77dd9 100644
      "Button", "FilledTonalButton", "OutlinedButton", "ElevatedButton", "TextButton" -> listOf(
        toPeekButton(converterContext, source)
      )
-@@ -231,6 +232,40 @@ private fun ReadableMap.toPeekText(converterContext: ConverterContext): Emittabl
+@@ -231,6 +232,43 @@ private fun ReadableMap.toPeekText(converterContext: ConverterContext): Emittabl
    }
  }
  
 +/**
 + * A countdown the system ticks every second (RemoteViews Chronometer), to the time in `at`
-+ * (ms since the epoch). Props: at, color ("#RRGGBB"), fontSize (sp). When it reaches zero,
++ * (ms since the epoch). Props: at, color ("#RRGGBB"), fontSize (sp), align ("center"). At zero,
 + * WidgetTicker re-renders the widgets so the layout can move on.
 + */
 +private fun ReadableMap.toPeekChronometer(converterContext: WidgetConverterContext): Emittable {
@@ -50,6 +61,9 @@ index 3df9e4a..7c77dd9 100644
 +    runCatching { android.graphics.Color.parseColor(color) }.getOrNull()?.let { views.setTextColor(viewId, it) }
 +  }
 +  double("fontSize")?.let { views.setTextViewTextSize(viewId, android.util.TypedValue.COMPLEX_UNIT_SP, it.toFloat()) }
++  if (string("align") == "center") {
++    views.setInt(viewId, "setGravity", android.view.Gravity.CENTER_HORIZONTAL)
++  }
 +  WidgetTicker.schedule(context, at + 1000)
 +  // Glance's EmittableAndroidRemoteViews is Kotlin-internal (public in the bytecode), so it's
 +  // created and filled through reflection.

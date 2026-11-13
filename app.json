@@ -12,7 +12,8 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Location Services required for fetching city and country",
         "UIViewControllerBasedStatusBarAppearance": false,
-        "UIBackgroundModes": ["fetch", "processing"]
+        "UIBackgroundModes": ["fetch", "processing"],
+        "INAlternativeAppNames": [{"INAlternativeAppName": "Adhan"}]
       },
       "appleTeamId": "APPLE_TEAM_ID_REDACTED",
       "entitlements": {

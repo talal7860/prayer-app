@@ -219,6 +219,13 @@
     "today": "آج",
     "until": "{{label}} تک"
   },
+  "siri": {
+    "next": "{{prayer}} {{time}} بجے ہے، {{left}} میں۔",
+    "current": "ابھی {{prayer}} کا وقت ہے۔ یہ {{end}} بجے ختم ہوگا، {{left}} میں۔",
+    "none": "ابھی نماز کا وقت نہیں ہے۔ {{prayer}} {{time}} بجے ہے، {{left}} میں۔",
+    "today": "آج {{prayer}} {{time}} بجے ہے۔",
+    "tomorrow": "کل {{prayer}} {{time}} بجے ہے۔"
+  },
   "qibla": {
     "title": "قبلہ",
     "starting": "کمپاس شروع ہو رہا ہے…",

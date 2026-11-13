@@ -219,6 +219,13 @@
     "today": "Today",
     "until": "until {{label}}"
   },
+  "siri": {
+    "next": "{{prayer}} is at {{time}}, in {{left}}.",
+    "current": "It's {{prayer}} time. It ends at {{end}}, in {{left}}.",
+    "none": "It's not a prayer time now. {{prayer}} is at {{time}}, in {{left}}.",
+    "today": "{{prayer}} is at {{time}} today.",
+    "tomorrow": "{{prayer}} is at {{time}} tomorrow."
+  },
   "qibla": {
     "title": "Qibla",
     "starting": "Starting the compass…",

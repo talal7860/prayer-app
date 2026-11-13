@@ -219,6 +219,13 @@
     "today": "اليوم",
     "until": "حتى {{label}}"
   },
+  "siri": {
+    "next": "{{prayer}} الساعة {{time}}، بعد {{left}}.",
+    "current": "حان وقت {{prayer}}. ينتهي الساعة {{end}}، بعد {{left}}.",
+    "none": "ليس وقت صلاة الآن. {{prayer}} الساعة {{time}}، بعد {{left}}.",
+    "today": "{{prayer}} اليوم الساعة {{time}}.",
+    "tomorrow": "{{prayer}} غدًا الساعة {{time}}."
+  },
   "qibla": {
     "title": "القبلة",
     "starting": "جارٍ تشغيل البوصلة…",

@@ -88,9 +88,15 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
   };
 
   // "Asr, 3:42 PM, Next": a chip or row read as one, with the full name and AM/PM.
-  const rowA11y = (r: {name: string; time: string; next: boolean}) => [
+  const rowA11y = (r: {name: string; time: string; now: boolean; next: boolean}) => [
     accessibilityElement('combine'),
-    accessibilityLabel(r.next ? `${r.name}, ${r.time}, ${p.nextTag}` : `${r.name}, ${r.time}`),
+    accessibilityLabel(
+      r.next
+        ? `${r.name}, ${r.time}, ${p.nextTag}`
+        : r.now
+          ? `${r.name}, ${r.time}, ${p.nowTag}`
+          : `${r.name}, ${r.time}`,
+    ),
   ];
 
   // A timer Text takes the full width, so it's aligned explicitly.
@@ -167,8 +173,9 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
               modifiers={[
                 frame({height: 36}),
                 frame({maxWidth: 1000}),
+                // Filled = it's that prayer's time now, as on Today; the next one is gold.
                 background(
-                  r.next ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0)',
+                  r.now ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0)',
                   shapes.roundedRectangle({cornerRadius: 10}),
                 ),
                 ...rowA11y(r),
@@ -235,7 +242,7 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
                 padding({horizontal: 10}),
                 frame({height: 30}),
                 background(
-                  r.next ? '#1E2848' : 'rgba(0,0,0,0)',
+                  r.now ? '#1E2848' : 'rgba(0,0,0,0)',
                   shapes.roundedRectangle({cornerRadius: 9}),
                 ),
                 ...rowA11y(r),
@@ -253,9 +260,13 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
                 ]}>
                 {r.name}
               </Text>
-              {r.next ? (
-                <Text modifiers={[font({size: 10, weight: 'bold'}), foregroundStyle(gold)]}>
-                  {p.nextTag.toUpperCase()}
+              {r.next || r.now ? (
+                <Text
+                  modifiers={[
+                    font({size: 10, weight: 'bold'}),
+                    foregroundStyle(r.next ? gold : soft),
+                  ]}>
+                  {(r.next ? p.nextTag : p.nowTag).toUpperCase()}
                 </Text>
               ) : null}
               <Spacer />

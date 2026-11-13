@@ -71,7 +71,13 @@
   },
   "sounds": {
     "mecca": "Makkah",
-    "default": "Default"
+    "default": "Default",
+    "istanbul": "Istanbul, Turkey",
+    "konya": "Konya, Turkey",
+    "casablanca": "Casablanca, Morocco",
+    "tripoli": "Tripoli, Lebanon",
+    "isfahan": "Isfahan, Iran",
+    "azeez": "Aaqib Azeez"
   },
   "today": {
     "title": "Today",
@@ -120,7 +126,13 @@
     "title": "Calculation method"
   },
   "soundsScreen": {
-    "title": "Adhan sound"
+    "title": "Adhan sound",
+    "adhan": "Adhan",
+    "fajr": "Fajr adhan at Fajr",
+    "fajrHint": "With “prayer is better than sleep”",
+    "play": "Play {{name}}",
+    "stop": "Stop",
+    "credits": "Recordings"
   },
   "highLats": {
     "title": "High latitudes",

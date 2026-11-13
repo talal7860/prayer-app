@@ -28,6 +28,8 @@ type Settings = {
   asr: AsrJuristics;
   calculationMethod: PrayerCalculationMethod;
   sound: string;
+  /** Play the Fajr adhan ("as-salatu khayrun min an-nawm") at Fajr, when an adhan sound is chosen. */
+  fajrAdhan: boolean;
   /** Prayers whose reminder bell is off. */
   muted: Partial<Record<PrayerKey, boolean>>;
   /** Minutes added to each calculated time (negative = earlier), to match the local mosque. */
@@ -52,7 +54,7 @@ type Adjustment = Record<string, number>;
 
 type PrayerTimesByDate = Record<string, PrayerTimeLabel[]>;
 
-type Sounds = Record<string, {name: string; path: string}>;
+type Sounds = Record<string, {name: string; path: string; channelId: string; preview?: number}>;
 type SettingScreenMap = Record<string, string>;
 type NotificationChannels = Record<string, {channelId: string; soundName: string}>;
 

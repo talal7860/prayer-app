@@ -20,6 +20,8 @@ const paths = {
   navigate: 'M3 11l18-8-8 18-2-8-8-2z',
   back: 'M15 6l-6 6 6 6',
   compass: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M15.5 8.5l-2.2 4.8-4.8 2.2 2.2-4.8z',
+  play: 'M8 5.5v13l10.5-6.5z',
+  stop: 'M7.5 7.5h9v9h-9z',
 } as const;
 
 export type IconName = keyof typeof paths | 'sliders' | 'clock' | 'calendar';

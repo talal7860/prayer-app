@@ -13,6 +13,7 @@ export const defaultSettings: Settings = Object.freeze({
   calculationMethod: 'Karachi',
   asr: 'Hanafi',
   sound: 'mecca',
+  fajrAdhan: true,
   muted: {sunrise: true},
   adjustments: {},
   travelAlerts: false,

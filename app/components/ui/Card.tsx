@@ -1,5 +1,6 @@
 import React, {type PropsWithChildren} from 'react';
-import {Pressable, StyleSheet, View, type ViewStyle} from 'react-native';
+import {Pressable, StyleSheet, useWindowDimensions, View, type ViewStyle} from 'react-native';
+import {isLargeText, joinLabel} from '../../lib/a11y';
 import usePalette from '../../hooks/usePalette';
 import Icon from './Icon';
 import Text from './Text';
@@ -13,7 +14,9 @@ export const SectionLabel = ({children}: {children: string}) => {
       size={12}
       color={t.muted}
       style={styles.label}
-      accessibilityRole="header">
+      accessibilityRole="header"
+      // Upper case is for the eye: screen readers spell out short all-caps words.
+      accessibilityLabel={children}>
       {children.toUpperCase()}
     </Text>
   );
@@ -36,17 +39,29 @@ type RowProps = PropsWithChildren<{
   last?: boolean;
 }>;
 
-/** 60pt settings row: title (+ subtitle) on the left, a control or value + chevron on the right. */
+/**
+ * 60pt settings row: title (+ subtitle) on the left, a control or value + chevron on the right.
+ * Screen readers get one stop per row: the pressable row, the control (which carries the title as
+ * its label), or the title and value read together. At large text sizes a control goes under
+ * the text, so the title isn't squeezed to a few letters a line.
+ */
 export const Row = ({title, subtitle, value, onPress, last, children}: RowProps) => {
   const {t} = usePalette();
+  const {fontScale} = useWindowDimensions();
+  const stacked = !!children && isLargeText(fontScale);
+  const label = joinLabel(title, subtitle, value);
   const body = (
     <>
-      <View style={styles.rowText}>
+      <View
+        style={[styles.rowText, stacked && styles.rowTextStacked]}
+        // With a control, the control says the title; the text would be a second stop.
+        accessibilityElementsHidden={!!children}
+        importantForAccessibility={children ? 'no-hide-descendants' : 'auto'}>
         <Text weight="medium" size={15} color={t.text}>
           {title}
         </Text>
         {subtitle ? (
-          <Text size={13} color={t.muted} numberOfLines={1}>
+          <Text size={13} color={t.muted} numberOfLines={stacked ? undefined : 1}>
             {subtitle}
           </Text>
         ) : null}
@@ -64,17 +79,20 @@ export const Row = ({title, subtitle, value, onPress, last, children}: RowProps)
     styles.row,
     !last && {borderBottomWidth: 1, borderBottomColor: t.divider},
     !onPress && styles.rowControl,
+    stacked && styles.rowStacked,
   ];
   return onPress ? (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={value ? `${title}, ${value}` : title}
+      accessibilityLabel={label}
       onPress={onPress}
       style={({pressed}) => [style, pressed && {backgroundColor: t.hi}]}>
       {body}
     </Pressable>
   ) : (
-    <View style={style}>{body}</View>
+    <View style={style} accessible={!children} accessibilityLabel={children ? undefined : label}>
+      {body}
+    </View>
   );
 };
 
@@ -90,4 +108,6 @@ const styles = StyleSheet.create({
   },
   rowControl: {paddingRight: 12},
   rowText: {flex: 1, minWidth: 0, gap: 1},
+  rowStacked: {flexDirection: 'column', alignItems: 'flex-start', paddingVertical: 12},
+  rowTextStacked: {flex: 0, alignSelf: 'stretch'},
 });

@@ -11,13 +11,10 @@ import usePalette from '../../../hooks/usePalette';
 import useReadableWidth from '../../../hooks/useReadableWidth';
 import I18n from '../../../I18n';
 
-/** Who made each recording (assets/sounds/CREDITS.md has the links and licences). */
+/** Where each recording comes from (assets/sounds/CREDITS.md has the details). */
 const CREDITS =
-  'Istanbul: Viceskeeni2 (CC0) · Konya: Frans van der Vaart (CC BY 3.0) · ' +
-  'Casablanca: Fraguando (CC BY-SA 4.0) · Tripoli: باسم (CC BY-SA 4.0) · ' +
-  'Isfahan: 10EldarionElessar (CC BY 3.0) · Aaqib Azeez: Atcovi (CC BY-SA 4.0) · ' +
-  'Fajr: Islamic Center Malmö (CC BY 3.0). From Wikimedia Commons; trimmed to 30 s and ' +
-  'volume-matched.';
+  'Madinah and Al-Aqsa: assabile.com · Fajr: Islamic Center Malmö (CC BY 3.0), from Wikimedia ' +
+  'Commons. Trimmed to 30 s and volume-matched.';
 
 type Previewable = {key: string; name: string; preview?: number};
 
@@ -38,6 +35,9 @@ const SoundScreen = () => {
       return;
     }
     if (sound.preview === undefined) {
+      // e.g. Default: nothing to preview, but stop whatever was playing.
+      player.pause();
+      setPicked(null);
       return;
     }
     player.replace(sound.preview);
@@ -83,20 +83,23 @@ const SoundScreen = () => {
         {options.map((o, i) => {
           const on = o.key === settings.sound;
           return (
-            // The play button sits next to the choice, not inside it: inside a radio, VoiceOver
-            // can't reach it.
+            // Choosing an adhan plays it; choosing the one that's playing stops it. While one plays,
+            // a stop button sits next to it (outside the radio, where VoiceOver can reach it).
             <View
               key={o.key}
               style={[
                 styles.row,
                 i < options.length - 1 && {borderBottomWidth: 1, borderBottomColor: t.divider},
               ]}>
-              {playButton(o)}
               <Pressable
                 accessibilityRole="radio"
                 accessibilityState={{selected: on}}
+                accessibilityHint={
+                  o.preview === undefined ? undefined : I18n.t('soundsScreen.selectHint')
+                }
                 onPress={() => {
                   setSetting('sound')(o.key);
+                  toggle(o);
                 }}
                 style={({pressed}) => [styles.choice, pressed && {backgroundColor: t.hi}]}>
                 <Text
@@ -108,6 +111,7 @@ const SoundScreen = () => {
                 </Text>
                 {on ? <Icon name="check" size={20} color={t.accent} strokeWidth={2.2} /> : null}
               </Pressable>
+              {playing === o.key ? playButton(o) : null}
             </View>
           );
         })}
@@ -142,7 +146,7 @@ const styles = StyleSheet.create({
   scroll: {padding: 16, paddingBottom: 32},
   row: {
     minHeight: 56,
-    paddingStart: 16,
+    paddingEnd: 12,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -151,7 +155,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignSelf: 'stretch',
     minHeight: 56,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     paddingVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',

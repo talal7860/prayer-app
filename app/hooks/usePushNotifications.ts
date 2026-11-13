@@ -13,11 +13,22 @@ import {syncWatch} from '../lib/watch';
 
 // Channels from older versions. A channel's sound can't change once created, so a fix needs a new
 // id: the WAV adhan replaced the MP3 one, and `adhan-makkah` was created without audio attributes
-// (silent on Android 17).
+// (silent on Android 17). The adhan-* ones are sounds that were removed.
 /** The removed travel alerts' geofence task. */
 const OLD_GEOFENCE_TASK = 'travel-geofence';
 
-const OLD_CHANNELS = ['prayer-time-notifications-mecca', 'adhan-makkah'];
+// …and the channels of adhan sounds that were removed (Istanbul, Konya, Casablanca, Tripoli,
+// Isfahan, Aaqib Azeez).
+const OLD_CHANNELS = [
+  'prayer-time-notifications-mecca',
+  'adhan-makkah',
+  'adhan-istanbul',
+  'adhan-konya',
+  'adhan-casablanca',
+  'adhan-tripoli',
+  'adhan-isfahan',
+  'adhan-azeez',
+];
 
 const createChannels = async () => {
   await Promise.all(OLD_CHANNELS.map(id => Notifications.deleteNotificationChannelAsync(id)));

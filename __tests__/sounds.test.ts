@@ -22,12 +22,12 @@ it('bundles every sound file with expo-notifications, and gives each its own cha
 });
 
 it('plays the Fajr adhan at Fajr when on, the chosen sound otherwise', () => {
-  const s = {...defaultSettings, sound: 'istanbul'};
+  const s = {...defaultSettings, sound: 'madinah'};
   expect(defaultSettings.fajrAdhan).toBe(true);
   expect(AppConstants.adhanChannel(s, 'fajr').soundName).toBe('adhan_fajr.wav');
-  expect(AppConstants.adhanChannel(s, 'dhuhr').soundName).toBe('adhan_istanbul.wav');
+  expect(AppConstants.adhanChannel(s, 'dhuhr').soundName).toBe('adhan_madinah.wav');
   expect(AppConstants.adhanChannel({...s, fajrAdhan: false}, 'fajr').soundName).toBe(
-    'adhan_istanbul.wav',
+    'adhan_madinah.wav',
   );
   // The system default sound stays the default at Fajr too.
   expect(AppConstants.adhanChannel({...s, sound: 'default'}, 'fajr').channelId).toBe(
@@ -35,4 +35,10 @@ it('plays the Fajr adhan at Fajr when on, the chosen sound otherwise', () => {
   );
   // A sound key this version doesn't have falls back to Makkah.
   expect(AppConstants.adhanChannel({...s, sound: 'gone'}, 'asr').channelId).toBe('adhan-makkah-v2');
+});
+
+it('sends a saved sound that was removed back to Makkah', () => {
+  const {parseSettings} = require('../app/lib/settingsStore');
+  expect(parseSettings(JSON.stringify({sound: 'istanbul'})).sound).toBe('mecca');
+  expect(parseSettings(JSON.stringify({sound: 'aqsa'})).sound).toBe('aqsa');
 });

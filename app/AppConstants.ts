@@ -14,41 +14,17 @@ const sounds: Sounds = {
     channelId: 'adhan-makkah-v2',
     preview: require('../assets/sounds/makkah_azan.wav') as number,
   },
-  istanbul: {
-    name: I18n.t('sounds.istanbul'),
-    path: 'adhan_istanbul.wav',
-    channelId: 'adhan-istanbul',
-    preview: require('../assets/sounds/adhan_istanbul.wav') as number,
+  madinah: {
+    name: I18n.t('sounds.madinah'),
+    path: 'adhan_madinah.wav',
+    channelId: 'adhan-madinah',
+    preview: require('../assets/sounds/adhan_madinah.wav') as number,
   },
-  konya: {
-    name: I18n.t('sounds.konya'),
-    path: 'adhan_konya.wav',
-    channelId: 'adhan-konya',
-    preview: require('../assets/sounds/adhan_konya.wav') as number,
-  },
-  casablanca: {
-    name: I18n.t('sounds.casablanca'),
-    path: 'adhan_casablanca.wav',
-    channelId: 'adhan-casablanca',
-    preview: require('../assets/sounds/adhan_casablanca.wav') as number,
-  },
-  tripoli: {
-    name: I18n.t('sounds.tripoli'),
-    path: 'adhan_tripoli.wav',
-    channelId: 'adhan-tripoli',
-    preview: require('../assets/sounds/adhan_tripoli.wav') as number,
-  },
-  isfahan: {
-    name: I18n.t('sounds.isfahan'),
-    path: 'adhan_isfahan.wav',
-    channelId: 'adhan-isfahan',
-    preview: require('../assets/sounds/adhan_isfahan.wav') as number,
-  },
-  azeez: {
-    name: I18n.t('sounds.azeez'),
-    path: 'adhan_azeez.wav',
-    channelId: 'adhan-azeez',
-    preview: require('../assets/sounds/adhan_azeez.wav') as number,
+  aqsa: {
+    name: I18n.t('sounds.aqsa'),
+    path: 'adhan_aqsa.wav',
+    channelId: 'adhan-aqsa',
+    preview: require('../assets/sounds/adhan_aqsa.wav') as number,
   },
   default: {
     name: I18n.t('sounds.default'),

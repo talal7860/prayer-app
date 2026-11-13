@@ -12,7 +12,7 @@ screen and wrist. English, Arabic and Urdu, with a right-to-left layout for the 
   button.
 - **Week**: seven days of times, and a monthly timetable you can share as a PDF.
 - **Settings**: location (GPS or a typed city), calculation method, Asr, high-latitude rule,
-  per-prayer minute adjustments, adhan sound, a 10-minute reminder, 12/24 h, and a
+  per-prayer minute adjustments, adhan sound (Makkah, Madinah or Al-Aqsa, played as you pick it), a 10-minute reminder, 12/24 h, and a
   test notification.
 - **First-run setup**: location, method and Asr (preselected for your country), then today's times.
 - **Notifications**: the Makkah adhan at every prayer, about 12 days ahead, kept topped up by a

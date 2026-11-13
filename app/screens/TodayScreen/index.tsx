@@ -85,26 +85,31 @@ const PhoneToday = ({m}: {m: TodayModel}) => {
           colors={skies[day.period]}
           locations={skyLocations}
           style={[styles.sky, {paddingTop: insets.top + 8}]}>
+          {/* The date at the start, the location at the end, on one line. */}
           <View style={[styles.topBar, m.topBarInset]}>
+            <View style={styles.dates} accessible>
+              <Text weight="semibold" size={15} color="#FFFFFF" numberOfLines={1}>
+                {formatDate(day.now, {weekday: 'long', month: 'long', day: 'numeric'})}
+              </Text>
+              <Text size={12} color="rgba(255,255,255,0.85)" numberOfLines={1}>
+                {hijriLabel(day.now)}
+              </Text>
+            </View>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={`${I18n.t('locations.title')}: ${city}`}
               onPress={() => navigation.navigate('location')}
               style={styles.cityPill}>
-              <Icon name="pin" size={18} color="#FFFFFF" strokeWidth={2} />
-              <Text weight="medium" size={15} color="#FFFFFF" numberOfLines={1}>
+              <Icon name="pin" size={16} color="#FFFFFF" strokeWidth={2} />
+              <Text
+                weight="medium"
+                size={14}
+                color="#FFFFFF"
+                numberOfLines={1}
+                style={styles.shrink}>
                 {city}
               </Text>
             </Pressable>
-          </View>
-
-          <View style={styles.dates} accessible>
-            <Text weight="medium" size={15} color="#FFFFFF">
-              {formatDate(day.now, {weekday: 'long', month: 'long', day: 'numeric'})}
-            </Text>
-            <Text size={13} color="rgba(255,255,255,0.85)">
-              {hijriLabel(day.now)}
-            </Text>
           </View>
 
           <View
@@ -124,8 +129,8 @@ const PhoneToday = ({m}: {m: TodayModel}) => {
               {formatCountdown(day.next.time.getTime() - day.now.getTime())}
             </Text>
             <Text size={14} color={WHITE_88} style={styles.centered}>
-              {fajrEnding
-                ? I18n.t('today.endsAt', {time: fmt(day.next.time)})
+              {fajrEnding || !nowLine
+                ? m.atLine
                 : I18n.t(
                     // After Isha the countdown is to tomorrow's Fajr, which isn't the Fajr in the list.
                     m.nextIsTomorrow ? 'today.atTomorrow' : 'today.at',
@@ -158,21 +163,28 @@ const PhoneToday = ({m}: {m: TodayModel}) => {
               <ExactAlarmPrompt onAllow={exactAlarms.allow} palette={t} />
             </View>
           ) : null}
-          <View
-            style={styles.sheetHead}
-            accessible
-            accessibilityRole="header"
-            accessibilityLabel={joinLabel(I18n.t('today.title'), m.asrLabel)}>
-            <Text weight="semibold" size={13} color={t.muted} style={styles.caps}>
-              {I18n.t('today.title').toUpperCase()}
-            </Text>
+          <View style={styles.sheetHead}>
             <Text
+              weight="semibold"
               size={13}
               color={t.muted}
-              numberOfLines={big ? undefined : 1}
-              style={styles.shrink}>
-              {m.asrLabel}
+              accessibilityRole="header"
+              accessibilityLabel={I18n.t('today.title')}
+              style={styles.caps}>
+              {I18n.t('today.title').toUpperCase()}
             </Text>
+            {/* The method's acronym; the full name is what a screen reader says. */}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${I18n.t('methods.title')}: ${m.method.name}`}
+              accessibilityHint={I18n.t('today.methodHint')}
+              onPress={() => navigation.navigate('settings')}
+              style={styles.methodLink}>
+              <Text weight="bold" size={13} color={t.accent} style={styles.caps}>
+                {m.method.short}
+              </Text>
+              <Icon name="chevron" size={14} color={t.accent} strokeWidth={2.2} />
+            </Pressable>
           </View>
           {/* Sunrise is on the sun arc above, so the list has only the five prayers. */}
           {day.list
@@ -245,14 +257,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     minHeight: 44,
-    paddingLeft: 12,
-    paddingRight: 16,
+    paddingLeft: 10,
+    paddingRight: 14,
     borderRadius: 999,
     backgroundColor: 'rgba(255,255,255,0.16)',
     flexShrink: 1,
+    maxWidth: '55%',
   },
-  dates: {marginTop: 22, gap: 4},
-  next: {marginTop: 26, gap: 2, alignItems: 'center'},
+  dates: {flexShrink: 1, minWidth: 0, gap: 2},
+  next: {marginTop: 34, gap: 2, alignItems: 'center'},
   centered: {textAlign: 'center'},
   countdown: {lineHeight: 68, letterSpacing: -1.9, fontVariant: ['tabular-nums']},
   skyBottom: {marginTop: 'auto', paddingTop: 20, paddingBottom: 34},
@@ -283,7 +296,15 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingTop: 14,
     paddingBottom: 10,
-    paddingHorizontal: 8,
+    paddingStart: 8,
+  },
+  methodLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    minHeight: 44,
+    marginVertical: -12,
+    paddingHorizontal: 6,
   },
   caps: {letterSpacing: 0.8},
   prompt: {paddingTop: 16},

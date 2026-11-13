@@ -103,6 +103,10 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
   isn't in Today's list and is never notified: it's on the sun arc), `headsUp` (extra notification 10 min before), `timeFormat`, `city`, `highLats`
   (`NightMiddle` default / `AngleBased` / `OneSeventh`), `onboarded`, `adjustments`,
   `travelAlerts`, `liveActivity`.
+- Today's top line: the date (Hijri under it) at the start, the location pill at the end (no
+  settings button on iPhone). Above the list, the method's acronym (`methodShort`: "UKIS",
+  "ISNA"…) links to Settings; a screen reader says the full name. Between sunrise and Dhuhr the
+  line under the countdown is just "at 12:31 PM" (the old "Fajr has ended" was dropped).
 - During Fajr the countdown is to sunrise and reads **"Fajr ends in"** (`today.endsIn`), on Today,
   in the widgets (`inLabel`, `untilLabel` → `widget.untilEnd`) and the Live Activity.
 - Far north in summer Isha can be after midnight (Calgary, June, Karachi: 01:38).

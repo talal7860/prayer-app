@@ -11,6 +11,7 @@ import useExactAlarms from '../../hooks/useExactAlarms';
 import useWindowControls from '../../hooks/useWindowControls';
 import I18n from '../../I18n';
 import {formatCoords, formatTime} from '../../lib/prayerDay';
+import {methodName, methodShort} from '../../lib/prayerTimes';
 import {paletteFor} from '../../theme/tokens';
 import useA11yPrefs, {announce} from '../../hooks/useA11yPrefs';
 import {countdownLabel, joinLabel, prayerLabel} from '../../lib/a11y';
@@ -18,7 +19,7 @@ import {countdownLabel, joinLabel, prayerLabel} from '../../lib/a11y';
 /** Everything the three Today layouts (phone, cover, wide) share. */
 const useToday = () => {
   const navigation = useNavigation<TabNavigation>();
-  const {settings, setSetting, calculationMethod} = useAppSettings();
+  const {settings, setSetting} = useAppSettings();
   const {isDark: systemDark} = usePalette();
   const day = usePrayerDay();
   const travel = useTravelCheck();
@@ -51,11 +52,11 @@ const useToday = () => {
   const headline = fajrEnding
     ? I18n.t('today.endsIn', {label: fajrLabel})
     : I18n.t('today.in', {label: nextLabel});
-  const asrName = I18n.t(`asrNames.${settings.asr}`);
-  const asrLabel = I18n.t('today.asrLabel', {
-    method: calculationMethod().split(',').pop()?.trim(),
-    asr: asrName,
-  });
+  // The method's acronym ("UKIS") above the list; it opens Settings.
+  const method = {
+    short: methodShort(settings.calculationMethod),
+    name: methodName(settings.calculationMethod),
+  };
   const city = settings.city ?? formatCoords(settings.location);
   const {muted} = settings;
   const toggleBell = (key: PrayerKey) => setSetting('muted')({...muted, [key]: !muted[key]});
@@ -64,9 +65,10 @@ const useToday = () => {
     ? I18n.t('today.endsAt', {time: fmtNext})
     : I18n.t(nextIsTomorrow ? 'today.nextAtTomorrow' : 'today.nextAt', {time: fmtNext});
   const ishaName = I18n.t('prayer.isha');
+  // Between sunrise and Dhuhr it isn't any prayer's time, so there's nothing to say.
   const nowLine =
     day.period === 'morning'
-      ? I18n.t('today.fajrEnded')
+      ? ''
       : I18n.t('today.nowTime', {
           label: day.current ? day.list.find(p => p.key === day.current)?.label : ishaName,
         });
@@ -130,7 +132,7 @@ const useToday = () => {
     fajrEnding,
     nextIsTomorrow,
     headline,
-    asrLabel,
+    method,
     city,
     muted,
     toggleBell,

@@ -13,7 +13,11 @@
         "NSLocationWhenInUseUsageDescription": "Location Services required for fetching city and country",
         "UIViewControllerBasedStatusBarAppearance": false,
         "UIBackgroundModes": ["fetch", "processing"],
-        "INAlternativeAppNames": [{"INAlternativeAppName": "Adhan"}],
+        "INAlternativeAppNames": [
+          {
+            "INAlternativeAppName": "Adhan"
+          }
+        ],
         "UISupportedInterfaceOrientations~ipad": [
           "UIInterfaceOrientationPortrait",
           "UIInterfaceOrientationPortraitUpsideDown",
@@ -46,7 +50,8 @@
       ],
       "blockedPermissions": [
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.FOREGROUND_SERVICE_LOCATION"
+        "android.permission.FOREGROUND_SERVICE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION"
       ]
     },
     "plugins": [
@@ -70,9 +75,11 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Location Services required for fetching city and country",
-          "locationAlwaysAndWhenInUsePermission": "Travel alerts use your location in the background to tell you when prayer times change because you are in another city.",
-          "isAndroidBackgroundLocationEnabled": true
+          "locationWhenInUsePermission": "Your location is used to calculate prayer times for where you are.",
+          "locationAlwaysAndWhenInUsePermission": false,
+          "locationAlwaysPermission": false,
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidBackgroundLocationEnabled": false
         }
       ],
       "expo-font",

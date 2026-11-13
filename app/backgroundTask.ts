@@ -3,8 +3,6 @@ import * as TaskManager from 'expo-task-manager';
 import {rescheduleNotifications} from './lib/notifications';
 import {loadSettings} from './lib/settingsStore';
 import {refreshWidgets} from './lib/widgets';
-import {checkTravel} from './travelTask';
-import {Platform} from 'react-native';
 
 export const RESCHEDULE_TASK = 'reschedule-prayer-notifications';
 
@@ -16,10 +14,6 @@ TaskManager.defineTask(RESCHEDULE_TASK, async () => {
     const settings = await loadSettings();
     refreshWidgets(settings);
     await rescheduleNotifications(settings);
-    // Android travel alerts: no geofence without fine location, so check here instead.
-    if (Platform.OS === 'android' && settings.travelAlerts) {
-      await checkTravel(settings).catch((error: unknown) => console.warn(error));
-    }
     return BackgroundTask.BackgroundTaskResult.Success;
   } catch (error) {
     console.warn(error);

@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   Alert,
-  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -26,7 +25,6 @@ import usePalette from '../../hooks/usePalette';
 import I18n from '../../I18n';
 import {formatCoords} from '../../lib/prayerDay';
 import {isHighLatitude} from '../../lib/recommend';
-import {backgroundLocationAllowed} from '../../travelTask';
 import {adjustmentSummary} from './Adjust';
 import useReadableWidth from '../../hooks/useReadableWidth';
 import {isLargeText} from '../../lib/a11y';
@@ -51,22 +49,6 @@ const SettingsScreen = () => {
       .catch((error: unknown) => {
         Alert.alert(String(error));
       });
-  };
-
-  const setTravelAlerts = async (on: boolean) => {
-    if (!on) {
-      setSetting('travelAlerts')(false);
-      return;
-    }
-    const allowed = await backgroundLocationAllowed(true).catch(() => false);
-    if (allowed) {
-      setSetting('travelAlerts')(true);
-      return;
-    }
-    Alert.alert(I18n.t('travel.needsAlways'), I18n.t('travel.needsAlwaysBody'), [
-      {text: I18n.t('locations.goToSettings'), onPress: () => Linking.openSettings()},
-      {text: I18n.t('travel.notNow'), style: 'cancel'},
-    ]);
   };
 
   return (
@@ -106,19 +88,6 @@ const SettingsScreen = () => {
               {I18n.t('settings.change')}
             </Text>
           </Pressable>
-        </Card>
-        <Card style={styles.below}>
-          <Row
-            title={I18n.t('settings.travelAlerts')}
-            subtitle={I18n.t('settings.travelAlertsHint')}
-            last>
-            <Toggle
-              value={settings.travelAlerts}
-              onChange={on => void setTravelAlerts(on)}
-              accessibilityLabel={I18n.t('settings.travelAlerts')}
-              accessibilityHint={I18n.t('settings.travelAlertsHint')}
-            />
-          </Row>
         </Card>
 
         <SectionLabel>{I18n.t('settings.calculationSection')}</SectionLabel>
@@ -261,7 +230,6 @@ const styles = StyleSheet.create({
   },
   badge: {width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center'},
   flex: {flex: 1, minWidth: 0, gap: 2},
-  below: {marginTop: 10},
   stacked: {flexDirection: 'column', alignItems: 'flex-start'},
   stackedText: {alignSelf: 'stretch', gap: 2},
   link: {minHeight: 44, justifyContent: 'center', paddingHorizontal: 4},

@@ -31,11 +31,10 @@ const run = async (settings: Settings, now: Date) => {
   const base = startOfDay(now);
   const days = range(0, DAYS_AHEAD).map(i => prayerTimesFor(settings, addDays(base, i)));
   const plan = fillSchedule(days, settings, now);
-  const adhan = AppConstants.notificationChannels[settings.sound];
   const plain = AppConstants.notificationChannels.default;
   await Promise.all(
     plan.map(n => {
-      const channel = n.kind === 'adhan' ? adhan : plain;
+      const channel = n.kind === 'adhan' ? AppConstants.adhanChannel(settings, n.prayer) : plain;
       return Notifications.scheduleNotificationAsync({
         identifier: notificationId(n),
         content: {
@@ -100,7 +99,7 @@ export const scheduleTestNotification = async (settings: Settings): Promise<bool
   if (!granted) {
     return false;
   }
-  const channel = AppConstants.notificationChannels[settings.sound];
+  const channel = AppConstants.adhanChannel(settings);
   await Notifications.scheduleNotificationAsync({
     identifier: `${TEST_PREFIX}${String(Date.now())}`,
     content: {

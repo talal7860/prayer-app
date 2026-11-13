@@ -325,6 +325,18 @@ One-time setup (needs the account owner):
     on `#2453B3`, `#0D1120` in dark mode.
   - The PNGs were rendered from the design's SVG with `@resvg/resvg-js` (not a project dependency).
     To change them, edit the SVG and re-render all five at 1024², then `npx expo prebuild --clean`.
+- **Adhan sounds** (Settings → Adhan sound, `app/screens/SettingsScreen/Sound`): Makkah, Istanbul,
+  Konya, Casablanca, Tripoli, Isfahan and Aaqib Azeez, plus the system default, each with a play
+  preview (`expo-audio`). A **Fajr adhan** ("as-salatu khayrun min an-nawm") plays at Fajr when
+  `settings.fajrAdhan` is on (default) and an adhan is chosen (`AppConstants.adhanChannel`); it isn't
+  an all-day choice. Every sound is a bundled ≤ 30 s WAV in `assets/sounds/` (listed in
+  `expo-notifications`' `sounds`) with its **own Android channel** (`AppConstants.sounds[].channelId`;
+  a test checks the list and the files match). The recordings are openly licensed, from Wikimedia
+  Commons (`assets/sounds/CREDITS.md`, credited in the app). Madinah, Al-Aqsa and famous reciters
+  aren't included: no openly licensed copies exist, and "public domain" uploads of broadcasts aren't
+  the uploader's to license. To add one: a 29.5 s, 22.05 kHz mono WAV at about −12 LUFS (the ffmpeg
+  line is in CREDITS.md), app.json `sounds`, an entry in `AppConstants.sounds` with a new channel id,
+  a name in all three locales, and a credit.
 - Azan sound `assets/sounds/makkah_azan.wav` (29 s, 16-bit mono 22 kHz) is bundled by the
   `expo-notifications` plugin `sounds` option. Code refers to it by file name
   (`AppConstants.sounds.mecca.path`). **iOS notification sounds must be ≤ 30 s and

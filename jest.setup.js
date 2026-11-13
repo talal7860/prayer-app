@@ -6,3 +6,18 @@ jest.mock('expo-widgets', () => {
     createLiveActivity: jest.fn(() => ({start: jest.fn(), getInstances: jest.fn(() => [])})),
   };
 });
+
+// expo-audio (the adhan previews in Settings → Adhan sound) has no native module in Jest.
+jest.mock('expo-audio', () => {
+  const player = {
+    replace: jest.fn(),
+    play: jest.fn(),
+    pause: jest.fn(),
+    seekTo: jest.fn(() => Promise.resolve()),
+  };
+  return {
+    __player: player,
+    useAudioPlayer: () => player,
+    useAudioPlayerStatus: () => ({playing: false, didJustFinish: false}),
+  };
+});

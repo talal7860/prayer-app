@@ -43,7 +43,8 @@
     "timeFormat": "صيغة الوقت",
     "unknownCity": "الموقع الحالي",
     "highLats": "خطوط العرض العليا",
-    "adjust": "تعديل الأوقات"
+    "adjust": "تعديل الأوقات",
+    "version": "الإصدار {{version}} ({{build}})"
   },
   "notification": {
     "title": "حان وقت {{label}} - {{time}}",

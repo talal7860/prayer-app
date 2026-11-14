@@ -98,6 +98,8 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
   doesn't mirror in RTL. A light `expo-haptics` tap when it turns to facing (once each time).
 - **Adjust times** (Settings → Calculation): per-prayer ± minutes (`settings.adjustments`,
   ±30), adhan's `params.adjustments` in `prayerTimesFor` (on top of the method's own).
+- Settings ends with **"Version 1.2.0 (42)"** (`expo-application`: the marketing version and the
+  build number EAS assigns), to tell which build is installed. Local dev builds show build 1.
 - `useCityName` fills `settings.city` by reverse geocoding when it's missing.
 - Settings model (`Settings` in `main.d.ts`): `muted` (per-prayer bells; Sunrise has no bell,
   isn't in Today's list and is never notified: it's on the sun arc), `headsUp` (extra notification 10 min before), `timeFormat`, `city`, `highLats`

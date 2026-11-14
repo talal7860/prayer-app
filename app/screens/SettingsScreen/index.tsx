@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import * as Application from 'expo-application';
 import type {TabNavigation} from '../../navigation';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Card, Row, SectionLabel} from '../../components/ui/Card';
@@ -29,6 +30,16 @@ import {adjustmentSummary} from './Adjust';
 import useReadableWidth from '../../hooks/useReadableWidth';
 import {isLargeText} from '../../lib/a11y';
 
+/** "Version 1.2.0 (42)": the store version and the build number EAS gives each build. */
+const versionLabel = (): string | null => {
+  const version = Application.nativeApplicationVersion;
+  if (!version) {
+    return null;
+  }
+  const build = Application.nativeBuildVersion;
+  return build ? I18n.t('settings.version', {version, build}) : version;
+};
+
 const SettingsScreen = () => {
   const column = useReadableWidth();
   const navigation = useNavigation<TabNavigation>();
@@ -39,6 +50,7 @@ const SettingsScreen = () => {
   // At large text sizes the location card stacks, so the city isn't squeezed to a letter.
   const {fontScale} = useWindowDimensions();
   const big = isLargeText(fontScale);
+  const version = versionLabel();
   const sendTest = () => {
     scheduleTestNotification(settings)
       .then(sent => {
@@ -204,6 +216,12 @@ const SettingsScreen = () => {
             />
           </Row>
         </Card>
+
+        {version ? (
+          <Text size={13} color={t.muted} selectable style={styles.version}>
+            {version}
+          </Text>
+        ) : null}
       </ScrollView>
     </View>
   );
@@ -233,6 +251,7 @@ const styles = StyleSheet.create({
   stacked: {flexDirection: 'column', alignItems: 'flex-start'},
   stackedText: {alignSelf: 'stretch', gap: 2},
   link: {minHeight: 44, justifyContent: 'center', paddingHorizontal: 4},
+  version: {textAlign: 'center', paddingTop: 24},
 });
 
 export default SettingsScreen;

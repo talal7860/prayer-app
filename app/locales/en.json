@@ -43,7 +43,8 @@
     "timeFormat": "Time format",
     "unknownCity": "Current location",
     "highLats": "High latitudes",
-    "adjust": "Adjust times"
+    "adjust": "Adjust times",
+    "version": "Version {{version}} ({{build}})"
   },
   "notification": {
     "title": "It's {{label}} time - {{time}}",

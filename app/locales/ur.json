@@ -43,7 +43,8 @@
     "timeFormat": "وقت کا انداز",
     "unknownCity": "موجودہ مقام",
     "highLats": "بلند عرض البلد",
-    "adjust": "اوقات میں ردوبدل"
+    "adjust": "اوقات میں ردوبدل",
+    "version": "ورژن {{version}} ({{build}})"
   },
   "notification": {
     "title": "{{label}} کا وقت ہو گیا - {{time}}",

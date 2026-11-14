@@ -329,6 +329,18 @@ For the next SDK bump: `npx expo install expo@^<next> --fix`, then `npx expo-doc
   plain `eas build` / `eas submit` runs. Needs Homebrew's `fastlane` (only that is put first on PATH: an rvm Ruby's
   fastlane can be broken, and Homebrew's CocoaPods can be too), Xcode, and a JDK 17 for Android.
   Only run local builds when asked; CI and "ship it" use EAS cloud builds.
+- **Promoting to production** (`scripts/promote.sh [ios|android|all]`): takes the builds release.sh
+  uploaded to the stores' production. iOS: `scripts/appstore_submit.py` (App Store Connect API) creates
+  the App Store version, attaches the newest processed TestFlight build, sets What's New (not on an
+  app's first version) and submits it for review, released automatically or by hand after approval.
+  Android: `scripts/play_promote.py` (Play Developer API, an edit) copies the internal testing release to
+  the production track, everyone or a staged rollout, with release notes (≤ 500 characters, the
+  listing's default language, en-CA) and commits it for Google's review. It **asks**: stores, version,
+  release notes (drafted from that version's CHANGELOG.md section: keep, edit, write, none), iOS release
+  timing, Android versionCode and rollout %, then a final y/N per store. `--dry-run` only reads (Play
+  validates the edit and discards it); flags answer the questions, `--yes` takes defaults. Both scripts
+  are standard-library Python, signing their tokens with `openssl`. Only run it when asked: it submits
+  to the stores.
 - The workflow uses `--no-wait`: a green Action means "builds queued". Build and submit
   results are on expo.dev.
 

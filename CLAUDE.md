@@ -102,7 +102,7 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
   build number EAS assigns), to tell which build is installed. Local dev builds show build 1.
 - `useCityName` fills `settings.city` by reverse geocoding when it's missing.
 - Settings model (`Settings` in `main.d.ts`): `muted` (per-prayer bells; Sunrise has no bell,
-  isn't in Today's list and is never notified: it's on the sun arc), `headsUp` (extra notification 10 min before), `timeFormat`, `city`, `highLats`
+  isn't in Today's list and is never notified: it's on the sun arc), `endsSoon` (extra notification 20 min before each prayer's time ends: Fajr at sunrise, Dhuhr at Asr, Asr at Maghrib, Maghrib at Isha, Isha at the next Fajr; replaced the 10-minute `headsUp`, and a saved `headsUp: true` turns it on), `timeFormat`, `city`, `highLats`
   (`NightMiddle` default / `AngleBased` / `OneSeventh`), `onboarded`, `adjustments`,
   `travelAlerts`, `liveActivity`.
 - Today's top line: the date (Hijri under it) at the start, the location pill at the end (no
@@ -182,6 +182,8 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
     as "Asr now" minutes before Asr. Nothing is filled between sunrise and Dhuhr. From Isha until
     Fajr the list is Isha's day (yesterday's after midnight, like the arc) with Isha filled, and
     nothing is gold: the next Fajr is another day, and the countdown names it.
+  - The widget lists include **Sunrise** (when Fajr ends; gold during Fajr). The arc's marks stay the
+    five prayers.
   - The widget gallery caches previews; add the widget to the home screen to see a change.
   - A layout function has the `'widget'` directive and runs in the widget's **own JS runtime**:
     no hooks, no app imports, no module-level values. Only `@expo/ui` components/modifiers
@@ -309,6 +311,7 @@ For the next SDK bump: `npx expo install expo@^<next> --fix`, then `npx expo-doc
 - Android release builds run `lintVitalRelease`. Strings in `app/locales/native/*.json` must be
   under `"ios"` or `"android"`: top-level keys go to both, and iOS keys in Android's
   `strings.xml` fail lint (`ExtraTranslation`).
+- **`CHANGELOG.md`**: add a line under the upcoming version for every user-facing PR.
 - `eas.json`: `appVersionSource: remote` + `autoIncrement`, so EAS owns the iOS build number
   and Android `versionCode`. Don't bump them in `app.json`. Bump `expo.version` for a new
   marketing version.
@@ -352,7 +355,7 @@ One-time setup (needs the account owner):
   #23. Renamed from `org.personal.talal7860.PrayerTimes` / `com.talal7860.prayertimes` before
   any store release. Don't change them again once the app is in the stores.
 - iOS entitlements: App Group `group.com.conelabs.adhanapp`, Time Sensitive notifications
-  (adhan and heads-up use `interruptionLevel: 'timeSensitive'` to get through Focus). **No push
+  (adhan and ending reminders use `interruptionLevel: 'timeSensitive'` to get through Focus). **No push
   entitlement**: `expo-notifications` has `enableRemoteNotifications: false` (local only).
   Background modes: fetch + processing.
 - Icons and splash use the **"Arch"** concept from the design canvas's "App icon concepts"

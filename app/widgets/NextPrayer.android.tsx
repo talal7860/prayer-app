@@ -136,7 +136,7 @@ const NextPrayer = (snapshot: NextPrayerProps) => {
         </Text>
       </Column>
 
-      {/* The day's five prayers along the bottom; the next one highlighted. */}
+      {/* The day's times along the bottom, Sunrise included: now filled, next gold. */}
       <Box contentAlignment="bottomCenter" modifiers={[fillMaxSize()]}>
         <Row
           horizontalAlignment="center"
@@ -151,7 +151,8 @@ const NextPrayer = (snapshot: NextPrayerProps) => {
               key={r.label}
               horizontalAlignment="center"
               modifiers={[
-                width(58),
+                // Six chips (with Sunrise) fit a 4×2 widget.
+                width(50),
                 padding(0, 6, 0, 6),
                 cornerRadius(10),
                 // Filled = it's that prayer's time now, as on Today; the next one is gold.
@@ -175,7 +176,7 @@ const NextPrayer = (snapshot: NextPrayerProps) => {
               <Text
                 color={white}
                 maxLines={1}
-                style={{fontSize: 14, fontWeight: r.next ? 'bold' : 'normal'}}>
+                style={{fontSize: 13, fontWeight: r.next ? 'bold' : 'normal'}}>
                 {r.hm}
               </Text>
             </Column>

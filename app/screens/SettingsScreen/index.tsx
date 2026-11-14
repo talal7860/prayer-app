@@ -160,12 +160,12 @@ const SettingsScreen = () => {
             value={AppConstants.soundName(settings.sound)}
             onPress={() => navigation.navigate('sound')}
           />
-          <Row title={I18n.t('settings.headsUp')} subtitle={I18n.t('settings.headsUpHint')}>
+          <Row title={I18n.t('settings.endsSoon')} subtitle={I18n.t('settings.endsSoonHint')}>
             <Toggle
-              value={settings.headsUp}
-              onChange={setSetting('headsUp')}
-              accessibilityLabel={I18n.t('settings.headsUp')}
-              accessibilityHint={I18n.t('settings.headsUpHint')}
+              value={settings.endsSoon}
+              onChange={setSetting('endsSoon')}
+              accessibilityLabel={I18n.t('settings.endsSoon')}
+              accessibilityHint={I18n.t('settings.endsSoonHint')}
             />
           </Row>
           {Platform.OS === 'ios' && (

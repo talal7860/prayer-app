@@ -25,8 +25,10 @@ export const WIDGET_SKIES: Record<Period, [string, string]> = {
   isha: ['#060A1C', '#1B2650'],
 };
 
-/** The five prayers. Sunrise is on the arc as the sun, not in the lists. */
+/** The five prayers: marks on the arc (the sun is drawn there by itself). */
 const LISTED: PrayerKey[] = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+/** The widgets' lists also show Sunrise, which is when Fajr's time ends. */
+const IN_LIST: PrayerKey[] = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
 const SHORT: Record<PrayerKey, string> = {
   fajr: 'week.fajr',
   sunrise: 'week.rise',
@@ -99,7 +101,7 @@ export const nextPrayerProps = (settings: Settings, at: Date): NextPrayerProps =
       return {t: along(d), next: nxt, past: !nxt && d.getTime() <= t};
     }),
     prayers: prayerDay
-      .filter(p => LISTED.includes(p.key))
+      .filter(p => IN_LIST.includes(p.key))
       .map(p => ({
         name: p.label,
         label:

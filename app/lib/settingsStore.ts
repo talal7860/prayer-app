@@ -16,7 +16,7 @@ export const defaultSettings: Settings = Object.freeze({
   fajrAdhan: true,
   muted: {sunrise: true},
   adjustments: {},
-  headsUp: false,
+  endsSoon: false,
   // Opt-in: off until someone turns it on (setup or Settings → Notifications).
   liveActivity: false,
   timeFormat: '12h',
@@ -28,24 +28,33 @@ export const defaultSettings: Settings = Object.freeze({
 const REMOVED_SOUNDS = ['istanbul', 'konya', 'casablanca', 'tripoli', 'isfahan', 'azeez'];
 
 /** What may be saved: any subset of the settings, plus keys from older versions. */
-type StoredSettings = Partial<Settings> & {fajrIshaCalculation?: string; travelAlerts?: boolean};
+type StoredSettings = Partial<Settings> & {
+  fajrIshaCalculation?: string;
+  travelAlerts?: boolean;
+  headsUp?: boolean;
+};
 
 /** Saved settings on top of `base`, with old keys dropped. */
 export const parseSettings = (
   stored: string | null,
   base: Settings = defaultSettings,
 ): Settings => {
-  // Removed settings, dropped if saved: `fajrIshaCalculation` (the old 90-minute rule) and
-  // `travelAlerts` (background "Always" location).
+  // Removed settings, dropped if saved: `fajrIshaCalculation` (the old 90-minute rule),
+  // `travelAlerts` (background "Always" location) and `headsUp` (10 minutes before each prayer,
+  // replaced by `endsSoon`: someone who had it on gets the new reminder).
   const {
     fajrIshaCalculation: _removed,
     travelAlerts: _travel,
+    headsUp,
     ...parsed
   } = stored ? (JSON.parse(stored) as StoredSettings) : {};
   const next: Settings = merge(base)(parsed);
   // Installed before the setup screen existed: they've already set things up.
   if (stored && parsed.onboarded === undefined) {
     next.onboarded = true;
+  }
+  if (parsed.endsSoon === undefined && headsUp) {
+    next.endsSoon = true;
   }
   if (REMOVED_SOUNDS.includes(next.sound)) {
     next.sound = 'mecca';

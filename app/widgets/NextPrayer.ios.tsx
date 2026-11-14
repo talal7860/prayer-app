@@ -233,14 +233,15 @@ const NextPrayer = (p: NextPrayerProps, env: WidgetEnvironment) => {
             <Text modifiers={[font({size: 12}), foregroundStyle(soft)]}>{p.atLabel}</Text>
           </VStack>
         </ZStack>
-        <VStack spacing={4}>
+        <VStack spacing={2}>
           {p.prayers.map(r => (
             <HStack
               key={r.name}
               spacing={10}
               modifiers={[
                 padding({horizontal: 10}),
-                frame({height: 30}),
+                // Six rows (with Sunrise) under the 162 pt sky still fit the large widget.
+                frame({height: 26}),
                 background(
                   r.now ? '#1E2848' : 'rgba(0,0,0,0)',
                   shapes.roundedRectangle({cornerRadius: 9}),

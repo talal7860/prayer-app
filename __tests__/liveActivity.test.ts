@@ -58,7 +58,14 @@ it('never starts or updates one when off, and ends a running one right away', as
 });
 
 it('drops the removed travel alerts setting from saved settings', () => {
-  const saved = parseSettings(JSON.stringify({travelAlerts: true, headsUp: true}));
+  const saved = parseSettings(JSON.stringify({travelAlerts: true}));
   expect(saved).not.toHaveProperty('travelAlerts');
-  expect(saved.headsUp).toBe(true);
+});
+
+it('turns the old 10-minute heads-up into the ending reminder', () => {
+  const old = parseSettings(JSON.stringify({headsUp: true}));
+  expect(old).not.toHaveProperty('headsUp');
+  expect(old.endsSoon).toBe(true);
+  expect(parseSettings(JSON.stringify({headsUp: false})).endsSoon).toBe(false);
+  expect(parseSettings(JSON.stringify({headsUp: true, endsSoon: false})).endsSoon).toBe(false);
 });

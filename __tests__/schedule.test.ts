@@ -13,7 +13,7 @@ const day = (d: number): PrayerTimeLabel[] => [
 it('skips muted prayers and past times', () => {
   const plan = planNotifications(
     [day(11), day(12)],
-    {muted: {sunrise: true, asr: true}, headsUp: false, timeFormat: '12h'},
+    {muted: {sunrise: true, asr: true}, endsSoon: false, timeFormat: '12h'},
     at(11, 13),
   );
   expect(plan.map(p => `${p.date.getDate()} ${p.prayer}`)).toEqual([
@@ -30,36 +30,56 @@ it('skips muted prayers and past times', () => {
 it('never schedules sunrise, even when its bell was on', () => {
   const plan = planNotifications(
     [day(11)],
-    {muted: {}, headsUp: true, timeFormat: '24h'},
+    {muted: {}, endsSoon: true, timeFormat: '24h'},
     at(11, 0, 0),
   );
   expect(plan.some(p => p.prayer === 'sunrise')).toBe(false);
 });
 
-it('adds a heads-up 10 minutes before each prayer', () => {
+it('reminds 20 minutes before each prayer’s time ends', () => {
   const plan = planNotifications(
-    [day(11)],
-    {muted: {}, headsUp: true, timeFormat: '24h'},
+    [day(11), day(12)],
+    {muted: {}, endsSoon: true, timeFormat: '24h'},
     at(11, 15, 0),
   );
-  expect(plan.map(p => `${p.kind} ${p.prayer}`)).toEqual([
+  expect(plan.slice(0, 7).map(p => `${p.kind} ${p.prayer}`)).toEqual([
     'adhan asr',
-    'headsUp maghrib',
+    'endsSoon asr', // Asr ends at Maghrib
     'adhan maghrib',
-    'headsUp isha',
+    'endsSoon maghrib', // Maghrib ends at Isha
     'adhan isha',
+    'endsSoon isha', // Isha ends at the next Fajr
+    'adhan fajr',
   ]);
-  expect(plan[1]).toMatchObject({date: at(11, 16, 44), title: 'Maghrib in 10 minutes - 16:54'});
+  expect(plan[1]).toMatchObject({date: at(11, 16, 34), title: 'Asr ends in 20 minutes - 16:54'});
+  expect(plan[5]).toMatchObject({date: at(12, 5, 56), title: 'Isha ends in 20 minutes - 06:16'});
+  // Fajr ends at sunrise.
+  expect(plan.find(p => p.kind === 'endsSoon' && p.prayer === 'fajr')).toMatchObject({
+    date: at(12, 7, 26),
+    title: 'Fajr ends in 20 minutes - 07:46',
+  });
+  // The last Isha has no next Fajr planned, so no reminder.
+  expect(plan.at(-1)).toMatchObject({kind: 'adhan', prayer: 'isha'});
+});
+
+it('no ending reminder for a muted prayer', () => {
+  const plan = planNotifications(
+    [day(11)],
+    {muted: {asr: true}, endsSoon: true, timeFormat: '24h'},
+    at(11, 15, 0),
+  );
+  expect(plan.some(p => p.prayer === 'asr')).toBe(false);
 });
 
 it('stays under the iOS limit of 64 pending notifications for 5 days', () => {
   const days = [11, 12, 13, 14, 15].map(day);
   const plan = planNotifications(
     days,
-    {muted: {sunrise: true}, headsUp: true, timeFormat: '12h'},
+    {muted: {sunrise: true}, endsSoon: true, timeFormat: '12h'},
     at(11, 0),
   );
-  expect(plan.length).toBe(50);
+  // 5 adhans and 5 ending reminders a day, less the last Isha's (no next Fajr planned).
+  expect(plan.length).toBe(49);
 });
 
 describe('fillSchedule', () => {
@@ -68,7 +88,7 @@ describe('fillSchedule', () => {
   it('fills the iOS limit and ends with a reminder to open the app', () => {
     const plan = fillSchedule(
       days,
-      {muted: {sunrise: true}, headsUp: false, timeFormat: '12h'},
+      {muted: {sunrise: true}, endsSoon: false, timeFormat: '12h'},
       at(11, 0),
     );
     expect(plan).toHaveLength(MAX_PENDING);
@@ -85,7 +105,7 @@ describe('fillSchedule', () => {
   it('plans all 14 days when they fit', () => {
     const plan = fillSchedule(
       days,
-      {muted: {fajr: true, sunrise: true, dhuhr: true}, headsUp: false, timeFormat: '12h'},
+      {muted: {fajr: true, sunrise: true, dhuhr: true}, endsSoon: false, timeFormat: '12h'},
       at(11, 0),
     );
     expect(plan).toHaveLength(14 * 3 + 1);
@@ -93,6 +113,6 @@ describe('fillSchedule', () => {
 
   it('schedules nothing when every prayer is muted', () => {
     const muted = {fajr: true, sunrise: true, dhuhr: true, asr: true, maghrib: true, isha: true};
-    expect(fillSchedule(days, {muted, headsUp: false, timeFormat: '12h'}, at(11, 0))).toEqual([]);
+    expect(fillSchedule(days, {muted, endsSoon: false, timeFormat: '12h'}, at(11, 0))).toEqual([]);
   });
 });

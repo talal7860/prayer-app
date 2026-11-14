@@ -59,18 +59,20 @@ export const nextPrayerProps = (settings: Settings, at: Date): NextPrayerProps =
   const fajr = today.find(p => p.key === 'fajr')?.label ?? String(I18n.t('prayer.fajr'));
   const fmt = (d: Date) => formatTime(d, settings.timeFormat);
 
-  // The arc runs Fajr → Isha of the current prayer day (before Fajr, that's still yesterday's).
-  const arc = toDayTimes(t < toDayTimes(today).fajr.getTime() ? yesterday : today);
+  // The current prayer day: before Fajr it's still yesterday's (its Isha is the prayer now).
+  // The arc and the list both show it.
+  const prayerDay = t < toDayTimes(today).fajr.getTime() ? yesterday : today;
+  const arc = toDayTimes(prayerDay);
   const span = arc.isha.getTime() - arc.fajr.getTime();
   const along = (d: Date) => Math.min(1, Math.max(0, (d.getTime() - arc.fajr.getTime()) / span));
   const sunUp = t >= arc.sunrise.getTime() && t <= arc.maghrib.getTime();
 
-  // After Isha the next prayer is tomorrow's Fajr: list tomorrow's times then.
-  const listDay = nextAt > today[today.length - 1].time.getTime() ? tomorrow : today;
+  // Filled = the prayer whose time it is now (none between sunrise and Dhuhr). From Isha until
+  // Fajr that's Isha, so the list stays on Isha's day, as on Today, and the next Fajr (another
+  // day) isn't in it: the countdown names it.
+  const current = info.current ?? (info.period === 'isha' ? 'isha' : null);
   const isNext = (p: PrayerTimeLabel) => p.key === info.next.key && p.time.getTime() === nextAt;
-  // The prayer whose time it is now (none between sunrise and Dhuhr). After Isha the list is
-  // tomorrow's, so nothing in it is now.
-  const isNow = (p: PrayerTimeLabel) => listDay === today && p.key === info.current;
+  const isNow = (p: PrayerTimeLabel) => p.key === current;
 
   return {
     city: settings.city?.split(',')[0] ?? I18n.t('settings.unknownCity'),
@@ -96,7 +98,7 @@ export const nextPrayerProps = (settings: Settings, at: Date): NextPrayerProps =
       const nxt = key === info.next.key && d.getTime() === nextAt;
       return {t: along(d), next: nxt, past: !nxt && d.getTime() <= t};
     }),
-    prayers: listDay
+    prayers: prayerDay
       .filter(p => LISTED.includes(p.key))
       .map(p => ({
         name: p.label,

@@ -35,8 +35,24 @@ it('after Isha the next prayer is the next day’s Fajr', () => {
   const props = nextPrayerProps(settings, new Date(at('isha').getTime() + minutes(30)));
   expect(props.next).toBe('Fajr');
   expect(props.at).toBeGreaterThan(at('isha').getTime());
-  // The list moves on to the next day, so it shows the Fajr it counts down to.
-  expect(props.prayers.filter(p => p.next).map(p => p.name)).toEqual(['Fajr']);
+  // It's still Isha's time: the list stays on today, Isha filled, and tomorrow's Fajr isn't in
+  // it (the countdown names it).
+  expect(props.prayers.filter(p => p.now).map(p => p.name)).toEqual(['Isha']);
+  expect(props.prayers.find(p => p.now)?.time).toBe(nextPrayerProps(settings, day).prayers[4].time);
+  expect(props.prayers.some(p => p.next)).toBe(false);
+});
+
+it('after midnight, before Fajr, it is still yesterday’s Isha', () => {
+  const tomorrowFajr = prayerTimesFor(settings, new Date(2026, 2, 11, 12)).find(
+    p => p.key === 'fajr',
+  )!.time;
+  const props = nextPrayerProps(settings, new Date(tomorrowFajr.getTime() - minutes(60)));
+  expect(props.next).toBe('Fajr');
+  expect(props.at).toBe(tomorrowFajr.getTime());
+  // The list is yesterday's (the arc's day): its Isha is filled, nothing is gold.
+  expect(props.prayers.filter(p => p.now).map(p => p.name)).toEqual(['Isha']);
+  expect(props.prayers.find(p => p.now)?.time).toBe(nextPrayerProps(settings, day).prayers[4].time);
+  expect(props.prayers.some(p => p.next)).toBe(false);
 });
 
 it('fills the prayer whose time it is, not the next one (as on Today)', () => {
@@ -48,9 +64,6 @@ it('fills the prayer whose time it is, not the next one (as on Today)', () => {
   expect(props.nowTag).toBe('Now');
   // Between sunrise and Dhuhr it isn't any prayer's time.
   expect(nextPrayerProps(settings, beforeDhuhr).prayers.some(p => p.now)).toBe(false);
-  // After Isha the list is tomorrow's, so nothing in it is now.
-  const late = nextPrayerProps(settings, new Date(at('isha').getTime() + minutes(30)));
-  expect(late.prayers.some(p => p.now)).toBe(false);
 });
 
 it('the timeline has an entry now and at each prayer time, moving to the next prayer', () => {

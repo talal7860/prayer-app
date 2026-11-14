@@ -179,8 +179,9 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
     takes the full width: centre it with `multilineTextAlignment('center')`.
   - Chips and rows: **filled = the prayer whose time it is now** (`WidgetPrayer.now`, as on
     Today), **gold = the next one** the countdown is to. It used to fill the next one, which read
-    as "Asr now" minutes before Asr. Nothing is filled between sunrise and Dhuhr or after Isha
-    (the list is tomorrow's then).
+    as "Asr now" minutes before Asr. Nothing is filled between sunrise and Dhuhr. From Isha until
+    Fajr the list is Isha's day (yesterday's after midnight, like the arc) with Isha filled, and
+    nothing is gold: the next Fajr is another day, and the countdown names it.
   - The widget gallery caches previews; add the widget to the home screen to see a change.
   - A layout function has the `'widget'` directive and runs in the widget's **own JS runtime**:
     no hooks, no app imports, no module-level values. Only `@expo/ui` components/modifiers

@@ -140,7 +140,7 @@ it('gives every notification a fixed id, and removes pending ones that are not i
 
 it('the id is the kind, the prayer and the minute', () => {
   const date = new Date(2026, 10, 11, 12, 53, 20);
-  expect(notificationId({kind: 'headsUp', prayer: 'dhuhr', title: '', date})).toBe(
-    `prayer:headsUp:dhuhr:${Math.floor(date.getTime() / 60000)}`,
+  expect(notificationId({kind: 'endsSoon', prayer: 'dhuhr', title: '', date})).toBe(
+    `prayer:endsSoon:dhuhr:${Math.floor(date.getTime() / 60000)}`,
   );
 });

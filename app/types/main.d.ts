@@ -34,8 +34,8 @@ type Settings = {
   muted: Partial<Record<PrayerKey, boolean>>;
   /** Minutes added to each calculated time (negative = earlier), to match the local mosque. */
   adjustments: Partial<Record<PrayerKey, number>>;
-  /** Extra reminder 10 minutes before each prayer. */
-  headsUp: boolean;
+  /** Extra reminder 20 minutes before each prayer's time ends ("Fajr ends in 20 minutes"). */
+  endsSoon: boolean;
   /** iOS: the Live Activity countdown (lock screen and Dynamic Island) before each prayer. */
   liveActivity: boolean;
   timeFormat: TimeFormat;

@@ -27,7 +27,7 @@ it('shows the next prayer, its time and the day list', () => {
   expect(props.city).toBe('Calgary');
   expect(props.next).toBe('Dhuhr');
   expect(props.at).toBe(at('dhuhr').getTime());
-  expect(props.prayers.map(r => r.label)).toEqual(['Fajr', 'Dhuhr', 'Asr', 'Magh', 'Isha']);
+  expect(props.prayers.map(r => r.label)).toEqual(['Fajr', 'Rise', 'Dhuhr', 'Asr', 'Magh', 'Isha']);
   expect(props.prayers.filter(p => p.next).map(p => p.name)).toEqual(['Dhuhr']);
 });
 
@@ -38,7 +38,7 @@ it('after Isha the next prayer is the next day’s Fajr', () => {
   // It's still Isha's time: the list stays on today, Isha filled, and tomorrow's Fajr isn't in
   // it (the countdown names it).
   expect(props.prayers.filter(p => p.now).map(p => p.name)).toEqual(['Isha']);
-  expect(props.prayers.find(p => p.now)?.time).toBe(nextPrayerProps(settings, day).prayers[4].time);
+  expect(props.prayers.find(p => p.now)?.time).toBe(nextPrayerProps(settings, day).prayers[5].time);
   expect(props.prayers.some(p => p.next)).toBe(false);
 });
 
@@ -51,7 +51,7 @@ it('after midnight, before Fajr, it is still yesterday’s Isha', () => {
   expect(props.at).toBe(tomorrowFajr.getTime());
   // The list is yesterday's (the arc's day): its Isha is filled, nothing is gold.
   expect(props.prayers.filter(p => p.now).map(p => p.name)).toEqual(['Isha']);
-  expect(props.prayers.find(p => p.now)?.time).toBe(nextPrayerProps(settings, day).prayers[4].time);
+  expect(props.prayers.find(p => p.now)?.time).toBe(nextPrayerProps(settings, day).prayers[5].time);
   expect(props.prayers.some(p => p.next)).toBe(false);
 });
 
@@ -141,4 +141,10 @@ it('gives Android an entry from every prayer time, so the widget moves on by its
   expect(entries.every((e, i) => i === 0 || e.from > (entries[i - 1]?.from ?? 0))).toBe(true);
   expect(entries.length).toBeGreaterThan(8);
   expect(entries.some(e => e.props.entries)).toBe(false);
+});
+
+it('lists Sunrise, gold during Fajr since that is when Fajr ends', () => {
+  const props = nextPrayerProps(settings, new Date(at('fajr').getTime() + minutes(10)));
+  expect(props.prayers.filter(p => p.now).map(p => p.name)).toEqual(['Fajr']);
+  expect(props.prayers.filter(p => p.next).map(p => p.label)).toEqual(['Rise']);
 });

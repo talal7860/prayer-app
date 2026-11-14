@@ -226,7 +226,7 @@ it('switches to Week and Settings', async () => {
   await fireEvent.press(await screen.findByRole('button', {name: /^Week/}));
   expect(await screen.findByText('Next week')).toBeTruthy();
   await fireEvent.press(screen.getByRole('button', {name: /^Settings/}));
-  expect(await screen.findByRole('switch', {name: 'Heads-up reminder'})).toBeTruthy();
+  expect(await screen.findByRole('switch', {name: 'Prayer ending reminder'})).toBeTruthy();
 });
 
 it('has a Qibla tab whose compass runs only while it is open', async () => {

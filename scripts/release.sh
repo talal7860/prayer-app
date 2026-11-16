@@ -113,7 +113,9 @@ for p in "${platforms[@]}"; do
   file="$OUT/AdhanApp-$p-$(date +%Y%m%d-%H%M).$ext"
 
   step "Building $p locally ($(git rev-parse --short HEAD))"
-  "${EAS[@]}" build --platform "$p" --profile production --local --non-interactive --output "$file"
+  "${EAS[@]}" build --platform "$p" --profile production --local --non-interactive --output "$file" 2>&1 |
+    tee "$OUT/last-build.log"
+  number="$(grep -oE '"(buildNumber|versionCode)": "[0-9]+"' "$OUT/last-build.log" | tail -1 | grep -oE '[0-9]+' || true)"
 
   step "Uploading $(basename "$file")"
   if [ "$p" = ios ]; then
@@ -123,4 +125,7 @@ for p in "${platforms[@]}"; do
     upload_android "$file"
     echo "Uploaded to Google Play internal testing."
   fi
+  # For scripts/production-release.sh: which commit each build is (the GitHub release's tag).
+  printf '%s\t%s\t%s\t%s\t%s\n' "$p" "$(python3 -c 'import json; print(json.load(open("app.json"))["expo"]["version"])')" \
+    "${number:-?}" "$(git rev-parse HEAD)" "$(date +%Y-%m-%dT%H:%M)" >>"$OUT/builds.tsv"
 done

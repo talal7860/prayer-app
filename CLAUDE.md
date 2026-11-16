@@ -311,7 +311,8 @@ For the next SDK bump: `npx expo install expo@^<next> --fix`, then `npx expo-doc
 - Android release builds run `lintVitalRelease`. Strings in `app/locales/native/*.json` must be
   under `"ios"` or `"android"`: top-level keys go to both, and iOS keys in Android's
   `strings.xml` fail lint (`ExtraTranslation`).
-- **`CHANGELOG.md`**: add a line under the upcoming version for every user-facing PR.
+- **`CHANGELOG.md`**: add a line under the upcoming version for every user-facing PR. Before a
+  production release the version also gets a `### What's new` (the store text, for users).
 - `eas.json`: `appVersionSource: remote` + `autoIncrement`, so EAS owns the iOS build number
   and Android `versionCode`. Don't bump them in `app.json`. Bump `expo.version` for a new
   marketing version.
@@ -329,18 +330,24 @@ For the next SDK bump: `npx expo install expo@^<next> --fix`, then `npx expo-doc
   plain `eas build` / `eas submit` runs. Needs Homebrew's `fastlane` (only that is put first on PATH: an rvm Ruby's
   fastlane can be broken, and Homebrew's CocoaPods can be too), Xcode, and a JDK 17 for Android.
   Only run local builds when asked; CI and "ship it" use EAS cloud builds.
-- **Promoting to production** (`scripts/promote.sh [ios|android|all]`): takes the builds release.sh
-  uploaded to the stores' production. iOS: `scripts/appstore_submit.py` (App Store Connect API) creates
-  the App Store version, attaches the newest processed TestFlight build, sets What's New (not on an
-  app's first version) and submits it for review, released automatically or by hand after approval.
-  Android: `scripts/play_promote.py` (Play Developer API, an edit) copies the internal testing release to
-  the production track, everyone or a staged rollout, with release notes (≤ 500 characters, the
-  listing's default language, en-CA) and commits it for Google's review. It **asks**: stores, version,
-  release notes (drafted from that version's CHANGELOG.md section: keep, edit, write, none), iOS release
-  timing, Android versionCode and rollout %, then a final y/N per store. `--dry-run` only reads (Play
-  validates the edit and discards it); flags answer the questions, `--yes` takes defaults. Both scripts
-  are standard-library Python, signing their tokens with `openssl`. Only run it when asked: it submits
-  to the stores.
+- **Production release** (`scripts/production-release.sh [ios|android|all]`, and the
+  `production-release` skill in `.claude/skills/`): the builds release.sh uploaded go to production,
+  and GitHub gets a release. It **asks**: stores, version, which TestFlight build and Play versionCode
+  (listed, newest by default: the ones the owner approves), the commit to tag (release.sh records each
+  build's commit in `build/releases/builds.tsv`, else origin/master), What's new (keep, edit, write,
+  none), iOS release timing, Android rollout %. Then it checks everything with the stores and previews
+  GitHub's notes, asks one y/N, and runs in order:
+  - iOS: `scripts/appstore_submit.py` (App Store Connect API) creates the App Store version, attaches
+    the build, sets What's New (every locale; not on an app's first version) and submits it for review.
+  - Android: `scripts/play_promote.py` (Play Developer API, an edit) copies the internal release to the
+    production track (everyone or staged) with the notes (en-CA) and commits it for Google's review.
+  - GitHub: `gh release create v<version> --generate-notes` (PRs since the previous `v` tag).
+  **What's new** is `scripts/whats_new.py <version>`: the version's `### What's new` in CHANGELOG.md
+  (on origin/master), written for users, ≤ 500 characters (Play's limit, one text for both stores);
+  without it, a rough draft from the Added/Changed/Fixed bullets. The skill writes that subsection.
+  `--dry-run` only reads and validates; flags answer the questions, `--yes` asks nothing. The Python
+  scripts are standard library, signing their tokens with `openssl`. Only run it when asked: it
+  submits to the stores.
 - The workflow uses `--no-wait`: a green Action means "builds queued". Build and submit
   results are on expo.dev.
 

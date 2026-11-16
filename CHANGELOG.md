@@ -2,8 +2,20 @@
 
 All notable changes to Adhan Times. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and versions follow the app's marketing version (`expo.version` in `app.json`).
+Each version's `### What's new` is the store text, for users (≤ 500 characters, `scripts/whats_new.py`).
 
 ## [1.1.0] - Unreleased
+
+### What's new
+New
+• Prayer ending reminder: a notification 20 minutes before each prayer's time ends, like "Fajr ends in 20 minutes". It replaces the 10-minute reminder.
+• Widgets show Sunrise, so you can see when Fajr ends.
+• A new Fajr adhan recording.
+• Settings shows which version you have.
+
+Improved
+• Widgets highlight the prayer whose time it is now, and the next one in gold.
+• Today is tidier: the date and your city share one line.
 
 ### Added
 - Settings shows the installed version and build number ([#68](https://github.com/talal7860/prayer-app/pull/68)).

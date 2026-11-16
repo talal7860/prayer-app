@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Promote a Google Play internal testing release to production (Play Developer API).
 
-Run through scripts/promote.sh, which loads the settings and asks the questions. On its own:
+Run through scripts/production-release.sh, which loads the settings and asks the questions. On its own:
 
   scripts/play_promote.py --package com.conelabs.adhanapp --key service-account.json --list
   scripts/play_promote.py --package … --key … [--version-code 16] [--rollout 0.2] \

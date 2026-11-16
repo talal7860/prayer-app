@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Submit an iOS build that's on TestFlight to App Store review (App Store Connect API).
 
-Run through scripts/promote.sh, which loads the settings. On its own:
+Run through scripts/production-release.sh, which loads the settings. On its own:
 
   ASC_API_KEY_ID=… ASC_API_ISSUER_ID=… ASC_API_KEY_PATH=… \
     scripts/appstore_submit.py --app 6833678431 --version 1.1.0 [--build 12] \
@@ -12,7 +12,7 @@ Run through scripts/promote.sh, which loads the settings. On its own:
 3. Attaches the build, sets "What's New" (updates only, not the first version) and the
    release type (after approval, or --manual-release), then submits it for review.
 
---dry-run only reads. Python's standard library plus `openssl` (for the ES256 token).
+--list prints the version's processed TestFlight builds. --dry-run only reads. Python's standard library plus `openssl` (for the ES256 token).
 """
 
 from __future__ import annotations
@@ -115,6 +115,7 @@ def main() -> None:
     ap.add_argument('--app', required=True, help='App Store Connect app id (eas.json ascAppId)')
     ap.add_argument('--version', required=True, help='marketing version, e.g. 1.1.0')
     ap.add_argument('--build', help='build number (default: the newest processed one)')
+    ap.add_argument('--list', action='store_true', help="print the version's processed builds and stop")
     ap.add_argument('--notes-file', help="What's New text (updates only)")
     ap.add_argument('--manual-release', action='store_true', help='release by hand after approval')
     ap.add_argument('--dry-run', action='store_true', help='only read; change nothing')
@@ -129,6 +130,20 @@ def main() -> None:
     )
     app, ver = args.app, args.version
     release_type = 'MANUAL' if args.manual_release else 'AFTER_APPROVAL'
+
+    if args.list:
+        builds = asc.call(
+            'GET',
+            f'/v1/builds?filter[app]={app}&filter[preReleaseVersion.version]={ver}'
+            '&filter[processingState]=VALID&filter[expired]=false&sort=-uploadedDate&limit=10',
+        )['data']
+        if not builds:
+            sys.exit(f'error: no processed build of {ver} on TestFlight')
+        for i, b in enumerate(builds):
+            a = b['attributes']
+            mark = '  (newest)' if i == 0 else ''
+            print(f"{ver} ({a['version']}), uploaded {a['uploadedDate'][:16]}{mark}")
+        return
 
     # 1. The App Store version.
     versions = asc.call('GET', f'/v1/apps/{app}/appStoreVersions?filter[platform]=IOS&limit=50')[

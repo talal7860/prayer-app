@@ -40,7 +40,8 @@ const sounds: Sounds = {
 const fajrSound = {
   name: I18n.t('soundsScreen.fajr'),
   path: 'adhan_fajr.wav',
-  channelId: 'adhan-fajr',
+  // v2: a new recording (Android channels keep the sound they were created with).
+  channelId: 'adhan-fajr-v2',
   preview: require('../assets/sounds/adhan_fajr.wav') as number,
 };
 

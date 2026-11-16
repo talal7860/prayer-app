@@ -370,7 +370,8 @@ One-time setup (needs the account owner):
 - **Adhan sounds** (Settings → Adhan sound, `app/screens/SettingsScreen/Sound`): **Makkah, Madinah
   and Al-Aqsa**, plus the system default. **Choosing one plays it** (`expo-audio`); choosing the one
   that's playing stops it, and a stop button shows beside it while it plays. A **Fajr adhan** ("as-salatu
-  khayrun min an-nawm", Malmö, CC BY) plays at Fajr when `settings.fajrAdhan` is on (default) and an
+  khayrun min an-nawm", a recording the owner gave, Nov 2026; it replaced the Malmö one, channel
+  `adhan-fajr-v2`) plays at Fajr when `settings.fajrAdhan` is on (default) and an
   adhan is chosen (`AppConstants.adhanChannel`); it isn't an all-day choice. Every sound is a bundled
   ≤ 30 s WAV in `assets/sounds/` (listed in `expo-notifications`' `sounds`) with its **own Android
   channel** (`AppConstants.sounds[].channelId`; a test checks the list and the files match). Madinah and

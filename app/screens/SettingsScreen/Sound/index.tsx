@@ -12,9 +12,7 @@ import useReadableWidth from '../../../hooks/useReadableWidth';
 import I18n from '../../../I18n';
 
 /** Where each recording comes from (assets/sounds/CREDITS.md has the details). */
-const CREDITS =
-  'Madinah and Al-Aqsa: assabile.com · Fajr: Islamic Center Malmö (CC BY 3.0), from Wikimedia ' +
-  'Commons. Trimmed to 30 s and volume-matched.';
+const CREDITS = 'Madinah and Al-Aqsa: assabile.com. Trimmed to 30 s and volume-matched.';
 
 type Previewable = {key: string; name: string; preview?: number};
 

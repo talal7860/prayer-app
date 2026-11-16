@@ -11,6 +11,7 @@ and versions follow the app's marketing version (`expo.version` in `app.json`).
 - "Prayer ending reminder": a notification 20 minutes before each prayer's time ends ("Fajr ends in 20 minutes"). It replaces the 10-minute heads-up, and it's on for anyone who had the heads-up on ([#70](https://github.com/talal7860/prayer-app/pull/70)).
 
 ### Changed
+- A new Fajr adhan recording.
 - Today: the date and the city are on one line. The calculation method's acronym (UKIS, ISNA…) sits above the list and opens Settings. The "Fajr has ended" line is gone ([#66](https://github.com/talal7860/prayer-app/pull/66)).
 
 ### Fixed

@@ -18,7 +18,7 @@ import {syncWatch} from '../lib/watch';
 const OLD_GEOFENCE_TASK = 'travel-geofence';
 
 // …and the channels of adhan sounds that were removed (Istanbul, Konya, Casablanca, Tripoli,
-// Isfahan, Aaqib Azeez).
+// Isfahan, Aaqib Azeez), and the first Fajr adhan's channel.
 const OLD_CHANNELS = [
   'prayer-time-notifications-mecca',
   'adhan-makkah',
@@ -28,6 +28,7 @@ const OLD_CHANNELS = [
   'adhan-tripoli',
   'adhan-isfahan',
   'adhan-azeez',
+  'adhan-fajr',
 ];
 
 const createChannels = async () => {

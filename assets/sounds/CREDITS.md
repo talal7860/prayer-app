@@ -10,11 +10,11 @@ shared under the same licence.
 | `makkah_azan.wav` | Makkah adhan | (bundled since the first version) | | |
 | `adhan_madinah.wav` | Madinah adhan (Masjid an-Nabawi) | | Source given by the app's owner | [assabile.com](https://media.assabile.com/assabile/adhan_3435370/e9bb86af0d30.mp3) |
 | `adhan_aqsa.wav` | Al-Aqsa adhan | | Source given by the app's owner | [assabile.com](https://media.assabile.com/assabile/adhan_3435370/c888cbd50d15.mp3) (16 kbps source, so it sounds thin) |
-| `adhan_fajr.wav` | Eid al-Fitr Fajr azan, Malmö Mosque (2012) | Islamic Center Malmö | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Eid_al-Fitr_Fajr_azan_at_Malm%C3%B6_Mosque_-_19_August_2012.webm) |
+| `adhan_fajr.wav` | Fajr adhan (Nov 2026, replaced the Malmö recording) | | Recording given by the app's owner | a TikTok video, downloaded as MP3 (3 min 41 s; the clip is its first 29.5 s) |
 
 The in-app credit is in Settings → Adhan sound (`app/screens/SettingsScreen/Sound`). Madinah and
-Al-Aqsa were added at the owner's request from assabile.com; their licence isn't stated there, so
-confirm the right to use them before a public release.
+Al-Aqsa were added at the owner's request from assabile.com, and the Fajr adhan is a recording the
+owner gave; their licence isn't stated, so confirm the right to use them.
 
 How a clip was made (ffmpeg), e.g. Madinah, whose adhan starts 4 s in:
 

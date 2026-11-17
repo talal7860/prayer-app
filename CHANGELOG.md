@@ -6,6 +6,9 @@ Each version's `### What's new` is the store text, for users (≤ 500 characters
 
 ## [1.2.0] - Unreleased
 
+### Added
+- Sunrise is in Today's list after Fajr, with a bell like the prayers. It's off unless you turn it on, and then a notification comes at sunrise, with the plain sound.
+
 ## [1.1.0] - 2026-11-16
 
 ### What's new

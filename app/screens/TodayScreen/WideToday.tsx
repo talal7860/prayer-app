@@ -39,18 +39,13 @@ const PrayerCard = ({m, slot, width, height, timeSize}: CardProps) => {
         <Text weight="semibold" size={15} color={color} numberOfLines={1} style={styles.shrink}>
           {slot.label}
         </Text>
-        {/* Sunrise is never notified, so it has no bell. */}
-        {slot.key === 'sunrise' ? (
-          <View style={styles.bell} />
-        ) : (
-          <Pressable
-            {...hiddenFromA11y}
-            onPress={() => m.toggleBell(slot.key)}
-            hitSlop={6}
-            style={styles.bell}>
-            <Icon name={off ? 'bellOff' : 'bell'} size={16} color={off ? t.past : t.text} />
-          </Pressable>
-        )}
+        <Pressable
+          {...hiddenFromA11y}
+          onPress={() => m.toggleBell(slot.key)}
+          hitSlop={6}
+          style={styles.bell}>
+          <Icon name={off ? 'bellOff' : 'bell'} size={16} color={off ? t.past : t.text} />
+        </Pressable>
       </View>
       <View style={styles.cardFoot}>
         {slot.isNext ? (

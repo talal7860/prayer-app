@@ -186,61 +186,59 @@ const PhoneToday = ({m}: {m: TodayModel}) => {
               <Icon name="chevron" size={14} color={t.accent} strokeWidth={2.2} />
             </Pressable>
           </View>
-          {/* Sunrise is on the sun arc above, so the list has only the five prayers. */}
-          {day.list
-            .filter(p => p.key !== 'sunrise')
-            .map(p => {
-              const isNow = p.key === day.current;
-              const past = p.time.getTime() <= day.now.getTime() && !isNow;
-              const off = !!muted[p.key];
-              const time = (
-                <Text
-                  weight={isNow ? 'semibold' : 'medium'}
-                  size={16}
-                  color={past ? t.past : t.text}
-                  style={styles.time}>
-                  {fmt(p.time)}
-                </Text>
-              );
-              return (
-                <View
-                  key={p.key}
-                  style={[styles.row, isNow && {backgroundColor: t.hi}]}
-                  {...m.rowA11y(p.key, p.label, p.time, isNow ? 'now' : undefined)}>
-                  <Icon name={p.key} size={20} color={isNow ? t.accent : t.muted} />
-                  <View style={styles.rowText}>
-                    <View style={styles.rowName}>
-                      <Text
-                        weight={isNow ? 'semibold' : 'medium'}
-                        size={16}
-                        color={past ? t.past : t.text}
-                        style={styles.shrink}>
-                        {p.label}
-                      </Text>
-                      {isNow ? (
-                        <View style={[styles.nowPill, {backgroundColor: t.accent}]}>
-                          <Text weight="bold" size={11} color={t.onAccent} style={styles.caps}>
-                            {I18n.t('today.now').toUpperCase()}
-                          </Text>
-                        </View>
-                      ) : null}
-                    </View>
-                    {big ? time : null}
+          {/* The five prayers and Sunrise (when Fajr ends), each with a bell. */}
+          {day.list.map(p => {
+            const isNow = p.key === day.current;
+            const past = p.time.getTime() <= day.now.getTime() && !isNow;
+            const off = !!muted[p.key];
+            const time = (
+              <Text
+                weight={isNow ? 'semibold' : 'medium'}
+                size={16}
+                color={past ? t.past : t.text}
+                style={styles.time}>
+                {fmt(p.time)}
+              </Text>
+            );
+            return (
+              <View
+                key={p.key}
+                style={[styles.row, isNow && {backgroundColor: t.hi}]}
+                {...m.rowA11y(p.key, p.label, p.time, isNow ? 'now' : undefined)}>
+                <Icon name={p.key} size={20} color={isNow ? t.accent : t.muted} />
+                <View style={styles.rowText}>
+                  <View style={styles.rowName}>
+                    <Text
+                      weight={isNow ? 'semibold' : 'medium'}
+                      size={16}
+                      color={past ? t.past : t.text}
+                      style={styles.shrink}>
+                      {p.label}
+                    </Text>
+                    {isNow ? (
+                      <View style={[styles.nowPill, {backgroundColor: t.accent}]}>
+                        <Text weight="bold" size={11} color={t.onAccent} style={styles.caps}>
+                          {I18n.t('today.now').toUpperCase()}
+                        </Text>
+                      </View>
+                    ) : null}
                   </View>
-                  {big ? null : time}
-                  <Pressable
-                    {...hiddenFromA11y}
-                    onPress={() => toggleBell(p.key)}
-                    style={styles.bell}>
-                    <Icon
-                      name={off ? 'bellOff' : 'bell'}
-                      size={19}
-                      color={off ? t.past : isNow ? t.accent : t.text}
-                    />
-                  </Pressable>
+                  {big ? time : null}
                 </View>
-              );
-            })}
+                {big ? null : time}
+                <Pressable
+                  {...hiddenFromA11y}
+                  onPress={() => toggleBell(p.key)}
+                  style={styles.bell}>
+                  <Icon
+                    name={off ? 'bellOff' : 'bell'}
+                    size={19}
+                    color={off ? t.past : isNow ? t.accent : t.text}
+                  />
+                </Pressable>
+              </View>
+            );
+          })}
         </View>
       </ScrollView>
     </View>

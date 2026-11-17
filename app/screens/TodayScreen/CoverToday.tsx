@@ -114,17 +114,12 @@ const CoverToday = ({m, width}: {m: TodayModel; width: number}) => {
                 <Text weight={weight} size={16} color={color} style={styles.time}>
                   {m.fmt(s.time)}
                 </Text>
-                {/* Sunrise is never notified, so it has no bell. */}
-                {s.key === 'sunrise' ? (
-                  <View style={styles.bell} />
-                ) : (
-                  <Pressable
-                    {...hiddenFromA11y}
-                    onPress={() => m.toggleBell(s.key)}
-                    style={styles.bell}>
-                    <Icon name={off ? 'bellOff' : 'bell'} size={18} color={off ? t.past : t.text} />
-                  </Pressable>
-                )}
+                <Pressable
+                  {...hiddenFromA11y}
+                  onPress={() => m.toggleBell(s.key)}
+                  style={styles.bell}>
+                  <Icon name={off ? 'bellOff' : 'bell'} size={18} color={off ? t.past : t.text} />
+                </Pressable>
               </View>
             );
           })}

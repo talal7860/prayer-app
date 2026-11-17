@@ -2,6 +2,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {merge} from 'lodash/fp';
 
 export const SETTINGS_KEY = '@prayer_app:settings';
+/**
+ * Saved with the settings, for changes an old value can't tell apart. 2: Sunrise got a bell
+ * (Nov 2026). Before it Sunrise was never notified, whatever `muted.sunrise` said.
+ */
+export const SETTINGS_VERSION = 2;
 
 export const defaultSettings: Settings = Object.freeze({
   location: {
@@ -14,6 +19,7 @@ export const defaultSettings: Settings = Object.freeze({
   asr: 'Hanafi',
   sound: 'mecca',
   fajrAdhan: true,
+  // Sunrise's bell is off until someone turns it on.
   muted: {sunrise: true},
   adjustments: {},
   endsSoon: false,
@@ -22,6 +28,7 @@ export const defaultSettings: Settings = Object.freeze({
   timeFormat: '12h',
   highLats: 'NightMiddle',
   onboarded: false,
+  version: SETTINGS_VERSION,
 });
 
 /** Adhan sounds that were removed; a saved one goes back to Makkah. */
@@ -56,6 +63,11 @@ export const parseSettings = (
   if (parsed.endsSoon === undefined && headsUp) {
     next.endsSoon = true;
   }
+  // Saved before Sunrise had a bell: keep it silent, as it was, whatever was saved for it.
+  if (stored && (parsed.version ?? 1) < 2) {
+    next.muted = {...next.muted, sunrise: true};
+  }
+  next.version = SETTINGS_VERSION;
   if (REMOVED_SOUNDS.includes(next.sound)) {
     next.sound = 'mecca';
   }

@@ -101,8 +101,10 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
 - Settings ends with **"Version 1.2.0 (42)"** (`expo-application`: the marketing version and the
   build number EAS assigns), to tell which build is installed. Local dev builds show build 1.
 - `useCityName` fills `settings.city` by reverse geocoding when it's missing.
-- Settings model (`Settings` in `main.d.ts`): `muted` (per-prayer bells; Sunrise has no bell,
-  isn't in Today's list and is never notified: it's on the sun arc), `endsSoon` (extra notification 20 min before each prayer's time ends: Fajr at sunrise, Dhuhr at Asr, Asr at Maghrib, Maghrib at Isha, Isha at the next Fajr; replaced the 10-minute `headsUp`, and a saved `headsUp: true` turns it on), `timeFormat`, `city`, `highLats`
+- Settings model (`Settings` in `main.d.ts`): `muted` (per-prayer bells; Sunrise is in Today's
+  list after Fajr with a bell that's **off by default**: a `sunrise` notification, "Sunrise - 7:46 AM",
+  plain sound, no adhan, no "ends soon". Settings saved before it (`version` < 2) keep it off, since
+  Sunrise used to be never notified whatever `muted.sunrise` said), `version` (`SETTINGS_VERSION`), `endsSoon` (extra notification 20 min before each prayer's time ends: Fajr at sunrise, Dhuhr at Asr, Asr at Maghrib, Maghrib at Isha, Isha at the next Fajr; replaced the 10-minute `headsUp`, and a saved `headsUp: true` turns it on), `timeFormat`, `city`, `highLats`
   (`NightMiddle` default / `AngleBased` / `OneSeventh`), `onboarded`, `adjustments`,
   `travelAlerts`, `liveActivity`.
 - Today's top line: the date (Hijri under it) at the start, the location pill at the end (no

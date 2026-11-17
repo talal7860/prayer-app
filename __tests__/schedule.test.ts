@@ -27,10 +27,22 @@ it('skips muted prayers and past times', () => {
   expect(plan[0].title).toBe("It's Maghrib time - 4:54 PM");
 });
 
-it('never schedules sunrise, even when its bell was on', () => {
+it('schedules sunrise when its bell is on: no adhan and no "ends soon"', () => {
   const plan = planNotifications(
     [day(11)],
-    {muted: {}, endsSoon: true, timeFormat: '24h'},
+    {muted: {}, endsSoon: true, timeFormat: '12h'},
+    at(11, 0, 0),
+  );
+  const sunrise = plan.filter(p => p.prayer === 'sunrise');
+  expect(sunrise).toHaveLength(1);
+  expect(sunrise[0].kind).toBe('sunrise');
+  expect(sunrise[0].title).toBe('Sunrise - 7:46 AM');
+});
+
+it('leaves sunrise out while its bell is off', () => {
+  const plan = planNotifications(
+    [day(11)],
+    {muted: {sunrise: true}, endsSoon: false, timeFormat: '12h'},
     at(11, 0, 0),
   );
   expect(plan.some(p => p.prayer === 'sunrise')).toBe(false);

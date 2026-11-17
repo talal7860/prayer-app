@@ -95,7 +95,7 @@ const useToday = () => {
 
   /**
    * One screen-reader stop per prayer row: "Asr, 3:04 PM, now, Reminder, switch, on". Double tap
-   * toggles the bell. Sunrise has no bell, so it's plain text.
+   * toggles the bell. Sunrise has one too (off by default).
    */
   const rowA11y = (
     key: PrayerKey,
@@ -104,9 +104,6 @@ const useToday = () => {
     state?: 'now' | 'next',
   ): ViewProps => {
     const text = prayerLabel(label, fmt(time), state);
-    if (key === 'sunrise') {
-      return {accessible: true, accessibilityLabel: text};
-    }
     return {
       accessible: true,
       accessibilityRole: 'switch',

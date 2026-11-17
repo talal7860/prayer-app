@@ -30,7 +30,7 @@ type Settings = {
   sound: string;
   /** Play the Fajr adhan ("as-salatu khayrun min an-nawm") at Fajr, when an adhan sound is chosen. */
   fajrAdhan: boolean;
-  /** Prayers whose reminder bell is off. */
+  /** Prayers whose reminder bell is off. Sunrise's is off by default. */
   muted: Partial<Record<PrayerKey, boolean>>;
   /** Minutes added to each calculated time (negative = earlier), to match the local mosque. */
   adjustments: Partial<Record<PrayerKey, number>>;
@@ -40,6 +40,8 @@ type Settings = {
   liveActivity: boolean;
   timeFormat: TimeFormat;
   highLats: HighLatRule;
+  /** The settings format (`SETTINGS_VERSION` in settingsStore.ts). */
+  version: number;
   /** The first-run setup was finished. Saved settings from before it existed count as done. */
   onboarded: boolean;
   /** Location (rounded) the user chose to keep when the travel prompt showed. */

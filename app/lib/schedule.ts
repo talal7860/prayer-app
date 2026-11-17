@@ -20,8 +20,11 @@ export const MAX_PENDING = 64;
 export const DAYS_AHEAD = 14;
 
 export type PlannedNotification = {
-  /** `reminder`: "open the app", fires after the last planned prayer. */
-  kind: 'adhan' | 'endsSoon' | 'reminder';
+  /**
+   * `sunrise`: Sunrise's bell (off by default), with the plain sound, not the adhan.
+   * `reminder`: "open the app", fires after the last planned prayer.
+   */
+  kind: 'adhan' | 'sunrise' | 'endsSoon' | 'reminder';
   prayer?: PrayerKey;
   title: string;
   date: Date;
@@ -38,11 +41,20 @@ export const planNotifications = (
   const plan: PlannedNotification[] = [];
   const all = days.flat();
   all.forEach((p, i) => {
-    // Sunrise isn't a prayer: it's shown on Today's sun arc, with no bell and no notification.
-    if (muted[p.key] || p.key === 'sunrise') {
+    if (muted[p.key]) {
       return;
     }
     const time = formatTime(p.time, timeFormat);
+    // Sunrise isn't a prayer: no adhan and no "ends soon", just "Sunrise - 7:46 AM".
+    if (p.key === 'sunrise') {
+      plan.push({
+        kind: 'sunrise',
+        prayer: p.key,
+        date: p.time,
+        title: I18n.t('notification.sunrise', {label: p.label, time}),
+      });
+      return;
+    }
     // "Fajr ends in 20 minutes": the time that ends it is the next one with that key. The
     // last Isha planned has no next Fajr here, so it gets none.
     const end = endsSoon ? all.slice(i + 1).find(e => e.key === ENDS_AT[p.key]) : undefined;

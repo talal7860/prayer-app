@@ -174,18 +174,26 @@ it('stops the removed travel alerts geofence an older version registered', async
   (TaskManager.isTaskRegisteredAsync as jest.Mock).mockImplementation(() => Promise.resolve(false));
 });
 
-it('renders Today with the five prayers, and never schedules Sunrise', async () => {
+it('renders Today with the prayers and Sunrise, whose bell is off until turned on', async () => {
   await savedSetup();
   await render(<App />);
   expect(await screen.findAllByText(/fajr/i)).not.toHaveLength(0);
   expect(screen.getByRole('switch', {name: reminder('Fajr')})).toBeTruthy();
-  // Sunrise is on the sun arc, not in the list.
-  expect(screen.queryByRole('switch', {name: /^Sunrise/})).toBeNull();
+  const sunrise = screen.getByRole('switch', {name: reminder('Sunrise')});
+  expect(sunrise.props.accessibilityState).toMatchObject({checked: false});
   await waitFor(() => expect(Notifications.scheduleNotificationAsync).toHaveBeenCalled());
-  const titles = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls.map(
-    ([request]) => request.content.title,
+  const titles = () =>
+    (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls.map(
+      ([request]) => request.content.title as string,
+    );
+  expect(titles().some(title => title.startsWith('Sunrise'))).toBe(false);
+  // Turned on, it's scheduled with the plain sound, not the adhan.
+  await fireEvent(sunrise, 'accessibilityAction', {nativeEvent: {actionName: 'activate'}});
+  await waitFor(() => expect(titles().some(title => title.startsWith('Sunrise'))).toBe(true));
+  const call = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls.find(([r]) =>
+    (r.content.title as string).startsWith('Sunrise'),
   );
-  expect(titles.some((title: string) => title.includes('Sunrise'))).toBe(false);
+  expect(call[0].trigger.channelId).toBe('prayer-time-notifications');
   expect(require('expo-background-task').registerTaskAsync).toHaveBeenCalledWith(
     'reschedule-prayer-notifications',
     {minimumInterval: 720},
@@ -203,8 +211,10 @@ describe('larger screens', () => {
     await render(<App />);
     expect(await screen.findByRole('switch', {name: reminder('Fajr')})).toBeTruthy();
     expect(screen.getByText('Sunrise')).toBeTruthy();
-    // Sunrise is never notified, so its card has no bell.
-    expect(screen.queryByRole('switch', {name: /^Sunrise/})).toBeNull();
+    // Sunrise has a bell too, off by default.
+    expect(
+      screen.getByRole('switch', {name: reminder('Sunrise')}).props.accessibilityState,
+    ).toMatchObject({checked: false});
     expect(screen.getByText('NEXT')).toBeTruthy();
     await fireEvent.press(screen.getByRole('link', {name: 'This week'}));
     expect(await screen.findByText('Next week')).toBeTruthy();

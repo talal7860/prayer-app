@@ -69,3 +69,15 @@ it('turns the old 10-minute heads-up into the ending reminder', () => {
   expect(parseSettings(JSON.stringify({headsUp: false})).endsSoon).toBe(false);
   expect(parseSettings(JSON.stringify({headsUp: true, endsSoon: false})).endsSoon).toBe(false);
 });
+
+it('keeps Sunrise silent for settings saved before it had a bell, then keeps the choice', () => {
+  // Before version 2 Sunrise was never notified, whatever muted.sunrise said.
+  const old = parseSettings(JSON.stringify({muted: {sunrise: false, asr: true}}));
+  expect(old.muted).toEqual({sunrise: true, asr: true});
+  expect(old.version).toBe(2);
+  // Turned on since: kept.
+  const now = parseSettings(JSON.stringify({version: 2, muted: {sunrise: false}}));
+  expect(now.muted.sunrise).toBe(false);
+  // A new install: off.
+  expect(parseSettings(null).muted.sunrise).toBe(true);
+});

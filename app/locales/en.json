@@ -55,6 +55,7 @@
       "description": "Prayer Notifications"
     },
     "endsSoon": "{{label}} ends in 20 minutes - {{time}}",
+    "sunrise": "{{label}} - {{time}}",
     "reminder": "Open Adhan Times to keep getting prayer notifications",
     "test": "Test adhan from Adhan Times"
   },

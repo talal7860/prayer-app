@@ -4,6 +4,11 @@ All notable changes to Adhan Times. The format follows [Keep a Changelog](https:
 and versions follow the app's marketing version (`expo.version` in `app.json`).
 Each version's `### What's new` is the store text, for users (≤ 500 characters, `scripts/whats_new.py`).
 
+## [1.3.0] - Unreleased
+
+### Added
+- Settings are kept in iCloud: after deleting and reinstalling Adhan Times, or on a new iPhone with the same Apple ID, they come back without the first-run setup.
+
 ## [1.2.0] - 2026-11-20
 
 ### What's new

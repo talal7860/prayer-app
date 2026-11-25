@@ -1,14 +1,21 @@
 import React from 'react';
-import {fireEvent, render, screen, waitFor} from '@testing-library/react-native';
+import {act, fireEvent, render, screen, waitFor} from '@testing-library/react-native';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import type * as CloudMock from '../modules/icloud-settings/__mocks__';
 import {Dimensions} from 'react-native';
 import App from '../App';
-import {SETTINGS_KEY} from '../app/lib/settingsStore';
+import {CLOUD_SETTINGS_KEY, SETTINGS_KEY} from '../app/lib/settingsStore';
+// The in-memory store in modules/icloud-settings/__mocks__.
+const {cloudChangedExternally, cloudStore, resetCloud} = jest.requireMock<typeof CloudMock>(
+  '../modules/icloud-settings',
+);
 
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
+
+jest.mock('../modules/icloud-settings');
 
 jest.mock(
   'react-native-safe-area-context',
@@ -63,6 +70,7 @@ const savedSetup = () => AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify({onbo
 
 beforeEach(async () => {
   await AsyncStorage.clear();
+  resetCloud();
   jest.clearAllMocks();
 });
 
@@ -128,6 +136,45 @@ describe('first run', () => {
     await fireEvent.press(screen.getByRole('button', {name: 'Continue'}));
     expect(await screen.findByText('High latitudes')).toBeTruthy();
     expect(screen.getByRole('radio', {name: /Middle of the night/})).toBeSelected();
+  });
+
+  it('restores the settings from iCloud after a reinstall, without the setup', async () => {
+    cloudStore.set(
+      CLOUD_SETTINGS_KEY,
+      JSON.stringify({onboarded: true, city: 'Islamabad, PK', calculationMethod: 'ISNA'}),
+    );
+    await render(<App />);
+    expect(await screen.findByRole('switch', {name: reminder('Fajr')})).toBeTruthy();
+    expect(screen.queryByText('Where are you?')).toBeNull();
+    // Saved on this device too, so the next launch doesn't need iCloud.
+    await waitFor(async () =>
+      expect(JSON.parse((await AsyncStorage.getItem(SETTINGS_KEY))!)).toMatchObject({
+        city: 'Islamabad, PK',
+        calculationMethod: 'ISNA',
+      }),
+    );
+  });
+
+  it('uses the iCloud copy if it arrives while the setup is showing', async () => {
+    await render(<App />);
+    expect(await screen.findByText('Where are you?')).toBeTruthy();
+    await act(() =>
+      cloudChangedExternally({
+        [CLOUD_SETTINGS_KEY]: JSON.stringify({onboarded: true, city: 'Islamabad, PK'}),
+      }),
+    );
+    expect(await screen.findByRole('switch', {name: reminder('Fajr')})).toBeTruthy();
+  });
+
+  it('copies the settings to iCloud once set up', async () => {
+    await savedSetup();
+    await render(<App />);
+    await screen.findByRole('switch', {name: reminder('Fajr')});
+    await waitFor(() =>
+      expect(JSON.parse(cloudStore.get(CLOUD_SETTINGS_KEY) ?? '{}')).toMatchObject({
+        onboarded: true,
+      }),
+    );
   });
 
   it('skips the setup for people who used the app before it existed', async () => {

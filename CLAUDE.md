@@ -66,6 +66,22 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
 - Pure, React-free modules (usable from the background task): `app/lib/prayerTimes.ts`
   (`prayerTimesFor(settings, date)`, `methodName`), `app/lib/settingsStore.ts` (defaults,
   `parseSettings`, `loadSettings`). The settings context wraps them.
+- **iCloud settings backup** (iOS): every settings save also writes the same JSON to iCloud
+  key-value storage (`NSUbiquitousKeyValueStore`, key `settings`) through the local module
+  `modules/icloud-settings`, but only once `onboarded` is true. On launch `readStoredSettings`
+  (`app/lib/settingsStore.ts`) uses AsyncStorage, else (a fresh install, a new iPhone with the same
+  Apple ID) the iCloud copy, through `parseSettings`, so old keys are migrated and the setup is
+  skipped. **This device's settings always win** when both exist: it's a backup, not a sync between
+  devices (an iPad and an iPhone can keep different cities). iCloud's first download after a
+  reinstall often finishes after launch, so while the setup is showing the settings context listens
+  for `didChangeExternallyNotification` and switches to the copy when it arrives; once set up, it
+  stops listening. Entitlement: `com.apple.developer.ubiquity-kvstore-identifier` in app.json (iCloud
+  capability on the App ID; the provisioning profile must include it). Without it, signed out of
+  iCloud, or with iCloud off for the app, the store stays on the device. Jest uses the in-memory
+  `modules/icloud-settings/__mocks__` (`jest.mock('../modules/icloud-settings')`).
+  **Android** has no iCloud: Google's Auto Backup restores AsyncStorage on reinstall (the generated
+  manifest has `android:allowBackup="true"` and no backup rules, so the whole app data is backed up,
+  when the phone's Google backup is on; backups run about daily, idle and charging).
 - `app/theme/tokens.ts`: light/dark palettes, per-period sky gradients, Inter font names.
   Use these instead of hex values in screens.
 - `app/components/ui/`: `Text` (Inter, pick the weight with `weight`, not `fontWeight`),
@@ -376,7 +392,8 @@ One-time setup (needs the account owner):
   #23. Renamed from `org.personal.talal7860.PrayerTimes` / `com.talal7860.prayertimes` before
   any store release. Don't change them again once the app is in the stores.
 - iOS entitlements: App Group `group.com.conelabs.adhanapp`, Time Sensitive notifications
-  (adhan and ending reminders use `interruptionLevel: 'timeSensitive'` to get through Focus). **No push
+  (adhan and ending reminders use `interruptionLevel: 'timeSensitive'` to get through Focus).
+  iCloud key-value storage (`$(TeamIdentifierPrefix)com.conelabs.adhanapp`, the settings backup). **No push
   entitlement**: `expo-notifications` has `enableRemoteNotifications: false` (local only).
   Background modes: fetch + processing.
 - Icons and splash use the **"Arch"** concept from the design canvas's "App icon concepts"

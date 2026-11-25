@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {merge} from 'lodash/fp';
+import {getCloudValue, setCloudValue} from '../../modules/icloud-settings';
 
 export const SETTINGS_KEY = '@prayer_app:settings';
 /**
@@ -75,6 +76,41 @@ export const parseSettings = (
   return parsed.location && !parsed.city ? {...next, city: undefined} : next;
 };
 
+/** The key of the settings' copy in iCloud key-value storage (iOS). */
+export const CLOUD_SETTINGS_KEY = 'settings';
+
+/**
+ * The settings saved in iCloud, if they're from a finished setup. Null without iCloud (Android,
+ * Jest, signed out, not downloaded yet) or if what's there isn't usable.
+ */
+export const cloudSettings = (): string | null => {
+  const stored = getCloudValue(CLOUD_SETTINGS_KEY);
+  if (!stored) {
+    return null;
+  }
+  try {
+    const parsed = JSON.parse(stored) as StoredSettings | null;
+    return parsed?.onboarded === true ? stored : null;
+  } catch {
+    return null;
+  }
+};
+
+/** Keep a copy in iCloud, once the setup is done (a half-done setup isn't worth restoring). */
+export const saveCloudSettings = (settings: Settings) => {
+  if (settings.onboarded) {
+    setCloudValue(CLOUD_SETTINGS_KEY, JSON.stringify(settings));
+  }
+};
+
+/**
+ * The settings JSON to start from: this device's, else (a fresh install, a new iPhone) the copy
+ * in iCloud. This device's always wins when there is one. Goes through `parseSettings` like any
+ * saved settings, so a copy from an older version is migrated too.
+ */
+export const readStoredSettings = async (): Promise<string | null> =>
+  (await AsyncStorage.getItem(SETTINGS_KEY).catch(() => null)) ?? cloudSettings();
+
 /** Read the saved settings outside React (the background task). */
 export const loadSettings = async (): Promise<Settings> =>
-  parseSettings(await AsyncStorage.getItem(SETTINGS_KEY));
+  parseSettings(await readStoredSettings());

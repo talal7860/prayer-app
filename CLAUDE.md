@@ -75,8 +75,11 @@ The UI follows the "Adhan App Redesign" canvas: https://claude.ai/artifact/Tzzom
   devices (an iPad and an iPhone can keep different cities). iCloud's first download after a
   reinstall often finishes after launch, so while the setup is showing the settings context listens
   for `didChangeExternallyNotification` and switches to the copy when it arrives; once set up, it
-  stops listening. Entitlement: `com.apple.developer.ubiquity-kvstore-identifier` in app.json (iCloud
-  capability on the App ID; the provisioning profile must include it). Without it, signed out of
+  stops listening. Entitlements in app.json: `com.apple.developer.ubiquity-kvstore-identifier` plus an **empty**
+  `com.apple.developer.icloud-container-identifiers` (what Xcode writes for key-value storage only).
+  The empty list matters: EAS's capability sync recognizes iCloud only by that key, and without it
+  the build *turns iCloud off* on the App ID and makes a profile without it ("doesn't include the
+  iCloud capability"). The provisioning profile must include iCloud. Without it, signed out of
   iCloud, or with iCloud off for the app, the store stays on the device. Jest uses the in-memory
   `modules/icloud-settings/__mocks__` (`jest.mock('../modules/icloud-settings')`).
   **Android** has no iCloud: Google's Auto Backup restores AsyncStorage on reinstall (the generated

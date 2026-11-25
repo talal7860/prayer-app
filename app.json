@@ -28,6 +28,7 @@
       "entitlements": {
         "com.apple.security.application-groups": ["group.com.conelabs.adhanapp"],
         "com.apple.developer.usernotifications.time-sensitive": true,
+        "com.apple.developer.icloud-container-identifiers": [],
         "com.apple.developer.ubiquity-kvstore-identifier": "$(TeamIdentifierPrefix)com.conelabs.adhanapp"
       },
       "config": {

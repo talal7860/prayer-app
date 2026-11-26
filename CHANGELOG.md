@@ -4,7 +4,11 @@ All notable changes to Adhan Times. The format follows [Keep a Changelog](https:
 and versions follow the app's marketing version (`expo.version` in `app.json`).
 Each version's `### What's new` is the store text, for users (≤ 500 characters, `scripts/whats_new.py`).
 
-## [1.3.0] - Unreleased
+## [1.3.0] - 2026-11-26
+
+### What's new
+New
+• Your settings come back after you reinstall Adhan Times or move to a new phone, without going through the setup again. On iPhone they're kept in iCloud, and on Android in your phone's Google backup.
 
 ### Added
 - Settings are kept in iCloud: after deleting and reinstalling Adhan Times, or on a new iPhone with the same Apple ID, they come back without the first-run setup.
@@ -87,6 +91,7 @@ First store release: the 2021 app, rebuilt.
 
 The first version: prayer times from the device location, calculation methods, Asr setting, and a notification with the Makkah azan for each prayer ([#1](https://github.com/talal7860/prayer-app/pull/1), [#2](https://github.com/talal7860/prayer-app/pull/2)).
 
+[1.3.0]: https://github.com/talal7860/prayer-app/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/talal7860/prayer-app/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/talal7860/prayer-app/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/talal7860/prayer-app/releases/tag/v1.0.0
